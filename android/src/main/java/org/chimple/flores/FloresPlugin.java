@@ -55,6 +55,14 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               }
               break;
           }
+          case "connectTo":
+          {
+              String neighbor = (String)call.arguments;
+              boolean connectionStatus = connectTo(neighbor);
+
+              result.success(connectionStatus);
+              break;
+          }
           default:
           {
               result.notImplemented();
@@ -85,5 +93,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
 //
 //    return batteryLevel;
       return Arrays.asList("foo", "bar", "baz");
+  }
+
+  private boolean connectTo(String neighbor) {
+      return true;
   }
 }

@@ -27,4 +27,8 @@ class Flores {
       .invokeMethod('getNeighbors')
       .then<List<String>>((dynamic result) => result);
 
+
+  Future<bool> connectTo(String neighbor) => _methodChannel
+      .invokeMethod('connectTo')
+      .then<bool>((dynamic result) => result);
 }
