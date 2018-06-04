@@ -19,6 +19,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.util.Log;
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PUserIdMessage;
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PSyncInfo;
+import org.chimple.flores.db.P2PDBApi;
+import org.chimple.flores.db.P2PDBApiImpl;
+
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

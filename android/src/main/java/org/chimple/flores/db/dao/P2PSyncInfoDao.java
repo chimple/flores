@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 import org.chimple.flores.db.entity.P2PLatestInfoByUserAndDevice;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
 
 import java.util.List;
 

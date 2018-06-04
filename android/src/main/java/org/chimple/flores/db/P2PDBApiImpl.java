@@ -30,6 +30,7 @@ import org.chimple.flores.db.entity.P2PLatestInfoByUserAndDevice;
 import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
 import org.chimple.flores.db.entity.ProfileMessage;
 import org.chimple.flores.db.entity.ProfileMessageDeserializer;
 import org.chimple.flores.sync.P2PSyncManager;

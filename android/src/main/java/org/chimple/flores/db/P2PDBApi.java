@@ -3,6 +3,7 @@ package org.chimple.flores.db;
 import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
 
 import java.util.Arrays;
 import java.util.List;
