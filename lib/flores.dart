@@ -23,9 +23,9 @@ class Flores {
   final MethodChannel _methodChannel;
   final EventChannel _eventChannel;
 
-//  Future<List<String>> get neighbors => _methodChannel
-//      .invokeMethod('getNeighbors')
-//      .then<List<String>>((dynamic result) => result);
+  Future<List<dynamic>> get neighbors async => _methodChannel
+      .invokeMethod('getNeighbors')
+      .then<List<dynamic>>((dynamic result) => result);
 
 
   Future<bool> connectTo(String neighbor) => _methodChannel
