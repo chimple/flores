@@ -11,7 +11,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Flores _flores = new Flores();
-  List<String> _neighbors = [];
+  List<dynamic> _neighbors = [];
 
   @override
   initState() {
@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   initPlatformState() async {
-    List<String> neighbors;
+    List<dynamic> neighbors;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       neighbors = await _flores.neighbors;
