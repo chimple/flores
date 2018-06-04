@@ -8,7 +8,7 @@ import android.arch.persistence.room.TypeConverters;
 import android.support.annotation.VisibleForTesting;
 
 
-import org.apache.commons.beanutils.converters.DateConverter;
+import org.chimple.flores.db.converter.DateConverter;
 import org.chimple.flores.db.dao.P2PSyncDeviceStatusDao;
 import org.chimple.flores.db.dao.P2PSyncInfoDao;
 import org.chimple.flores.db.entity.P2PSyncDeviceStatus;

@@ -4,11 +4,16 @@ import android.os.Bundle;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import android.app.Application;
+import android.content.Context;
+import android.util.Log;
+
+import org.chimple.flores.db.AppDatabase;
+import org.chimple.flores.application.P2PContext;
 
 public class MainActivity extends FlutterActivity {
-
+    private static final String TAG = MainActivity.class.getName();
     private static Context context;
-    private P2PApplication that;
     public static AppDatabase db;
 
     public static int REGULAR_JOB_TIMINGS_FOR_MIN_LATENCY = 4 * 60 * 1000; // every 4 mins mininum
@@ -22,7 +27,6 @@ public class MainActivity extends FlutterActivity {
         GeneratedPluginRegistrant.registerWith(this);
         initialize();
         context = this;
-        that = this;
     }
 
     private void initialize() {
@@ -32,9 +36,9 @@ public class MainActivity extends FlutterActivity {
             @Override
             public void run() {
                 // Initialize all of the important frameworks and objects
-                P2PContext.getInstance().initialize(P2PApplication.this);
+                P2PContext.getInstance().initialize(MainActivity.this);
                 //TODO: for now force the creation here
-                db = AppDatabase.getInstance(P2PApplication.this);
+                db = AppDatabase.getInstance(MainActivity.this);
 
                 Log.i(TAG, "app database instance" + String.valueOf(db));
 
