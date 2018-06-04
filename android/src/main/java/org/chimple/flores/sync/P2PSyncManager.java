@@ -532,4 +532,36 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         }
 
     }
+
+
+    public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);
+    }
+
+
+    public boolean addMessage(String userId, String recipientId, String messageType, String message) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.addMessage(userId, recipientId, messageType, message);
+    }
+
+    public List<P2PUserIdDeviceId> getUsers() {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getUsers();
+    }
+
+    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.fetchLatestMessagesByMessageType(messageType, userIds);
+    }
+
+    public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getConversations(firstUserId, secondUserId, messageType);
+    }
+
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
+    }
 }

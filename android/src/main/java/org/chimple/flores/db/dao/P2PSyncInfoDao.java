@@ -46,8 +46,8 @@ public interface P2PSyncInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public Long insertP2PSyncInfo(P2PSyncInfo info);
 
-    @Query("SELECT distinct(user_id) from P2PSyncInfo")
-    public String[] fetchAllUsers();
+    @Query("SELECT user_id, device_id from P2PSyncInfo")
+    public P2PUserIdDeviceId[] fetchAllUsers();    
 
     @Query("SELECT distinct(user_id) from P2PSyncInfo")
     public String[] fetchAllNeighours();

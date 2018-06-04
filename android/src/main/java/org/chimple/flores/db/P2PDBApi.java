@@ -11,7 +11,7 @@ public interface P2PDBApi {
 
     // API designed for Application
 
-    List<String> getUsers();
+    List<P2PUserIdDeviceId> getUsers();
 
     List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds);
 

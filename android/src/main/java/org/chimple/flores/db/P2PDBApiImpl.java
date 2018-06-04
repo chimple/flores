@@ -448,10 +448,10 @@ public class P2PDBApiImpl implements P2PDBApi {
         return results;
     }
 
-
-    public List<String> getUsers() {
+    public List<P2PUserIdDeviceId> getUsers() {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
     }
+
 
     public List<P2PSyncInfo> getInfoByUserId(String userid) {
         return Arrays.asList(db.p2pSyncDao().getSyncInformationByUserId(userid));
