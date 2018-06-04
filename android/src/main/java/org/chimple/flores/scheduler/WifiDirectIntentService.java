@@ -16,10 +16,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
-import p2p.chimple.org.p2pconnector.sync.P2PSyncManager;
+import org.chimple.flores.sync.P2PSyncManager;
 
+import static org.chimple.flores.scheduler.P2PHandShakingJobService.JOB_PARAMS;
 
-import static p2p.chimple.org.p2pconnector.scheduler.P2PHandShakingJobService.JOB_PARAMS;
 
 public class WifiDirectIntentService extends Service {
     private static final String TAG = WifiDirectIntentService.class.getSimpleName();
