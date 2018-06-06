@@ -47,4 +47,6 @@ public interface P2PDBApi {
     public void syncCompleted(String deviceId);
 
     public P2PSyncDeviceStatus getLatestDeviceToSyncFromDevices(List<String> items);
+
+    public boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message);
 }

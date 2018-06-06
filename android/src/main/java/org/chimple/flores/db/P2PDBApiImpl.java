@@ -547,7 +547,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    private boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message) {
+    public boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message) {
         try {
             P2PSyncInfo userInfo = db.p2pSyncDao().getProfileByUserId(userId, P2PSyncManager.MessageTypes.PHOTO.type());
             if (userInfo != null) {
