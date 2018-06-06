@@ -572,7 +572,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
     }
 
-    public void upsertUser(String userId, String deviceId, String fileName) {
+    public boolean upsertUser(String userId, String deviceId, String fileName) {
         P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
         return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
     }
