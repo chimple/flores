@@ -1,7 +1,10 @@
 package org.chimple.flores;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.os.Build.VERSION;
@@ -18,6 +21,9 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
+
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.sync.P2PSyncManager;
 
 /**
  * FloresPlugin
@@ -44,15 +50,24 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
   @Override
   public void onMethodCall(MethodCall call, Result result) {
       switch (call.method) {
-          case "getNeighbors":
+          case "getUsers":
           {
-              List<String> neighbors = getNeighbors();
+              List<Map<String, String>> users = getUsers();
 
-              if (neighbors.size() >= 0) {
-                  result.success(neighbors);
+              if (users.size() >= 0) {
+                  result.success(users);
               } else {
-                  result.error("UNAVAILABLE", "Neighbors are not available.", null);
+                  result.error("UNAVAILABLE", "Users are not available.", null);
               }
+              break;
+          }
+          case "addUser":
+          {
+              Map<String, String> arg = (Map<String, String>)call.arguments;
+              String userId = arg.get("user_id");
+              String deviceId = arg.get("device_id");
+              boolean status = addUser(userId, deviceId);
+              result.success(status);
               break;
           }
           case "connectTo":
@@ -76,23 +91,21 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
   @Override
   public void onCancel(Object arguments) {}
 
-  private List<String> getNeighbors() {
-//    Context context = registrar.context();
-//    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-//      BatteryManager batteryManager =
-//              (BatteryManager) context.getSystemService(context.BATTERY_SERVICE);
-//      batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-//    } else {
-//      Intent intent =
-//              new ContextWrapper(context)
-//                      .registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-//      batteryLevel =
-//              (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100)
-//                      / intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-//    }
-//
-//    return batteryLevel;
-      return Arrays.asList("foo", "bar", "baz");
+  private List<Map<String, String>> getUsers() {
+      List<P2PUserIdDeviceId> udList = P2PSyncManager.getInstance(registrar.context()).getUsers();
+      List<Map<String, String>> userList = new ArrayList<Map<String, String>>();
+      for (P2PUserIdDeviceId ud: udList
+           ) {
+          Map<String, String> user = new HashMap<String, String>();
+          user.put("user_id", ud.userId);
+          user.put("device_id", ud.deviceId);
+          userList.add(user);
+      }
+      return userList;
+  }
+
+  private boolean addUser(String userId, String deviceId) {
+      return P2PSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, null);
   }
 
   private boolean connectTo(String neighbor) {

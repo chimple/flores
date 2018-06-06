@@ -24,7 +24,7 @@ class _MyAppState extends State<MyApp> {
     List<dynamic> neighbors;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      neighbors = await _flores.neighbors;
+      neighbors = await _flores.users;
     } on PlatformException {
       print('Failed getting neighbors');
     }
@@ -45,16 +45,25 @@ class _MyAppState extends State<MyApp> {
       home: new Scaffold(
         appBar: new AppBar(
           title: new Text('Flores example app'),
+          actions: <Widget>[
+            new IconButton(
+              icon: new Icon(Icons.playlist_play),
+              tooltip: 'Air it',
+              onPressed: () {
+                _flores.addUser('a', 'b');
+              },
+            )
+          ],
         ),
         body: new ListView.builder(
             itemBuilder: (BuildContext context, int index) => new RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
-                    return new ConnectPage(_neighbors[index]);
+                    return new ConnectPage(_neighbors[index]['user_id']);
                   }));
                 },
-                child: new Text(_neighbors[index])),
+                child: new Text(_neighbors[index]['user_id'])),
             itemCount: _neighbors.length),
       ),
     );

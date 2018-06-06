@@ -23,12 +23,23 @@ class Flores {
   final MethodChannel _methodChannel;
   final EventChannel _eventChannel;
 
-  Future<List<dynamic>> get neighbors async => _methodChannel
-      .invokeMethod('getNeighbors')
+  Future<List<dynamic>> get users async => _methodChannel
+      .invokeMethod('getUsers')
       .then<List<dynamic>>((dynamic result) => result);
 
 
   Future<bool> connectTo(String neighbor) => _methodChannel
       .invokeMethod('connectTo')
       .then<bool>((dynamic result) => result);
+
+  Future<bool> addUser(String userId, String deviceId) {
+    final Map<String, String> params = <String, String>{
+      'user_id': userId,
+      'device_id': deviceId
+    };
+
+    _methodChannel
+        .invokeMethod('addUser', params)
+        .then<bool>((dynamic result) => result);
+  }
 }
