@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flores/flores.dart';
@@ -10,8 +11,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   Flores _flores = new Flores();
   List<dynamic> _neighbors = [];
+  final TextEditingController _textController = new TextEditingController();
+  bool _isComposing = false;
 
   @override
   initState() {
@@ -39,32 +45,82 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<Null> _handleRefresh() {
+    initPlatformState();
+    final Completer<Null> completer = new Completer<Null>();
+    new Timer(const Duration(seconds: 3), () {
+      completer.complete(null);
+    });
+    return completer.future.then((_) {
+      _scaffoldKey.currentState?.showSnackBar(new SnackBar(
+          content: const Text('Refresh complete'),
+          action: new SnackBarAction(
+              label: 'RETRY',
+              onPressed: () {
+                _refreshIndicatorKey.currentState.show();
+              })));
+    });
+  }
+
+  _handleTextInput(String text) {
+    _textController.clear();
+    setState(() {
+      _isComposing = false;
+    });
+    _flores.addUser(text, 'b');
+  }
+
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       home: new Scaffold(
+        key: _scaffoldKey,
         appBar: new AppBar(
           title: new Text('Flores example app'),
-          actions: <Widget>[
-            new IconButton(
-              icon: new Icon(Icons.playlist_play),
-              tooltip: 'Air it',
-              onPressed: () {
-                _flores.addUser('a', 'b');
-              },
-            )
+        ),
+        body: new Column(
+          children: <Widget>[
+            new Row(
+              children: <Widget>[
+                new Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    onChanged: (String text) {
+                      setState(() {
+                        _isComposing = text.length > 0;
+                      });
+                    },
+                  ),
+                ),
+                new IconButton(
+                  icon: new Icon(Icons.send),
+                  onPressed: _isComposing
+                      ? () => _handleTextInput(_textController.text)
+                      : null,
+                )
+              ],
+            ),
+            new Expanded(
+              child: new RefreshIndicator(
+                key: _refreshIndicatorKey,
+                onRefresh: _handleRefresh,
+                child: new ListView.builder(
+                    itemBuilder: (BuildContext context, int index) =>
+                        new RaisedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                  new MaterialPageRoute<Null>(
+                                      builder: (BuildContext context) {
+                                return new ConnectPage(
+                                    _neighbors[index]['user_id']);
+                              }));
+                            },
+                            child: new Text(_neighbors[index]['user_id'])),
+                    itemCount: _neighbors.length),
+              ),
+            ),
           ],
         ),
-        body: new ListView.builder(
-            itemBuilder: (BuildContext context, int index) => new RaisedButton(
-                onPressed: () {
-                  Navigator.of(context).push(new MaterialPageRoute<Null>(
-                      builder: (BuildContext context) {
-                    return new ConnectPage(_neighbors[index]['user_id']);
-                  }));
-                },
-                child: new Text(_neighbors[index]['user_id'])),
-            itemCount: _neighbors.length),
       ),
     );
   }
