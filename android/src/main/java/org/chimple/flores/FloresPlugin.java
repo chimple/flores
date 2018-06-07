@@ -107,8 +107,10 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               Map<String, String> arg = (Map<String, String>)call.arguments;
               String messageType = arg.get("message_type");
               String userId = arg.get("user_id");
+              String secondUserId = arg.get("second_user_id");
               List<String> userIds = new ArrayList<String>();
               userIds.add(userId);
+              userIds.add(secondUserId);
               List<P2PUserIdMessage> messageList =
                       P2PSyncManager.getInstance(registrar.context())
                               .fetchLatestMessagesByMessageType(messageType, userIds);

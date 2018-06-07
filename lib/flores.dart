@@ -47,4 +47,30 @@ class Flores {
         .invokeMethod('addUser', params)
         .then<bool>((dynamic result) => result);
   }
+
+  Future<List<dynamic>> getLatestMessages(String userId, String secondUserId, String messageType) {
+    final Map<String, String> params = <String, String>{
+      'user_id': userId,
+      'second_user_id': secondUserId,
+      'messageType': messageType
+    };
+
+    _methodChannel
+        .invokeMethod('getLatestMessages', params)
+        .then<List<dynamic>>((dynamic result) => result);
+  }
+
+  Future<bool> addMessage(String userId, String recipientId, String messageType, String message) {
+    final Map<String, String> params = <String, String>{
+      'user_id': userId,
+      'recipient_id': recipientId,
+      'message_type': messageType,
+      'message': message
+    };
+
+    _methodChannel
+        .invokeMethod('addMessage', params)
+        .then<bool>((dynamic result) => result);
+  }
+
 }
