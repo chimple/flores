@@ -12,6 +12,7 @@ import android.os.Build.VERSION_CODES;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Environment;
 
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
@@ -23,6 +24,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 
 import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.scheduler.JobUtils;
 import org.chimple.flores.sync.P2PSyncManager;
 
 /**
@@ -70,12 +72,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               result.success(status);
               break;
           }
-          case "connectTo":
+          case "start":
           {
-              String neighbor = (String)call.arguments;
-              boolean connectionStatus = connectTo(neighbor);
-
-              result.success(connectionStatus);
+              JobUtils.scheduledJob(registrar.context().getApplicationContext(), true);
               break;
           }
           default:

@@ -32,10 +32,10 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="flores_example"
         android:icon="@mipmap/ic_launcher">
-        <service android:name=".scheduler.WifiDirectIntentService" />
+        <service android:name="org.chimple.flores.scheduler.WifiDirectIntentService" />
         <service
-            android:name=".scheduler.P2PHandShakingJobService"
-            android:exported="true"
+            android:name="org.chimple.flores.scheduler.P2PHandShakingJobService"
+            android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <activity
             android:name=".MainActivity"

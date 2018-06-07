@@ -553,6 +553,8 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     }
 
     public List<P2PUserIdDeviceId> getUsers() {
+        Log.i(TAG, "Called getUsers");
+
         P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
         return p2pdbapi.getUsers();
     }

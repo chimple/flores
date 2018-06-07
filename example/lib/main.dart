@@ -77,6 +77,15 @@ class _MyAppState extends State<MyApp> {
         key: _scaffoldKey,
         appBar: new AppBar(
           title: new Text('Flores example app'),
+          actions: <Widget>[
+            new IconButton(
+              icon: new Icon(Icons.star),
+              tooltip: 'Start',
+              onPressed: () {
+                _flores.start();
+              },
+            )
+          ],
         ),
         body: new Column(
           children: <Widget>[

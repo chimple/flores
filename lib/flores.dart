@@ -32,6 +32,10 @@ class Flores {
       .invokeMethod('connectTo')
       .then<bool>((dynamic result) => result);
 
+  Future<bool> start() => _methodChannel
+      .invokeMethod('start')
+      .then<bool>((dynamic result) => result);
+
   Future<bool> addUser(String userId, String deviceId) {
     final Map<String, String> params = <String, String>{
       'user_id': userId,
