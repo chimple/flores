@@ -38,8 +38,8 @@ class Flores {
 
   Future<bool> addUser(String userId, String deviceId, String message) {
     final Map<String, String> params = <String, String>{
-      'user_id': userId,
-      'device_id': deviceId,
+      'userId': userId,
+      'deviceId': deviceId,
       'message': message
     };
 
@@ -50,8 +50,8 @@ class Flores {
 
   Future<List<dynamic>> getLatestMessages(String userId, String secondUserId, String messageType) {
     final Map<String, String> params = <String, String>{
-      'user_id': userId,
-      'second_user_id': secondUserId,
+      'userId': userId,
+      'secondUserId': secondUserId,
       'messageType': messageType
     };
 
@@ -62,8 +62,8 @@ class Flores {
 
   Future<List<dynamic>> getConversations(String userId, String secondUserId, String messageType) {
     final Map<String, String> params = <String, String>{
-      'user_id': userId,
-      'second_user_id': secondUserId,
+      'userId': userId,
+      'secondUserId': secondUserId,
       'messageType': messageType
     };
 
@@ -74,9 +74,9 @@ class Flores {
 
   Future<bool> addMessage(String userId, String recipientId, String messageType, String message) {
     final Map<String, String> params = <String, String>{
-      'user_id': userId,
-      'recipient_id': recipientId,
-      'message_type': messageType,
+      'userId': userId,
+      'recipientId': recipientId,
+      'messageType': messageType,
       'message': message
     };
 
