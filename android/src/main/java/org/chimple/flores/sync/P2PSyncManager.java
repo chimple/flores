@@ -242,6 +242,27 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         }
     }
 
+    public void reStartConnector(boolean shouldRestart, int delayMillis) {
+        stopConnector();
+        if (shouldRestart) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                //Lets give others chance on creating new group before we come back online
+                public void run() {
+                    StartConnector();
+                }
+            }, delayMillis);
+        }
+    }
+
+    public void toggle() {
+        if (mWDConnector != null) {
+            stopConnector();
+        } else {
+            StartConnector();
+        }
+    }
+
     public void StartConnector() {
         //lets be ready for incoming test communications
         updateStatus(TAG, "starting listener now, and connector");
@@ -321,7 +342,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
     private void startTestConnection(Socket socket, final boolean shouldInitiate) {
         Log.i(TAG, "Initial Connection established with shouldInitiate:" + shouldInitiate);
-        instance.mTestConnectedThread = new ConnectedThread(socket, mHandler);
+        instance.mTestConnectedThread = new ConnectedThread(socket, mHandler, context);
         instance.mTestConnectedThread.start();
         instance.shouldInitiate = shouldInitiate;
         Log.i(TAG, "Initial Connection established - mTestConnectedThread initialized:" + (mTestConnectedThread != null));
@@ -336,6 +357,12 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         Log.i(TAG, "Connected to ");
         final Socket socketTmp = socket;
         mTestConnectToThread = null;
+        //Client side send image here
+        //================================
+//        instance.imageSyncInfo = new ImageSyncInfo(socketTmp,context);
+//        instance.imageSyncInfo.start();
+//        instance.imageSyncInfo.write(socketTmp);
+        //================================
         this.p2PStateFlow.resetAllStates();
         startTestConnection(socketTmp, true);
     }
@@ -344,6 +371,12 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     public void GotConnection(Socket socket) {
         Log.i(TAG, "We got incoming connection");
         final Socket socketTmp = socket;
+        //Server side send image here
+        //================================
+//        instance.imageSyncInfo = new ImageSyncInfo(socketTmp,context);
+//        instance.imageSyncInfo.start();
+//        instance.imageSyncInfo.write(socketTmp);
+        //================================
         startListenerThread();
         mTestConnectToThread = null;
         this.p2PStateFlow.resetAllStates();
@@ -419,6 +452,44 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         updateStatus(TAG, "onDestroy");
     }
 
+    public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);
+    }
+
+
+    public boolean addMessage(String userId, String recipientId, String messageType, String message) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.addMessage(userId, recipientId, messageType, message);
+    }
+
+    public List<P2PUserIdDeviceId> getUsers() {
+        Log.i(TAG, "Called getUsers");
+
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getUsers();
+    }
+
+    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.fetchLatestMessagesByMessageType(messageType, userIds);
+    }
+
+    public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getConversations(firstUserId, secondUserId, messageType);
+    }
+
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
+    }
+
+    public boolean upsertUser(String userId, String deviceId, String fileName) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
+    }
+
     // Manage photo
     public static String createProfilePhoto(String generateUserId, byte[] contents, Context context) {
         Boolean canWrite = false;
@@ -453,6 +524,44 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             Log.i(TAG, "could not write to external storage");
         }
         return fileName;
+    }
+
+    public static String encodeFileToBase64Binary(String fileName) {
+        String encodedString = null;
+        try {
+            File file = new File(fileName);
+            byte[] bytes = loadFile(file);
+            byte[] encoded = Base64.encode(bytes, Base64.DEFAULT);
+            encodedString = new String(encoded);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return encodedString;
+    }
+
+    private static byte[] loadFile(File file) throws IOException {
+        InputStream is = new FileInputStream(file);
+
+        long length = file.length();
+        if (length > Integer.MAX_VALUE) {
+            // File is too large
+        }
+        byte[] bytes = new byte[(int) length];
+
+        int offset = 0;
+        int numRead = 0;
+        while (offset < bytes.length
+                && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+            offset += numRead;
+        }
+
+        if (offset < bytes.length) {
+            throw new IOException("Could not completely read file " + file.getName());
+        }
+
+        is.close();
+        return bytes;
     }
 
     public static String getStringFile(File f) {
@@ -539,46 +648,4 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         }
 
     }
-
-
-    public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);
-    }
-
-
-    public boolean addMessage(String userId, String recipientId, String messageType, String message) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.addMessage(userId, recipientId, messageType, message);
-    }
-
-    public List<P2PUserIdDeviceId> getUsers() {
-        Log.i(TAG, "Called getUsers");
-
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getUsers();
-    }
-
-    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.fetchLatestMessagesByMessageType(messageType, userIds);
-    }
-
-    public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getConversations(firstUserId, secondUserId, messageType);
-    }
-
-    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
-    }
-
-    public boolean upsertUser(String userId, String deviceId, String fileName) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
-    }
-
-
-
 }
