@@ -82,6 +82,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
             wifiIsEnabled = false;
             setConnectionState(SyncUtils.ConnectionState.NotInitialized);
             setListeningState(SyncUtils.ReportingState.NotInitialized);
+            P2PSyncManager.getInstance(context).shutDownAll();
         } else if (mWifiBase.isWifiEnabled()) {
             Log.i(TAG, "All stuff available and enabled");
             wifiIsEnabled = true;

@@ -30,7 +30,7 @@ import org.chimple.flores.db.entity.P2PLatestInfoByUserAndDevice;
 import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.ProfileMessage;
 import org.chimple.flores.db.entity.ProfileMessageDeserializer;
 import org.chimple.flores.sync.P2PSyncManager;
@@ -449,7 +449,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         return results;
     }
 
-    public List<P2PUserIdDeviceId> getUsers() {
+    public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
     }
 
@@ -525,6 +525,11 @@ public class P2PDBApiImpl implements P2PDBApi {
     public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
         return db.p2pSyncDao().fetchLatestConversations(firstUserId, secondUserId, messageType);
     }
+
+    public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
+        return db.p2pSyncDao().fetchLatestConversationsByUser(firstUserId);
+    }
+
 
     public String readProfilePhoto() {
         SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);

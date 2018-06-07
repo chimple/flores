@@ -19,9 +19,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.util.Log;
-import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.P2PDBApi;
 import org.chimple.flores.db.P2PDBApiImpl;
@@ -217,6 +217,13 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         StartConnector();
     }
 
+    public void shutDownAll() {
+        Log.i(TAG, "SHUTTING DOWN CURRENT JOB");
+        Intent result = new Intent(P2P_SYNC_RESULT_RECEIVED);
+        result.putExtra(JOB_PARAMS, currentJobParams);
+        LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
+    }
+
     public void startExitTimer() {
         synchronized (this) {
             disconnectGroupOwnerTimeOut = new CountDownTimer(5000, 1000) {
@@ -225,10 +232,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                 }
 
                 public void onFinish() {
-                    Log.i(TAG, "SHUTTING DOWN CURRENT JOB");
-                    Intent result = new Intent(P2P_SYNC_RESULT_RECEIVED);
-                    result.putExtra(JOB_PARAMS, currentJobParams);
-                    LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
+                    shutDownAll();
                 }
             };
 
@@ -463,7 +467,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         return p2pdbapi.addMessage(userId, recipientId, messageType, message);
     }
 
-    public List<P2PUserIdDeviceId> getUsers() {
+    public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         Log.i(TAG, "Called getUsers");
 
         P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
@@ -489,6 +493,14 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
         return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
     }
+
+    public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
+        return p2pdbapi.getLatestConversationsByUser(firstUserId);
+    }
+
+
+
 
     // Manage photo
     public static String createProfilePhoto(String generateUserId, byte[] contents, Context context) {

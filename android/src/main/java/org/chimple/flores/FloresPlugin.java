@@ -24,7 +24,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 
 import org.chimple.flores.db.entity.P2PSyncInfo;
-import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
 import org.chimple.flores.scheduler.JobUtils;
 import org.chimple.flores.sync.P2PSyncManager;
@@ -56,9 +56,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
       switch (call.method) {
           case "getUsers":
           {
-              List<P2PUserIdDeviceId> udList = P2PSyncManager.getInstance(registrar.context()).getUsers();
+              List<P2PUserIdDeviceIdAndMessage> udList = P2PSyncManager.getInstance(registrar.context()).getUsers();
               List<Map<String, String>> users = new ArrayList<Map<String, String>>();
-              for (P2PUserIdDeviceId ud: udList
+              for (P2PUserIdDeviceIdAndMessage ud: udList
                       ) {
                   Map<String, String> user = new HashMap<String, String>();
                   user.put("user_id", ud.userId);

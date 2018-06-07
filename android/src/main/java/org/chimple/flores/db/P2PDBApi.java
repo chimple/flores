@@ -3,7 +3,7 @@ package org.chimple.flores.db;
 import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.db.entity.P2PUserIdDeviceId;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +12,7 @@ public interface P2PDBApi {
 
     // API designed for Application
 
-    List<P2PUserIdDeviceId> getUsers();
+    List<P2PUserIdDeviceIdAndMessage> getUsers();
 
     List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds);
 
@@ -49,4 +49,6 @@ public interface P2PDBApi {
     public P2PSyncDeviceStatus getLatestDeviceToSyncFromDevices(List<String> items);
 
     public boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message);
+
+    public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId);
 }
