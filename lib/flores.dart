@@ -60,6 +60,18 @@ class Flores {
         .then<List<dynamic>>((dynamic result) => result);
   }
 
+  Future<List<dynamic>> getConversations(String userId, String secondUserId, String messageType) {
+    final Map<String, String> params = <String, String>{
+      'user_id': userId,
+      'second_user_id': secondUserId,
+      'messageType': messageType
+    };
+
+    _methodChannel
+        .invokeMethod('getConversations', params)
+        .then<List<dynamic>>((dynamic result) => result);
+  }
+
   Future<bool> addMessage(String userId, String recipientId, String messageType, String message) {
     final Map<String, String> params = <String, String>{
       'user_id': userId,
