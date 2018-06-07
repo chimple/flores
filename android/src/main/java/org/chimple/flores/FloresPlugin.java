@@ -63,6 +63,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                   Map<String, String> user = new HashMap<String, String>();
                   user.put("user_id", ud.userId);
                   user.put("device_id", ud.deviceId);
+                  user.put("message", ud.message);
                   users.add(user);
               }
 
@@ -78,7 +79,8 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               Map<String, String> arg = (Map<String, String>)call.arguments;
               String userId = arg.get("user_id");
               String deviceId = arg.get("device_id");
-              boolean status = P2PSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, null);
+              String message = arg.get("message");
+              boolean status = P2PSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
               result.success(status);
               break;
           }
