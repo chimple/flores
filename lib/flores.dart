@@ -36,10 +36,11 @@ class Flores {
       .invokeMethod('start')
       .then<bool>((dynamic result) => result);
 
-  Future<bool> addUser(String userId, String deviceId) {
+  Future<bool> addUser(String userId, String deviceId, String message) {
     final Map<String, String> params = <String, String>{
       'user_id': userId,
-      'device_id': deviceId
+      'device_id': deviceId,
+      'message': message
     };
 
     _methodChannel
