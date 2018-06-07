@@ -61,8 +61,8 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               for (P2PUserIdDeviceIdAndMessage ud: udList
                       ) {
                   Map<String, String> user = new HashMap<String, String>();
-                  user.put("user_id", ud.userId);
-                  user.put("device_id", ud.deviceId);
+                  user.put("userId", ud.userId);
+                  user.put("deviceId", ud.deviceId);
                   user.put("message", ud.message);
                   users.add(user);
               }
@@ -77,8 +77,8 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           case "addUser":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
-              String userId = arg.get("user_id");
-              String deviceId = arg.get("device_id");
+              String userId = arg.get("userId");
+              String deviceId = arg.get("deviceId");
               String message = arg.get("message");
               boolean status = P2PSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
               result.success(status);
@@ -92,9 +92,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           case "addMessage":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
-              String userId = arg.get("user_id");
-              String recipientId = arg.get("recipient_id");
-              String messageType = arg.get("message_type");
+              String userId = arg.get("userId");
+              String recipientId = arg.get("recipientId");
+              String messageType = arg.get("messageType");
               String message = arg.get("message");
               boolean status =
                       P2PSyncManager.getInstance(registrar.context())
@@ -105,9 +105,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           case "getLatestMessages":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
-              String messageType = arg.get("message_type");
-              String userId = arg.get("user_id");
-              String secondUserId = arg.get("second_user_id");
+              String messageType = arg.get("messageType");
+              String userId = arg.get("userId");
+              String secondUserId = arg.get("secondUserId");
               List<String> userIds = new ArrayList<String>();
               userIds.add(userId);
               userIds.add(secondUserId);
@@ -118,7 +118,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               for (P2PUserIdMessage m: messageList
                       ) {
                   Map<String, String> message = new HashMap<String, String>();
-                  message.put("user_id", m.userId);
+                  message.put("userId", m.userId);
                   message.put("message", m.message);
                   messages.add(message);
               }
@@ -133,9 +133,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           case "getConversations":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
-              String messageType = arg.get("message_type");
-              String firstUserId = arg.get("first_user_id");
-              String secondUserId = arg.get("second_user_id");
+              String messageType = arg.get("messageType");
+              String firstUserId = arg.get("firstUserId");
+              String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
                       P2PSyncManager.getInstance(registrar.context())
                               .getConversations(firstUserId, secondUserId, messageType);
@@ -151,9 +151,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           case "getLatestConversations":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
-              String messageType = arg.get("message_type");
-              String firstUserId = arg.get("first_user_id");
-              String secondUserId = arg.get("second_user_id");
+              String messageType = arg.get("messageType");
+              String firstUserId = arg.get("firstUserId");
+              String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
                       P2PSyncManager.getInstance(registrar.context())
                               .getLatestConversations(firstUserId, secondUserId, messageType);
@@ -184,17 +184,17 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
       for (P2PSyncInfo m: messageList
               ) {
           Map<String, String> message = new HashMap<String, String>();
-          message.put("user_id", m.userId);
+          message.put("userId", m.userId);
           message.put("message", m.message);
-          message.put("message", m.messageType);
-          message.put("message", m.deviceId);
-          message.put("message", m.recipientUserId);
-          message.put("message", m.sessionId);
-          message.put("message", m.id.toString());
-          message.put("message", m.loggedAt.toString());
-          message.put("message", m.sequence.toString());
-          message.put("message", m.status.toString());
-          message.put("message", m.step.toString());
+          message.put("messageType", m.messageType);
+          message.put("deviceId", m.deviceId);
+          message.put("recipientUserId", m.recipientUserId);
+          message.put("sessionId", m.sessionId);
+          message.put("id", m.id.toString());
+          message.put("loggedAt", m.loggedAt.toString());
+          message.put("sequence", m.sequence.toString());
+          message.put("status", m.status.toString());
+          message.put("step", m.step.toString());
           messages.add(message);
       }
     return messages;
