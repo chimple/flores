@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.util.Log;
 import android.content.Context;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -33,6 +34,7 @@ import org.chimple.flores.sync.P2PSyncManager;
  * FloresPlugin
  */
 public class FloresPlugin implements MethodCallHandler, StreamHandler {
+    private static final String TAG = P2PDBApiImpl.class.getName();
   /**
    * Plugin registration.
    */
@@ -139,6 +141,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               List<P2PSyncInfo> messageList =
                       P2PSyncManager.getInstance(registrar.context())
                               .getConversations(userId, secondUserId, messageType);
+              Log.i(TAG, "getConversations: "+messageType+userId+secondUserId);
               List<Map<String, String>> messages = convertToMap(messageList);
 
               if (messages.size() >= 0) {
@@ -200,6 +203,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
             message.put("status", m.status.toString());
           if(m.step != null)
             message.put("step", m.step.toString());
+          Log.i(TAG, "convertToMap: "+message.toString());
           messages.add(message);
       }
     return messages;
