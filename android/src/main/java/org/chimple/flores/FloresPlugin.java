@@ -34,7 +34,7 @@ import org.chimple.flores.sync.P2PSyncManager;
  * FloresPlugin
  */
 public class FloresPlugin implements MethodCallHandler, StreamHandler {
-    private static final String TAG = P2PDBApiImpl.class.getName();
+    private static final String TAG = FloresPlugin.class.getName();
   /**
    * Plugin registration.
    */
