@@ -34,7 +34,7 @@ class Flores {
       'messageType': messageType
     };
     print('getConversations $userId $secondUserId $messageType');
-    _methodChannel
+    return _methodChannel
         .invokeMethod('getConversations', params)
         .then<List<dynamic>>((dynamic result) {
           print('getConversations: $result');
