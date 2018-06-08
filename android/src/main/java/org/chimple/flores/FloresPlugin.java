@@ -143,7 +143,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                               .getConversations(userId, secondUserId, messageType);
               Log.i(TAG, "getConversations: "+messageType+userId+secondUserId);
               List<Map<String, String>> messages = convertToMap(messageList);
-
+              Log.i(TAG, messages.toString());
               if (messages.size() >= 0) {
                   result.success(messages);
               } else {

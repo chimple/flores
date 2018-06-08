@@ -69,7 +69,9 @@ class Flores {
 
     _methodChannel
         .invokeMethod('getConversations', params)
-        .then<List<dynamic>>((dynamic result) => result);
+        .then<List<dynamic>>((dynamic result) {
+          print(result);
+          return result});
   }
 
   Future<bool> addMessage(String userId, String recipientId, String messageType, String message) async {
