@@ -35,7 +35,6 @@ class Flores {
       'messageType': messageType
     })
         .then<List<dynamic>>((dynamic result) => result);
-  }
 
   Future<bool> connectTo(String neighbor) async => _methodChannel
       .invokeMethod('connectTo')
