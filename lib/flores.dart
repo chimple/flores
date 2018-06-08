@@ -27,19 +27,14 @@ class Flores {
       .invokeMethod('getUsers')
       .then<List<dynamic>>((dynamic result) => result);
 
-  Future<List<dynamic>> getConversations(String userId, String secondUserId, String messageType) async {
-    final Map<String, String> params = <String, String>{
+  Future<List<dynamic>> getConversations(String userId, String secondUserId, String messageType) async =>
+    _methodChannel
+        .invokeMethod('getConversations', <String, String>{
       'userId': userId,
       'secondUserId': secondUserId,
       'messageType': messageType
-    };
-    print('getConversations $userId $secondUserId $messageType');
-    return _methodChannel
-        .invokeMethod('getConversations', params)
-        .then<List<dynamic>>((dynamic result) {
-          print('getConversations: $result');
-          return result;
-        });
+    })
+        .then<List<dynamic>>((dynamic result) => result);
   }
 
   Future<bool> connectTo(String neighbor) async => _methodChannel
@@ -57,7 +52,7 @@ class Flores {
       'message': message
     };
 
-    _methodChannel
+    return _methodChannel
         .invokeMethod('addUser', params)
         .then<bool>((dynamic result) => result);
   }
@@ -69,7 +64,7 @@ class Flores {
       'messageType': messageType
     };
 
-    _methodChannel
+    return _methodChannel
         .invokeMethod('getLatestMessages', params)
         .then<List<dynamic>>((dynamic result) => result);
   }
@@ -82,7 +77,7 @@ class Flores {
       'message': message
     };
 
-    _methodChannel
+    return _methodChannel
         .invokeMethod('addMessage', params)
         .then<bool>((dynamic result) => result);
   }
