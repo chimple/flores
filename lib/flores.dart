@@ -38,7 +38,8 @@ class Flores {
         .invokeMethod('getConversations', params)
         .then<List<dynamic>>((dynamic result) {
           print('getConversations: $result');
-          return result});
+          return result;
+        });
   }
 
   Future<bool> connectTo(String neighbor) async => _methodChannel
