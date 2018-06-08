@@ -12,7 +12,6 @@ import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 
 import java.util.List;
 
-
 @Dao
 public interface P2PSyncInfoDao {
     @Query("SELECT * FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId")
@@ -60,15 +59,13 @@ public interface P2PSyncInfoDao {
     public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType);
 
 
-    @Query("SELECT * FROM P2PSyncInfo WHERE message_type = :messageType AND ((user_id = :userId or recipient_user_id = :recipientId) or (user_id = :recipientId or recipient_user_id = :userId))")
+    @Query("SELECT * FROM P2PSyncInfo WHERE message_type = :messageType AND ((user_id = :userId and recipient_user_id = :recipientId) or (user_id = :recipientId and recipient_user_id = :userId))")
     public List<P2PSyncInfo> fetchConversations(String userId, String recipientId, String messageType);
 
-    @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where message_type = :messageType and status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and ((p2p.user_id = :userId or p2p.recipient_user_id = :recipientId) or (p2p.user_id = :userId or p2p.recipient_user_id = :recipientId))")
+    @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where message_type = :messageType and status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and ((p2p.user_id = :userId and p2p.recipient_user_id = :recipientId) or (p2p.user_id = :recipientId and p2p.recipient_user_id = :userId))")
     public List<P2PSyncInfo> fetchLatestConversations(String userId, String recipientId, String messageType);
-
 
     @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and p2p.user_id = :userId")
     public List<P2PSyncInfo> fetchLatestConversationsByUser(String userId);
-
-
 }
+
