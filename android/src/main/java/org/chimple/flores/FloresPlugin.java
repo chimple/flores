@@ -190,11 +190,16 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           message.put("deviceId", m.deviceId);
           message.put("recipientUserId", m.recipientUserId);
           message.put("sessionId", m.sessionId);
-          message.put("id", m.id.toString());
-          message.put("loggedAt", m.loggedAt.toString());
-          message.put("sequence", m.sequence.toString());
-          message.put("status", m.status.toString());
-          message.put("step", m.step.toString());
+          if(m.id != null)
+            message.put("id", m.id.toString());
+          if(m.loggedAt != null)
+            message.put("loggedAt", m.loggedAt.toString());
+          if(m.sequence != null)
+            message.put("sequence", m.sequence.toString());
+          if(m.status != null)
+            message.put("status", m.status.toString());
+          if(m.step != null)
+            message.put("step", m.step.toString());
           messages.add(message);
       }
     return messages;
