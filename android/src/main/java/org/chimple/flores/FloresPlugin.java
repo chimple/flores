@@ -134,11 +134,11 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
               String messageType = arg.get("messageType");
-              String firstUserId = arg.get("firstUserId");
+              String userId = arg.get("userId");
               String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
                       P2PSyncManager.getInstance(registrar.context())
-                              .getConversations(firstUserId, secondUserId, messageType);
+                              .getConversations(userId, secondUserId, messageType);
               List<Map<String, String>> messages = convertToMap(messageList);
 
               if (messages.size() >= 0) {
@@ -152,11 +152,11 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
               String messageType = arg.get("messageType");
-              String firstUserId = arg.get("firstUserId");
+              String userId = arg.get("userId");
               String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
                       P2PSyncManager.getInstance(registrar.context())
-                              .getLatestConversations(firstUserId, secondUserId, messageType);
+                              .getLatestConversations(userId, secondUserId, messageType);
               List<Map<String, String>> messages = convertToMap(messageList);
 
               if (messages.size() >= 0) {
