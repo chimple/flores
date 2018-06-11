@@ -196,7 +196,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           if(m.id != null)
             message.put("id", m.id.toString());
           if(m.loggedAt != null)
-            message.put("loggedAt", m.loggedAt.getTime().toString());
+            message.put("loggedAt", Long.toString(m.loggedAt.getTime()));
           if(m.sequence != null)
             message.put("sequence", m.sequence.toString());
           if(m.status != null)
