@@ -339,116 +339,73 @@ public class P2PDBApiImpl implements P2PDBApi {
     }
 
 
-    private List<P2PSyncInfo> buildSyncInformation(final List<HandShakingInfo> otherHandShakeInfos) {
-        final List<HandShakingInfo> latestInfoFromCurrentDevice = this.queryInitialHandShakingMessage();
 
-        Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
-            @Override
-            public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                return o1.getUserId().compareTo(o2.getUserId());
-            }
-        });
+private List<P2PSyncInfo> buildSyncInformation(final List<HandShakingInfo> otherHandShakeInfos) {
+List<P2PSyncInfo> results = new ArrayList<P2PSyncInfo>();
+
+try {
+final List<HandShakingInfo> latestInfoFromCurrentDevice = this.queryInitialHandShakingMessage();
+
+Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
+@Override
+public int compare(HandShakingInfo o1, HandShakingInfo o2) {
+if (o1.getUserId() != null && o2.getUserId() != null) {
+return o1.getUserId().compareTo(o2.getUserId());
+} else {
+return -1;
+}
+}
+});
 
 
-        Collections.sort(otherHandShakeInfos, new Comparator<HandShakingInfo>() {
-            @Override
-            public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                return o1.getUserId().compareTo(o2.getUserId());
-            }
-        });
+Collections.sort(otherHandShakeInfos, new Comparator<HandShakingInfo>() {
+@Override
+public int compare(HandShakingInfo o1, HandShakingInfo o2) {
+if (o1.getUserId() != null && o2.getUserId() != null) {
+return o1.getUserId().compareTo(o2.getUserId());
+} else {
+return -1;
+}
+}
+});
 
-        final List<HandShakingInfo> validElementsFromOther = new ArrayList<HandShakingInfo>();
-        final List<HandShakingInfo> removeElementsFromInput = new ArrayList<HandShakingInfo>();
+final List<HandShakingInfo> validElementsFromOther = new ArrayList<HandShakingInfo>();
+final List<HandShakingInfo> removeElementsFromInput = new ArrayList<HandShakingInfo>();
 
-        CollectionUtils.forAllDo(latestInfoFromCurrentDevice, new Closure<HandShakingInfo>() {
-            @Override
-            public void execute(final HandShakingInfo input) {
-                Log.i(TAG, "processing element" + input);
-                CollectionUtils.find(otherHandShakeInfos, new Predicate<HandShakingInfo>() {
-                    @Override
-                    public boolean evaluate(HandShakingInfo other) {
-                        // if element exists in both list for same device
-                        if (input.getDeviceId().equals(other.getDeviceId())) {
-                            if (input.getUserId().equals(other.getUserId())) {
-                                if (input.getSequence() > other.getSequence()) {
-                                    validElementsFromOther.add(other);
-                                } else {
-                                    removeElementsFromInput.add(input);
-                                }
-                            }
-                        } else {
-                            validElementsFromOther.add(other);
-                        }
-//                        if (input.getUserId().equals(other.getUserId())) {
-//                            if (input.getSequence() > other.getSequence()) {
-//                                validElementsFromOther.add(other);
-//                            } else {
-//                                removeElementsFromInput.add(input);
-//                            }
-//                        } else {
+CollectionUtils.forAllDo(latestInfoFromCurrentDevice, new Closure<HandShakingInfo>() {
+@Override
+public void execute(final HandShakingInfo input) {
+Log.i(TAG, "processing element" + input);
+CollectionUtils.find(otherHandShakeInfos, new Predicate<HandShakingInfo>() {
+@Override
+public boolean evaluate(HandShakingInfo other) {
+// if element exists in both list for same device
+if (input.getDeviceId() != null &&
+other.getDeviceId() != null &&
+input.getDeviceId().equals(other.getDeviceId())) {
+if (input.getUserId() != null &&
+other.getUserId() != null && input.getUserId().equals(other.getUserId())) {
+if (input.getSequence() > other.getSequence()) {
+validElementsFromOther.add(other);
+} else {
+removeElementsFromInput.add(input);
+}
+}
+} else {
+validElementsFromOther.add(other);
+}
+// if (input.getUserId().equals(other.getUserId())) {
+// if (input.getSequence() > other.getSequence()) {
+// validElementsFromOther.add(other);
+// } else {
+// removeElementsFromInput.add(input);
+// }
+// } else {
 //
-//                        }
-                        return false;
-                    }
-                });
-            }
-        });
-
-        latestInfoFromCurrentDevice.addAll(validElementsFromOther);
-        latestInfoFromCurrentDevice.removeAll(removeElementsFromInput);
-
-        Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
-            @Override
-            public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                return (o1.getUserId().compareTo(o2.getUserId()));
-            }
-        });
-
-
-        @SuppressWarnings("unchecked")
-        Map<String, HandShakingInfo> map = new HashMap<String, HandShakingInfo>() {
-            {
-                IteratorUtils.forEach(latestInfoFromCurrentDevice.iterator(), new Closure() {
-                    @Override
-                    public void execute(Object input) {
-                        HandShakingInfo item = (HandShakingInfo) input;
-                        String key = item.getUserId() + "_" + item.getDeviceId();
-                        if (containsKey(key)) {
-                            HandShakingInfo storedItem = get(key);
-                            if (storedItem.getSequence() > item.getSequence()) {
-                                storedItem.setStartingSequence(item.getSequence());
-                            } else {
-                                storedItem.setStartingSequence(storedItem.getSequence());
-                                storedItem.setSequence(item.getSequence());
-                            }
-                        } else {
-                            put(key, item);
-                        }
-                    }
-                });
-            }
-        };
-
-
-        // process Map (execute queries and get result)
-
-        Collection<HandShakingInfo> collectionValues = map.values();
-        List<P2PSyncInfo> results = new ArrayList<P2PSyncInfo>();
-        for (HandShakingInfo i : collectionValues) {
-            P2PSyncInfo[] res = null;
-            if (i.getStartingSequence() != null && i.getSequence() != null) {
-                res = db.p2pSyncDao().fetchByUserAndDeviceBetweenSequences(i.getUserId(), i.getDeviceId(), i.getStartingSequence(), i.getSequence());
-            } else if (i.getStartingSequence() == null && i.getSequence() != null) {
-                res = db.p2pSyncDao().fetchByUserAndDeviceUpToSequence(i.getUserId(), i.getDeviceId(), i.getSequence());
-            }
-            if (res != null) {
-                results.addAll(Arrays.asList(res));
-            }
-        }
-
-        return results;
-    }
-
+// }
+return false;
+}
+});
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
     }
