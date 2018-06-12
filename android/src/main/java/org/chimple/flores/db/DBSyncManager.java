@@ -1,6 +1,7 @@
 package org.chimple.flores.db;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.List;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
+
+import static org.chimple.flores.sync.NSD.NSDSyncManager.P2P_SHARED_PREF;
 
 public class DBSyncManager {
 
@@ -95,11 +98,12 @@ public class DBSyncManager {
         return p2pdbapi.getLatestConversationsByUser(firstUserId);
     }
 
-    public void loggedInUser(String userId, String deviceId) {
+    public boolean loggedInUser(String userId, String deviceId) {
         SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("USER_ID", userId);
         editor.putString("DEVICE_ID", deviceId);
         editor.commit();
+        return true;
     }
 }
