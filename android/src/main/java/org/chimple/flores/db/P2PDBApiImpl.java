@@ -97,18 +97,22 @@ public class P2PDBApiImpl implements P2PDBApi {
     }
 
     public void persistP2PSyncInfos(String p2pSyncJson) {
-        List<P2PSyncInfo> infos = this.deSerializeP2PSyncInfoFromJson(p2pSyncJson);
-        db.beginTransaction();
         try {
-            for (P2PSyncInfo info : infos) {
-                this.persistP2PSyncMessage(info);
+            List<P2PSyncInfo> infos = this.deSerializeP2PSyncInfoFromJson(p2pSyncJson);
+            db.beginTransaction();
+            try {
+                for (P2PSyncInfo info : infos) {
+                    this.persistP2PSyncMessage(info);
+                }
+                db.setTransactionSuccessful();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                db.endTransaction();
             }
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            db.endTransaction();
-        }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }        
     }
 
 

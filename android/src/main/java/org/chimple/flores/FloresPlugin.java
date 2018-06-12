@@ -60,6 +60,8 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           {
               List<P2PUserIdDeviceIdAndMessage> udList = DBSyncManager.getInstance(registrar.context()).getUsers();
               List<Map<String, String>> users = new ArrayList<Map<String, String>>();
+              Log.i(TAG, "getUsers: "+users);
+
               for (P2PUserIdDeviceIdAndMessage ud: udList
                       ) {
                   Map<String, String> user = new HashMap<String, String>();

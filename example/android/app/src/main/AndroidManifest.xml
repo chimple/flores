@@ -32,7 +32,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="flores_example"
         android:icon="@mipmap/ic_launcher">
-        <service android:name="org.chimple.flores.scheduler.WifiDirectIntentService" />
+        <service android:name="org.chimple.flores.scheduler.P2PIntentService" />
         <service
             android:name="org.chimple.flores.scheduler.P2PHandShakingJobService"
             android:exported="false"

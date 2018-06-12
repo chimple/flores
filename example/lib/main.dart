@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
     } on PlatformException {
       print('Failed getting neighbors');
     }
-
+    print('users: $neighbors');
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
@@ -121,11 +121,11 @@ class _MyAppState extends State<MyApp> {
                                   new MaterialPageRoute<Null>(
                                       builder: (BuildContext context) {
                                 return new ConnectPage(
-                                    _neighbors[index]['user_id']);
+                                    _neighbors[index]['userId']);
                               }));
                             },
-                            child: new Text(_neighbors[index]['user_id'])),
-                    itemCount: _neighbors.length),
+                            child: new Text(_neighbors[index]['userId'])),
+                    itemCount: _neighbors?.length ?? 0),
               ),
             ),
           ],
