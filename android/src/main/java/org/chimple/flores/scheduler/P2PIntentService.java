@@ -116,7 +116,7 @@ public class P2PIntentService extends Service {
             Log.i(TAG, "should start NSD Sync");
             this.nsdSyncManager.execute(this.currentJobParams);
         } else {
-            editor.putBoolean("IS_P2P", false);
+            editor.putBoolean("IS_P2P", true);
             editor.commit();
             Log.i(TAG, "should start P2P Sync");
             if (this.p2pSyncManager != null) {
