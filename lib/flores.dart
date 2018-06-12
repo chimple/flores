@@ -27,52 +27,48 @@ class Flores {
       .invokeMethod('getUsers')
       .then<List<dynamic>>((dynamic result) => result);
 
+  Future<List<dynamic>> getConversations(String userId, String secondUserId, String messageType) async =>
+    _methodChannel
+        .invokeMethod('getConversations', <String, String>{
+      'userId': userId,
+      'secondUserId': secondUserId,
+      'messageType': messageType
+    })
+        .then<List<dynamic>>((dynamic result) => result);
 
-  Future<bool> connectTo(String neighbor) => _methodChannel
+  Future<bool> connectTo(String neighbor) async => _methodChannel
       .invokeMethod('connectTo')
       .then<bool>((dynamic result) => result);
 
-  Future<bool> start() => _methodChannel
+  Future<bool> start() async => _methodChannel
       .invokeMethod('start')
       .then<bool>((dynamic result) => result);
 
-  Future<bool> addUser(String userId, String deviceId, String message) {
+  Future<bool> addUser(String userId, String deviceId, String message) async {
     final Map<String, String> params = <String, String>{
       'userId': userId,
       'deviceId': deviceId,
       'message': message
     };
 
-    _methodChannel
+    return _methodChannel
         .invokeMethod('addUser', params)
         .then<bool>((dynamic result) => result);
   }
 
-  Future<List<dynamic>> getLatestMessages(String userId, String secondUserId, String messageType) {
+  Future<List<dynamic>> getLatestMessages(String userId, String secondUserId, String messageType) async {
     final Map<String, String> params = <String, String>{
       'userId': userId,
       'secondUserId': secondUserId,
       'messageType': messageType
     };
 
-    _methodChannel
+    return _methodChannel
         .invokeMethod('getLatestMessages', params)
         .then<List<dynamic>>((dynamic result) => result);
   }
 
-  Future<List<dynamic>> getConversations(String userId, String secondUserId, String messageType) {
-    final Map<String, String> params = <String, String>{
-      'userId': userId,
-      'secondUserId': secondUserId,
-      'messageType': messageType
-    };
-
-    _methodChannel
-        .invokeMethod('getConversations', params)
-        .then<List<dynamic>>((dynamic result) => result);
-  }
-
-  Future<bool> addMessage(String userId, String recipientId, String messageType, String message) {
+  Future<bool> addMessage(String userId, String recipientId, String messageType, String message) async {
     final Map<String, String> params = <String, String>{
       'userId': userId,
       'recipientId': recipientId,
@@ -80,7 +76,7 @@ class Flores {
       'message': message
     };
 
-    _methodChannel
+    return _methodChannel
         .invokeMethod('addMessage', params)
         .then<bool>((dynamic result) => result);
   }

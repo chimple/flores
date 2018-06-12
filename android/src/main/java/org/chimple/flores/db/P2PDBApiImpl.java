@@ -340,14 +340,17 @@ public class P2PDBApiImpl implements P2PDBApi {
         return result;
     }
 
-
     private List<P2PSyncInfo> buildSyncInformation(final List<HandShakingInfo> otherHandShakeInfos) {
         final List<HandShakingInfo> latestInfoFromCurrentDevice = this.queryInitialHandShakingMessage();
 
         Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
             @Override
             public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                return o1.getUserId().compareTo(o2.getUserId());
+                if(o1.getUserId() != null && o2.getUserId() != null) {
+                    return o1.getUserId().compareTo(o2.getUserId());
+                } else {
+                    return -1;
+                }
             }
         });
 
@@ -355,7 +358,11 @@ public class P2PDBApiImpl implements P2PDBApi {
         Collections.sort(otherHandShakeInfos, new Comparator<HandShakingInfo>() {
             @Override
             public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                return o1.getUserId().compareTo(o2.getUserId());
+                if(o1.getUserId() != null && o2.getUserId() != null) {
+                    return o1.getUserId().compareTo(o2.getUserId());
+                } else {
+                    return -1;
+                }
             }
         });
 
@@ -370,8 +377,9 @@ public class P2PDBApiImpl implements P2PDBApi {
                     @Override
                     public boolean evaluate(HandShakingInfo other) {
                         // if element exists in both list for same device
-                        if (input.getDeviceId().equals(other.getDeviceId())) {
-                            if (input.getUserId().equals(other.getUserId())) {
+                        if (input.getDeviceId() != null && other.getDeviceId() != null
+                                && input.getDeviceId().equals(other.getDeviceId())) {
+                            if (input.getUserId() != null && other.getUserId() != null && input.getUserId().equals(other.getUserId())) {
                                 if (input.getSequence() > other.getSequence()) {
                                     validElementsFromOther.add(other);
                                 } else {
@@ -402,7 +410,11 @@ public class P2PDBApiImpl implements P2PDBApi {
         Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
             @Override
             public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                return (o1.getUserId().compareTo(o2.getUserId()));
+                if(o1.getUserId() != null && o2.getUserId() != null) {
+                    return (o1.getUserId().compareTo(o2.getUserId()));
+                } else {
+                    return -1;
+                }
             }
         });
 
@@ -451,6 +463,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         return results;
     }
 
+
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
     }
@@ -459,7 +472,8 @@ public class P2PDBApiImpl implements P2PDBApi {
         return Arrays.asList(db.p2pSyncDao().getSyncInformationByUserId(userid));
     }
 
-    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
+    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String
+                                                                           messageType, List<String> userIds) {
         if (userIds != null && userIds.size() > 0) {
             return db.p2pSyncDao().fetchLatestMessagesByMessageType(messageType, userIds);
         } else {
@@ -467,7 +481,8 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public boolean addMessage(String userId, String recipientId, String messageType, String message) {
+    public boolean addMessage(String userId, String recipientId, String
+            messageType, String message) {
         try {
             SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
             String deviceId = pref.getString("DEVICE_ID", null); // getting String
@@ -488,7 +503,8 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
+    public boolean addMessage(String userId, String recipientId, String
+            messageType, String message, Boolean status, String sessionId) {
         try {
             SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
             String deviceId = pref.getString("DEVICE_ID", null); // getting String
@@ -519,11 +535,13 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
+    public List<P2PSyncInfo> getConversations(String firstUserId, String
+            secondUserId, String messageType) {
         return db.p2pSyncDao().fetchConversations(firstUserId, secondUserId, messageType);
     }
 
-    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String
+            secondUserId, String messageType) {
         return db.p2pSyncDao().fetchLatestConversations(firstUserId, secondUserId, messageType);
     }
 
@@ -548,7 +566,8 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message) {
+    public boolean upsertProfileForUserIdAndDevice(String userId, String
+            deviceId, String message) {
         try {
             P2PSyncInfo userInfo = db.p2pSyncDao().getProfileByUserId(userId, DBSyncManager.MessageTypes.PHOTO.type());
             if (userInfo != null) {
