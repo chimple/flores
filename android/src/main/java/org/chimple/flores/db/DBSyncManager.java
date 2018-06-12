@@ -94,4 +94,12 @@ public class DBSyncManager {
         P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
         return p2pdbapi.getLatestConversationsByUser(firstUserId);
     }
+
+    public void loggedInUser(String userId, String deviceId) {
+        SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("USER_ID", userId);
+        editor.putString("DEVICE_ID", deviceId);
+        editor.commit();
+    }
 }
