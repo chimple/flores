@@ -171,6 +171,18 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               }
               break;
           }
+          case "loggedInUser":
+          {
+              Map<String, String> arg = (Map<String, String>)call.arguments;
+              String userId = arg.get("userId");
+              String deviceId = arg.get("deviceId");
+              boolean status = DBSyncManager.getInstance(registrar.context())
+                              .loggedInUser(userId, deviceId);
+
+              result.success(status);
+              break;
+
+          }
           default:
           {
               result.notImplemented();

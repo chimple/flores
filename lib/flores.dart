@@ -56,6 +56,17 @@ class Flores {
         .then<bool>((dynamic result) => result);
   }
 
+  Future<bool> loggedInUser(String userId, String deviceId) async {
+    final Map<String, String> params = <String, String>{
+      'userId': userId,
+      'deviceId': deviceId
+    };
+
+    return _methodChannel
+        .invokeMethod('loggedInUser', params)
+        .then<bool>((dynamic result) => result);
+  }
+
   Future<List<dynamic>> getLatestMessages(String userId, String secondUserId, String messageType) async {
     final Map<String, String> params = <String, String>{
       'userId': userId,
