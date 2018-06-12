@@ -1,12 +1,12 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.Direct;
 
-public class WifiDirectService {
+public class P2PSyncService {
     private String instanceName;
     private String serviceType;
     private String deviceAddress;
     private String deviceName;
 
-    public WifiDirectService(String instance,String type,String address, String name){
+    public P2PSyncService(String instance, String type, String address, String name){
         this.instanceName = instance;
         this.serviceType = type;
         this.deviceAddress = address;
@@ -55,7 +55,7 @@ public class WifiDirectService {
         if (obj == null) {
             return false;
         }
-        final WifiDirectService info = (WifiDirectService) obj;
+        final P2PSyncService info = (P2PSyncService) obj;
         if (this == info) {
             return true;
         } else {

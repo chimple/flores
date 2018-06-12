@@ -5,12 +5,13 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
+import java.util.List;
+
 import org.chimple.flores.db.entity.P2PLatestInfoByUserAndDevice;
 import org.chimple.flores.db.entity.P2PSyncInfo;
-import org.chimple.flores.db.entity.P2PUserIdMessage;
 import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
+import org.chimple.flores.db.entity.P2PUserIdMessage;
 
-import java.util.List;
 
 @Dao
 public interface P2PSyncInfoDao {
@@ -68,4 +69,3 @@ public interface P2PSyncInfoDao {
     @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and p2p.user_id = :userId")
     public List<P2PSyncInfo> fetchLatestConversationsByUser(String userId);
 }
-

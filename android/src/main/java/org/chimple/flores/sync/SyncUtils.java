@@ -2,28 +2,51 @@ package org.chimple.flores.sync;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.support.v7.app.AlertDialog;
 
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.Collections;
 import java.util.List;
+
+import org.chimple.flores.sync.Direct.P2PSyncService;
+import org.chimple.flores.sync.NSD.NSDSyncService;
 
 public class SyncUtils {
 
     public static final int HandShakeportToUse = 38777;
     public static final String SERVICE_TYPE = "_WAPC_p2p._tcp";
 
-
     public enum DiscoveryState {
         NONE,
         DiscoverPeer,
-        DiscoverService
+        DiscoverService,
+        NSDServiceLost,
+        NSDServiceFound,
+        NSDServiceFoundNotServiceType,
+        NSDServiceFoundSameMachine,
+        NSDServiceFoundDifferentMachine,
+        NSDDiscoveryServiceStopped,
+        NSDServiceFailed,
+        NSDDiscoveryFailed,
+        NSDStartDiscoveryFailed,
+        NSDStopDiscoveryFailed,
+        NSDServiceUnRegistrationFailed,
+        NSDServiceUnRegistrationSucceed,
+        NSDServiceRegistrationFailed,
+        NSDServiceRegistrationSucceed,
+        NSDServiceResolved,
+        NSDServiceResolvedSameIP,
+        NSDServiceResolvedFailed
     }
 
     public enum SyncHandShakeState {
@@ -45,7 +68,7 @@ public class SyncUtils {
         ConnectedAndListening
     }
 
-    public enum ConnectionState{
+    public enum ConnectionState {
         Idle,
         NotInitialized,
         WaitingStateChange,
@@ -148,4 +171,58 @@ public class SyncUtils {
         alertDialog.show();
     }
 
+
+    public static boolean isWifiConnected(Context context) {
+        WifiManager wifiMgr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if (wifiMgr.isWifiEnabled()) { // WiFi adapter is ON
+            WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
+            if (wifiInfo != null && wifiInfo.getNetworkId() == -1) {
+                return false; // Not connected to an access-Point
+            }
+            return true;      // Connected to an Access Point
+        } else {
+            return false; // WiFi adapter is OFF
+        }
+    }
+
+
+    public static P2PSyncService createP2PSyncService(String instance, String type, String deviceAddress, String deviceName) {
+        return new P2PSyncService(instance, type, deviceAddress, deviceName);
+    }
+
+    public static NSDSyncService createNSDSyncService(String instance, String type, InetAddress deviceAddress, int port) {
+        return new NSDSyncService(instance, type, deviceAddress, port);
+    }
+
+
+    public static String getWiFiIPAddress(Context context) {
+        WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        String ip = getDottedDecimalIP(wm.getConnectionInfo().getIpAddress());
+        return ip;
+    }
+
+    public static String getDottedDecimalIP(int ipAddr) {
+
+        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+            ipAddr = Integer.reverseBytes(ipAddr);
+        }
+
+        byte[] ipByteArray = BigInteger.valueOf(ipAddr).toByteArray();
+
+        //convert to dotted decimal notation:
+        String ipAddrStr = getDottedDecimalIP(ipByteArray);
+        return ipAddrStr;
+    }
+
+    public static String getDottedDecimalIP(byte[] ipAddr) {
+        //convert to dotted decimal notation:
+        String ipAddrStr = "";
+        for (int i = 0; i < ipAddr.length; i++) {
+            if (i > 0) {
+                ipAddrStr += ".";
+            }
+            ipAddrStr += ipAddr[i] & 0xFF;
+        }
+        return ipAddrStr;
+    }
 }

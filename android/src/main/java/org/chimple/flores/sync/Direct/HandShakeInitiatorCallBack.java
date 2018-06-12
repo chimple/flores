@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.Direct;
 
 import java.net.InetAddress;
 

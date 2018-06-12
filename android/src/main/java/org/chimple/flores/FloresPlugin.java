@@ -23,11 +23,11 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 
+import org.chimple.flores.db.DBSyncManager;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
 import org.chimple.flores.scheduler.JobUtils;
-import org.chimple.flores.sync.P2PSyncManager;
 
 /**
  * FloresPlugin
@@ -56,7 +56,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
       switch (call.method) {
           case "getUsers":
           {
-              List<P2PUserIdDeviceIdAndMessage> udList = P2PSyncManager.getInstance(registrar.context()).getUsers();
+              List<P2PUserIdDeviceIdAndMessage> udList = DBSyncManager.getInstance(registrar.context()).getUsers();
               List<Map<String, String>> users = new ArrayList<Map<String, String>>();
               for (P2PUserIdDeviceIdAndMessage ud: udList
                       ) {
@@ -80,7 +80,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String userId = arg.get("userId");
               String deviceId = arg.get("deviceId");
               String message = arg.get("message");
-              boolean status = P2PSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
+              boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
               result.success(status);
               break;
           }
@@ -97,7 +97,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String messageType = arg.get("messageType");
               String message = arg.get("message");
               boolean status =
-                      P2PSyncManager.getInstance(registrar.context())
+              DBSyncManager.getInstance(registrar.context())
                               .addMessage(userId, recipientId, messageType, message);
               result.success(status);
               break;
@@ -112,7 +112,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               userIds.add(userId);
               userIds.add(secondUserId);
               List<P2PUserIdMessage> messageList =
-                      P2PSyncManager.getInstance(registrar.context())
+              DBSyncManager.getInstance(registrar.context())
                               .fetchLatestMessagesByMessageType(messageType, userIds);
               List<Map<String, String>> messages = new ArrayList<Map<String, String>>();
               for (P2PUserIdMessage m: messageList
@@ -137,7 +137,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String userId = arg.get("userId");
               String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
-                      P2PSyncManager.getInstance(registrar.context())
+              DBSyncManager.getInstance(registrar.context())
                               .getConversations(userId, secondUserId, messageType);
               List<Map<String, String>> messages = convertToMap(messageList);
 
@@ -155,7 +155,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String userId = arg.get("userId");
               String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
-                      P2PSyncManager.getInstance(registrar.context())
+              DBSyncManager.getInstance(registrar.context())
                               .getLatestConversations(userId, secondUserId, messageType);
               List<Map<String, String>> messages = convertToMap(messageList);
 

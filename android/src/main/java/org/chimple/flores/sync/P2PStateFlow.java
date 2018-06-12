@@ -1,13 +1,19 @@
 package org.chimple.flores.sync;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import org.chimple.flores.db.P2PDBApi;
-import org.chimple.flores.db.P2PDBApiImpl;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.chimple.flores.db.DBSyncManager;
+import org.chimple.flores.sync.sender.ConnectedThread;
+
+import static org.chimple.flores.sync.Direct.P2POrchester.allMessageExchangedForP2P;
+import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
+import static org.chimple.flores.sync.NSD.NSDOrchester.allMessageExchangedForNSD;
 import static org.chimple.flores.sync.P2PStateFlow.Transition.NONE;
 import static org.chimple.flores.sync.P2PStateFlow.Transition.RECEIVE_DB_SYNC_INFORMATION;
 import static org.chimple.flores.sync.P2PStateFlow.Transition.RECEIVE_HANDSHAKING_INFORMATION;
@@ -31,7 +37,7 @@ public class P2PStateFlow {
     private boolean handShakingInformationSent = false;
     private boolean allSyncInformationSent = false;
 
-    private P2PSyncManager manager;
+    private DBSyncManager manager;
     private static P2PStateFlow instance;
     private ConnectedThread thread;
 
@@ -52,12 +58,13 @@ public class P2PStateFlow {
     }
 
 
-    public static P2PStateFlow getInstanceUsingDoubleLocking(P2PSyncManager manager) {
+    public static P2PStateFlow getInstanceUsingDoubleLocking(DBSyncManager manager) {
         if (instance == null) {
             synchronized (P2PStateFlow.class) {
                 if (instance == null) {
                     instance = new P2PStateFlow();
                     instance.manager = manager;
+
                     instance.initializeAllP2PStates();
                     instance.setInitialState(new NoneState());
                 }
@@ -111,19 +118,29 @@ public class P2PStateFlow {
         }
     }
 
+    private void broadcastExitMessageForP2P() {
+        Log.d("sender", "Broadcasting message exit for P2P");
+        Intent intent = new Intent(allMessageExchangedForP2P);
+        LocalBroadcastManager.getInstance(manager.getContext()).sendBroadcast(intent);
+    }
+
+    private void broadcastExitMessageForNSD() {
+        Log.d("sender", "Broadcasting message exit message for NSD");
+        Intent intent = new Intent(allMessageExchangedForNSD);
+        LocalBroadcastManager.getInstance(manager.getContext()).sendBroadcast(intent);
+    }
+
     public void allMessagesExchanged() {
-        Log.i(TAG, ".... All messages exchanged ....");
+        SharedPreferences pref = manager.getContext().getSharedPreferences(P2P_SHARED_PREF, 0);
+        boolean isP2P = pref.getBoolean("IS_P2P", false); // getting String
+
+        Log.i(TAG, ".... All messages exchanged .... with P2P = " + isP2P);
         this.resetAllStates();
-        P2PDBApi api = P2PDBApiImpl.getInstance(manager.getContext());
-        String deviceId = manager.fetchFromSharedPreference(P2PSyncManager.connectedDevice);
-        if (deviceId != null) {
-            api.syncCompleted(deviceId);
+        if(isP2P) {
+            this.broadcastExitMessageForP2P();
+        } else {
+            this.broadcastExitMessageForNSD();
         }
-        Log.i(TAG, ".... calling removeClientIPAddressToConnect ....");
-        manager.removeClientIPAddressToConnect();
-        Log.i(TAG, ".... calling startExitTimer....");
-        manager.resetExitTimer();
-        manager.startExitTimer();
     }
 
     public void transit(Transition command, String message) {

@@ -1,7 +1,7 @@
 package org.chimple.flores.sync;
 
-
 import org.chimple.flores.db.AppDatabase;
+import org.chimple.flores.db.DBSyncManager;
 import org.chimple.flores.db.P2PDBApiImpl;
 
 import static org.chimple.flores.sync.P2PStateFlow.Transition.RECEIVE_DB_SYNC_INFORMATION;
@@ -19,9 +19,10 @@ public class ReceiveSyncInfoMessageState implements P2PState {
     }
 
     @Override
-    public void onEnter(P2PStateFlow p2PStateFlow, P2PSyncManager manager, String readMessage) {
+    public void onEnter(P2PStateFlow p2PStateFlow, DBSyncManager manager, String readMessage) {
         if (p2PStateFlow.getThread() != null) {
             this.outcome = readMessage;
+            AppDatabase db = AppDatabase.getInstance(manager.getContext());
             P2PDBApiImpl.getInstance(manager.getContext()).persistP2PSyncInfos(readMessage);
             p2PStateFlow.setAllSyncInformationReceived(true);
             if (!p2PStateFlow.isAllSyncInformationSent()) {

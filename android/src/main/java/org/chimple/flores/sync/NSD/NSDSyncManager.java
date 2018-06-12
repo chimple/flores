@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.NSD;
 
 import android.app.job.JobParameters;
 import android.content.BroadcastReceiver;
@@ -6,11 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pGroup;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -19,15 +16,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.util.Log;
-import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
-import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
-import org.chimple.flores.db.entity.P2PSyncInfo;
-import org.chimple.flores.db.P2PDBApi;
-import org.chimple.flores.db.P2PDBApiImpl;
 
-
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,17 +30,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.chimple.flores.db.DBSyncManager;
+import org.chimple.flores.db.P2PDBApi;
+import org.chimple.flores.db.P2PDBApiImpl;
+import org.chimple.flores.sync.P2PStateFlow;
+import org.chimple.flores.sync.Direct.P2PSyncManager;
+import org.chimple.flores.sync.Direct.P2PSyncService;
+import org.chimple.flores.sync.SyncUtils;
+import org.chimple.flores.sync.sender.CommunicationCallBack;
+import org.chimple.flores.sync.sender.CommunicationThread;
+import org.chimple.flores.sync.sender.ConnectToThread;
+import org.chimple.flores.sync.sender.ConnectedThread;
+
 import static org.chimple.flores.scheduler.P2PHandShakingJobService.JOB_PARAMS;
 import static org.chimple.flores.scheduler.P2PHandShakingJobService.P2P_SYNC_RESULT_RECEIVED;
-import static org.chimple.flores.sync.P2POrchester.neighboursUpdateEvent;
+import static org.chimple.flores.sync.Direct.P2POrchester.neighboursUpdateEvent;
+import static org.chimple.flores.sync.NSD.NSDOrchester.allMessageExchangedForNSD;
 
-public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBack, Handler.Callback {
-    private static final String TAG = P2PSyncManager.class.getSimpleName();
+public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBack, Handler.Callback {
+    private static final String TAG = NSDSyncManager.class.getSimpleName();
     private Context context;
-    private static P2PSyncManager instance;
-    private CountDownTimer disconnectGroupOwnerTimeOut;
+    private static NSDSyncManager instance;
+    private CountDownTimer shutDownJobTimer;
     private String clientIPAddressToConnect = null;
-    private P2POrchester mWDConnector = null;
+    private NSDOrchester mNSDConnector = null;
     private CommunicationThread mTestListenerThread = null;
     private ConnectToThread mTestConnectToThread = null;
     private ConnectedThread mTestConnectedThread = null;
@@ -59,6 +61,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     private Handler mHandler;
     private HandlerThread handlerThread;
     private P2PStateFlow p2PStateFlow;
+    private DBSyncManager dbSyncManager;
     private boolean shouldInitiate;
     //Status
     private int mInterval = 1000; // 1 second by default, can be changed later
@@ -69,9 +72,8 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
     private JobParameters currentJobParams;
 
-    private Map<String, WifiDirectService> neighbours = null;
+    private Map<String, P2PSyncService> neighbours = null;
 
-    //    public static final String profileFileExtension = ".txt";
     public static final String profileFileExtension = ".jpg";
     public static final String customStatusUpdateEvent = "custom-status-update-event";
     public static final String customTimerStatusUpdateEvent = "custom-timer-status-update-event";
@@ -79,41 +81,26 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     public static final String P2P_SHARED_PREF = "p2pShardPref";
     public static final int EXIT_CURRENT_JOB_TIME = 4 * 60; // 4 mins
 
-    public enum MessageTypes {
-        PHOTO("Photo"),
-        CHAT("Chat"),
-        GAME("Game");
-
-        private String type;
-
-        MessageTypes(String type) {
-            this.type = type;
-        }
-
-        public String type() {
-            return type;
-        }
-    }
-
-
-    public static P2PSyncManager getInstance(Context context) {
+    public static NSDSyncManager getInstance(Context context) {
         if (instance == null) {
             synchronized (P2PSyncManager.class) {
-                instance = new P2PSyncManager(context);
+                instance = new NSDSyncManager(context);
             }
         }
 
         return instance;
     }
 
-    private P2PSyncManager(Context context) {
+    private NSDSyncManager(Context context) {
         this.context = context;
-        this.handlerThread = new HandlerThread("P2PSyncManager");
+        this.handlerThread = new HandlerThread("NSDSyncManager");
         this.handlerThread.start();
         this.mHandler = new Handler(this.handlerThread.getLooper(), this);
-        this.p2PStateFlow = P2PStateFlow.getInstanceUsingDoubleLocking(this);
+        dbSyncManager = DBSyncManager.getInstance(this.context);
+        this.p2PStateFlow = P2PStateFlow.getInstanceUsingDoubleLocking(dbSyncManager);
 
         LocalBroadcastManager.getInstance(this.context).registerReceiver(mMessageReceiver, new IntentFilter(neighboursUpdateEvent));
+        LocalBroadcastManager.getInstance(this.context).registerReceiver(nsdAllMessageExchangedReceiver, new IntentFilter(allMessageExchangedForNSD));
 
         this.initStatusChecker();
     }
@@ -143,29 +130,13 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
     private void broadcastCustomTimerStatusUpdateEvent() {
         Intent intent = new Intent(customTimerStatusUpdateEvent);
-        // You can also include some extra data.
 //        Log.i(TAG, "totalTimeTillJobStarted" + totalTimeTillJobStarted + " Time left:" + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
         intent.putExtra("timeCounter", "T:" + this.timeCounter + " Exit In :" + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
         LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
     }
 
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            synchronized (this) {
-                neighbours = (HashMap<String, WifiDirectService>) intent.getSerializableExtra("neighbours");
-                for (Map.Entry<String, WifiDirectService> entry : neighbours.entrySet()) {
-                    if (entry.getKey() != null && entry.getValue() != null) {
-                        Log.i(TAG, "got neighbour: " + entry.getKey() + " : " + ((WifiDirectService) entry.getValue()).print());
-                    }
-                }
-            }
-        }
-    };
 
-
-    public Map<String, WifiDirectService> getNeighbours() {
+    public Map<String, P2PSyncService> getNeighbours() {
         return this.neighbours;
     }
 
@@ -196,6 +167,9 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
     public void execute(final JobParameters currentJobParams) {
         this.currentJobParams = currentJobParams;
+
+        Log.i(TAG, "currentJobParams in NSDSyncManager" + this.currentJobParams.toString());
+
         mStatusChecker.run();
         //changing the time and its interval
         //Start Init
@@ -214,25 +188,21 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             }
 
         }
-        StartConnector();
-    }
-
-    public void shutDownAll() {
-        Log.i(TAG, "SHUTTING DOWN CURRENT JOB");
-        Intent result = new Intent(P2P_SYNC_RESULT_RECEIVED);
-        result.putExtra(JOB_PARAMS, currentJobParams);
-        LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
+        StartNSDConnector();
     }
 
     public void startExitTimer() {
         synchronized (this) {
-            disconnectGroupOwnerTimeOut = new CountDownTimer(5000, 1000) {
+            shutDownJobTimer = new CountDownTimer(5000, 1000) {
                 public void onTick(long millisUntilFinished) {
-                    Log.i(TAG, "disconnectGroupOwnerTimeOut ticking.....");
+                    Log.i(TAG, "shutDownJobTimer ticking.....");
                 }
 
                 public void onFinish() {
-                    shutDownAll();
+                    Log.i(TAG, "SHUTTING DOWN CURRENT JOB with parameters" + instance.currentJobParams.toString());
+                    Intent result = new Intent(P2P_SYNC_RESULT_RECEIVED);
+                    result.putExtra(JOB_PARAMS, instance.currentJobParams);
+                    LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
                 }
             };
 
@@ -240,48 +210,26 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             if (!exitTimerStarted) {
                 exitTimerStarted = true;
                 Log.i(TAG, "...... exitTimerStarted .....");
-                disconnectGroupOwnerTimeOut.start();
-                Log.i(TAG, "Exit time reached ... starting disconnectGroupOwnerTimeOut");
+                shutDownJobTimer.start();
+                Log.i(TAG, "Exit time reached ... starting shutDownJobTimer");
             }
         }
     }
 
-    public void reStartConnector(boolean shouldRestart, int delayMillis) {
-        stopConnector();
-        if (shouldRestart) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                //Lets give others chance on creating new group before we come back online
-                public void run() {
-                    StartConnector();
-                }
-            }, delayMillis);
-        }
-    }
-
-    public void toggle() {
-        if (mWDConnector != null) {
-            stopConnector();
-        } else {
-            StartConnector();
-        }
-    }
-
-    public void StartConnector() {
-        //lets be ready for incoming test communications
-        updateStatus(TAG, "starting listener now, and connector");
+    public void StartNSDConnector() {
+        updateStatus(TAG, "starting NSD listener now, and connector");
         startListenerThread();
-        mWDConnector = new P2POrchester(this.context, this, this.mHandler);
+        mNSDConnector = new NSDOrchester(this.context, this, this.mHandler);
     }
 
-    public void stopConnector() {
-        stopConnectedThread();
-        stopConnectToThread();
-        stopListenerThread();
+    public void stopNSDConnector() {
+        this.stopListenerThread();
+        this.stopConnectedThread();
+        this.stopConnectToThread();
 
-        if (mWDConnector != null) {
-            mWDConnector.cleanUp();
-            mWDConnector = null;
+        if (mNSDConnector != null) {
+            mNSDConnector.cleanUp();
+            mNSDConnector = null;
         }
 
         updateStatus(TAG, "Stopped");
@@ -323,8 +271,8 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     public void connectToClient() {
         stopConnectedThread();
         stopConnectToThread();
-        if (instance.disconnectGroupOwnerTimeOut != null) {
-            instance.disconnectGroupOwnerTimeOut.cancel();
+        if (instance.shutDownJobTimer != null) {
+            instance.shutDownJobTimer.cancel();
         }
 
         if (clientIPAddressToConnect != null) {
@@ -361,12 +309,6 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         Log.i(TAG, "Connected to ");
         final Socket socketTmp = socket;
         mTestConnectToThread = null;
-        //Client side send image here
-        //================================
-//        instance.imageSyncInfo = new ImageSyncInfo(socketTmp,context);
-//        instance.imageSyncInfo.start();
-//        instance.imageSyncInfo.write(socketTmp);
-        //================================
         this.p2PStateFlow.resetAllStates();
         startTestConnection(socketTmp, true);
     }
@@ -375,12 +317,6 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     public void GotConnection(Socket socket) {
         Log.i(TAG, "We got incoming connection");
         final Socket socketTmp = socket;
-        //Server side send image here
-        //================================
-//        instance.imageSyncInfo = new ImageSyncInfo(socketTmp,context);
-//        instance.imageSyncInfo.start();
-//        instance.imageSyncInfo.write(socketTmp);
-        //================================
         startListenerThread();
         mTestConnectToThread = null;
         this.p2PStateFlow.resetAllStates();
@@ -395,37 +331,6 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     @Override
     public void ListeningFailed(String reason) {
         startListenerThread();
-    }
-
-    @Override
-    public void Connected(String address, boolean isGroupOwner) {
-        if (isGroupOwner) {
-            clientIPAddressToConnect = address;
-            updateStatus("Connectec", "Connected From remote host: " + address + ", CTread : " + mTestConnectedThread + ", CtoTread: " + mTestConnectToThread);
-            Log.i(TAG, "Connectec" + "Connected From remote host: " + address + ", CTread : " + mTestConnectedThread + ", CtoTread: " + mTestConnectToThread);
-            if (mTestConnectedThread == null && mTestConnectToThread == null) {
-                Log.i(TAG, "CONNECT TO:" + clientIPAddressToConnect);
-                connectToClient();
-            }
-        } else {
-            updateStatus("Connectec", "Connected to remote host: " + address);
-            Log.i(TAG, "Connectec" + "Connected to remote host: " + address);
-        }
-    }
-
-    @Override
-    public void GroupInfoChanged(WifiP2pGroup group) {
-        // updateStatus("GroupInfoChanged:", "group: " + group.getOwner());
-    }
-
-    @Override
-    public void ConnectionStateChanged(SyncUtils.ConnectionState newState) {
-        updateStatus("ConnectionStateChanged:", "New state: " + newState);
-    }
-
-    @Override
-    public void ListeningStateChanged(SyncUtils.ReportingState newState) {
-        updateStatus("ListeningStateChanged", "New state: " + newState);
     }
 
 
@@ -446,61 +351,18 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     }
 
     public void onDestroy() {
-        Log.i(TAG, "in P2P Destroy");
-        if (this.disconnectGroupOwnerTimeOut != null) {
-            this.disconnectGroupOwnerTimeOut.cancel();
+        Log.i(TAG, "in NSD Destroy");
+
+        if (this.shutDownJobTimer != null) {
+            this.shutDownJobTimer.cancel();
         }
-        this.stopConnector();
+        LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this.context).unregisterReceiver(nsdAllMessageExchangedReceiver);
+        this.stopNSDConnector();
         this.mStatusChecker = null;
-        P2PSyncManager.instance = null;
+        NSDSyncManager.instance = null;
         updateStatus(TAG, "onDestroy");
     }
-
-    public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);
-    }
-
-
-    public boolean addMessage(String userId, String recipientId, String messageType, String message) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.addMessage(userId, recipientId, messageType, message);
-    }
-
-    public List<P2PUserIdDeviceIdAndMessage> getUsers() {
-        Log.i(TAG, "Called getUsers");
-
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getUsers();
-    }
-
-    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.fetchLatestMessagesByMessageType(messageType, userIds);
-    }
-
-    public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getConversations(firstUserId, secondUserId, messageType);
-    }
-
-    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
-    }
-
-    public boolean upsertUser(String userId, String deviceId, String fileName) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
-    }
-
-    public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
-        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(P2PSyncManager.instance.context);
-        return p2pdbapi.getLatestConversationsByUser(firstUserId);
-    }
-
-
-
 
     // Manage photo
     public static String createProfilePhoto(String generateUserId, byte[] contents, Context context) {
@@ -660,4 +522,70 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         }
 
     }
+
+    @Override
+    public void NSDDiscovertyStateChanged(SyncUtils.DiscoveryState newState) {
+        updateStatus("NSDStatusChanged:", "New state: " + newState);
+    }
+
+
+    @Override
+    public void NSDConnectionStateChanged(SyncUtils.ConnectionState newState) {
+        updateStatus("NSDConnectionStateChanged:", "New state: " + newState);
+    }
+
+    @Override
+    public void NSDListeningStateChanged(SyncUtils.ReportingState newState) {
+        updateStatus("NSDListeningStateChanged", "New state: " + newState);
+    }
+
+    @Override
+    public void NSDConnected(String address, boolean isOwner) {
+        if (isOwner) {
+            clientIPAddressToConnect = address;
+            updateStatus("Connectec", "Connected From remote host: " + address + ", CTread : " + mTestConnectedThread + ", CtoTread: " + mTestConnectToThread);
+            Log.i(TAG, "Connectec" + "Connected From remote host: " + address + ", CTread : " + mTestConnectedThread + ", CtoTread: " + mTestConnectToThread);
+            if (mTestConnectedThread == null && mTestConnectToThread == null) {
+                Log.i(TAG, "CONNECT TO:" + clientIPAddressToConnect);
+                connectToClient();
+            }
+        } else {
+            updateStatus("Connectec", "Connected to remote host: " + address);
+            Log.i(TAG, "Connectec" + "Connected to remote host: " + address);
+        }
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            synchronized (this) {
+                neighbours = (HashMap<String, P2PSyncService>) intent.getSerializableExtra("neighbours");
+                for (Map.Entry<String, P2PSyncService> entry : neighbours.entrySet()) {
+                    if (entry.getKey() != null && entry.getValue() != null) {
+                        Log.i(TAG, "got neighbour: " + entry.getKey() + " : " + ((P2PSyncService) entry.getValue()).print());
+                    }
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver nsdAllMessageExchangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            synchronized (this) {
+                P2PDBApi api = P2PDBApiImpl.getInstance(instance.getContext());
+                String deviceId = instance.fetchFromSharedPreference(P2PSyncManager.connectedDevice);
+                if (deviceId != null) {
+                    api.syncCompleted(deviceId);
+                }
+                Log.i(TAG, ".... calling removeClientIPAddressToConnect ....");
+                instance.removeClientIPAddressToConnect();
+                Log.i(TAG, ".... calling startExitTimer....");
+                instance.resetExitTimer();
+                instance.startExitTimer();
+            }
+        }
+    };
 }

@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.Direct;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,11 +11,13 @@ import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
 import android.util.Log;
 
+import org.chimple.flores.sync.SyncUtils;
+
 public class P2PWifiConnector {
 
     private static final String TAG = P2PWifiConnector.class.getSimpleName();
     private boolean hadConnected = false;
-    private WifiDirectService currentlyTryingToConnectService = null;
+    private P2PSyncService currentlyTryingToConnectService = null;
 
     // Context
     private Context context;
@@ -166,11 +168,11 @@ public class P2PWifiConnector {
         }
     }
 
-    public WifiDirectService getCurrentlyTryingToConnectService() {
+    public P2PSyncService getCurrentlyTryingToConnectService() {
         return currentlyTryingToConnectService;
     }
 
-    public void setCurrentlyTryingToConnectService(WifiDirectService currentlyTryingToConnectService) {
+    public void setCurrentlyTryingToConnectService(P2PSyncService currentlyTryingToConnectService) {
         this.currentlyTryingToConnectService = currentlyTryingToConnectService;
     }
 }

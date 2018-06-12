@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _isComposing = false;
     });
-    _flores.addUser(text, 'b');
+    _flores.addUser(text, 'b','hi');
   }
 
   @override

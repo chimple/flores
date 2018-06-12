@@ -1,9 +1,10 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.sender;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
+
 
 import java.io.BufferedOutputStream;
 import java.io.File;

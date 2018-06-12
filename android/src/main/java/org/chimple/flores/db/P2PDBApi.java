@@ -1,12 +1,13 @@
 package org.chimple.flores.db;
 
-import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
-import org.chimple.flores.db.entity.P2PSyncInfo;
-import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.chimple.flores.db.entity.HandShakingInfo;
+import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
+import org.chimple.flores.db.entity.P2PSyncInfo;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
+import org.chimple.flores.db.entity.P2PUserIdMessage;
 
 public interface P2PDBApi {
 

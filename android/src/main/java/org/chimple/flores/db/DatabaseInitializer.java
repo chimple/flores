@@ -7,15 +7,14 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import org.chimple.flores.sync.P2PSyncManager;
-
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static org.chimple.flores.sync.P2PSyncManager.P2P_SHARED_PREF;
+import org.chimple.flores.sync.Direct.P2PSyncManager;
+
+import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 
 public class DatabaseInitializer {
 

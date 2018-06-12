@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.Direct;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,9 +11,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class P2PBase implements WifiP2pManager.ChannelListener {
     private static final String TAG = P2PBase.class.getSimpleName();
@@ -21,7 +19,7 @@ public class P2PBase implements WifiP2pManager.ChannelListener {
     private boolean wifiDirectEnabledDevice = false;
 
     // list of devices which are connected (now or sometime in past)
-    private List<WifiDirectService> connectedDevices = new ArrayList<WifiDirectService>();
+    private List<P2PSyncService> connectedDevices = new ArrayList<P2PSyncService>();
 
     // Wifi P2P Manager
     private WifiP2pManager wifiP2pManager = null;
@@ -142,16 +140,16 @@ public class P2PBase implements WifiP2pManager.ChannelListener {
     }
 
 
-    public List<WifiDirectService> connectedDevices() {
+    public List<P2PSyncService> connectedDevices() {
         return this.connectedDevices;
     }
 
     // TO DO - Unit Test Required
-    public WifiDirectService selectServiceToConnect(List<WifiDirectService> available, List<WifiDirectService> highPriorityDevices) {
+    public P2PSyncService selectServiceToConnect(List<P2PSyncService> available, List<P2PSyncService> highPriorityDevices) {
 
-        WifiDirectService ret = null;
+        P2PSyncService ret = null;
 
-        List<WifiDirectService> list = Collections.synchronizedList(this.connectedDevices);
+        List<P2PSyncService> list = Collections.synchronizedList(this.connectedDevices);
 
         synchronized (list) {
 

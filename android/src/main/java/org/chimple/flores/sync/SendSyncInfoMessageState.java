@@ -3,6 +3,7 @@ package org.chimple.flores.sync;
 import android.util.Log;
 
 import org.chimple.flores.db.AppDatabase;
+import org.chimple.flores.db.DBSyncManager;
 import org.chimple.flores.db.P2PDBApiImpl;
 
 import static org.chimple.flores.sync.P2PStateFlow.Transition.RECEIVE_DB_SYNC_INFORMATION;
@@ -22,7 +23,7 @@ public class SendSyncInfoMessageState implements P2PState {
     }
 
     @Override
-    public void onEnter(P2PStateFlow p2PStateFlow, P2PSyncManager manager, String message) {
+    public void onEnter(P2PStateFlow p2PStateFlow, DBSyncManager manager, String message) {
         //send handshaking message
         try {
             String handShakingInformationReceived = p2PStateFlow.getStateResult(P2PStateFlow.Transition.RECEIVE_HANDSHAKING_INFORMATION);
@@ -35,7 +36,7 @@ public class SendSyncInfoMessageState implements P2PState {
                 Log.i(TAG, "syncInformation message sent" + syncInformation);
             }
             p2PStateFlow.setAllSyncInformationSent(true);
-            if (p2PStateFlow.isAllSyncInformationReceived()) {
+            if(p2PStateFlow.isAllSyncInformationReceived()) {
                 Log.i(TAG, "setAllSyncInformationSent");
                 p2PStateFlow.allMessagesExchanged();
             }

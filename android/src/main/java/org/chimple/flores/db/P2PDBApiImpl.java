@@ -22,20 +22,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
-import org.chimple.flores.db.entity.HandShakingInfo;
-import org.chimple.flores.db.entity.HandShakingInfoDeserializer;
-import org.chimple.flores.db.entity.HandShakingMessage;
-import org.chimple.flores.db.entity.HandShakingMessageDeserializer;
-import org.chimple.flores.db.entity.P2PLatestInfoByUserAndDevice;
-import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
-import org.chimple.flores.db.entity.P2PSyncInfo;
-import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
-import org.chimple.flores.db.entity.ProfileMessage;
-import org.chimple.flores.db.entity.ProfileMessageDeserializer;
-import org.chimple.flores.sync.P2PSyncManager;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,11 +33,24 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.chimple.flores.sync.P2PSyncManager.P2P_SHARED_PREF;
+import org.chimple.flores.db.entity.HandShakingInfo;
+import org.chimple.flores.db.entity.HandShakingInfoDeserializer;
+import org.chimple.flores.db.entity.HandShakingMessage;
+import org.chimple.flores.db.entity.HandShakingMessageDeserializer;
+import org.chimple.flores.db.entity.P2PLatestInfoByUserAndDevice;
+import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
+import org.chimple.flores.db.entity.P2PSyncInfo;
+import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
+import org.chimple.flores.db.entity.P2PUserIdMessage;
+import org.chimple.flores.db.entity.ProfileMessage;
+import org.chimple.flores.db.entity.ProfileMessageDeserializer;
+import org.chimple.flores.sync.Direct.P2PSyncManager;
 
+import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 
 public class P2PDBApiImpl implements P2PDBApi {
     private static final String TAG = P2PDBApiImpl.class.getName();
@@ -453,7 +455,6 @@ public class P2PDBApiImpl implements P2PDBApi {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
     }
 
-
     public List<P2PSyncInfo> getInfoByUserId(String userid) {
         return Arrays.asList(db.p2pSyncDao().getSyncInformationByUserId(userid));
     }
@@ -526,11 +527,6 @@ public class P2PDBApiImpl implements P2PDBApi {
         return db.p2pSyncDao().fetchLatestConversations(firstUserId, secondUserId, messageType);
     }
 
-    public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
-        return db.p2pSyncDao().fetchLatestConversationsByUser(firstUserId);
-    }
-
-
     public String readProfilePhoto() {
         SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String
@@ -554,12 +550,12 @@ public class P2PDBApiImpl implements P2PDBApi {
 
     public boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message) {
         try {
-            P2PSyncInfo userInfo = db.p2pSyncDao().getProfileByUserId(userId, P2PSyncManager.MessageTypes.PHOTO.type());
+            P2PSyncInfo userInfo = db.p2pSyncDao().getProfileByUserId(userId, DBSyncManager.MessageTypes.PHOTO.type());
             if (userInfo != null) {
                 userInfo.setUserId(userId);
                 userInfo.setDeviceId(deviceId);
                 userInfo.setMessage(message);
-                userInfo.setMessageType(P2PSyncManager.MessageTypes.PHOTO.type());
+                userInfo.setMessageType(DBSyncManager.MessageTypes.PHOTO.type());
             } else {
                 userInfo = new P2PSyncInfo();
                 userInfo.setUserId(userId);
@@ -573,7 +569,7 @@ public class P2PDBApiImpl implements P2PDBApi {
                 maxSequence++;
                 userInfo.setSequence(maxSequence);
                 userInfo.setMessage(message);
-                userInfo.setMessageType(P2PSyncManager.MessageTypes.PHOTO.type());
+                userInfo.setMessageType(DBSyncManager.MessageTypes.PHOTO.type());
             }
             db.p2pSyncDao().insertP2PSyncInfo(userInfo);
             return true;
@@ -582,6 +578,11 @@ public class P2PDBApiImpl implements P2PDBApi {
             Log.e(TAG, e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
+        return db.p2pSyncDao().fetchLatestConversationsByUser(firstUserId);
     }
 }
 

@@ -1,36 +1,39 @@
 package org.chimple.flores.scheduler;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.app.job.JobParameters;
-import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
-import org.chimple.flores.sync.P2PSyncManager;
+import java.util.UUID;
+
+import org.chimple.flores.sync.NSD.NSDSyncManager;
+import org.chimple.flores.sync.Direct.P2PSyncManager;
+import org.chimple.flores.sync.SyncUtils;
+
 
 import static org.chimple.flores.scheduler.P2PHandShakingJobService.JOB_PARAMS;
+import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 
-
-public class WifiDirectIntentService extends Service {
-    private static final String TAG = WifiDirectIntentService.class.getSimpleName();
+public class P2PIntentService extends Service {
+    private static final String TAG = P2PIntentService.class.getSimpleName();
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
     private P2PSyncManager p2pSyncManager;
+    private NSDSyncManager nsdSyncManager;
     private JobParameters currentJobParams;
     ;
-    private WifiDirectIntentService that = this;
+    private P2PIntentService that = this;
 
-    public WifiDirectIntentService() {
+    public P2PIntentService() {
         super();
     }
 
@@ -51,9 +54,15 @@ public class WifiDirectIntentService extends Service {
         HandlerThread thread = new HandlerThread("IntentService");
         thread.start();
         mServiceLooper = thread.getLooper();
+        boolean isInternetConnected = SyncUtils.isWifiConnected(this);
         mServiceHandler = new ServiceHandler(mServiceLooper);
-        this.p2pSyncManager = P2PSyncManager.getInstance(this.getApplicationContext());
+        if (isInternetConnected) {
+            this.nsdSyncManager = NSDSyncManager.getInstance(this.getApplicationContext());
+        } else {
+            this.p2pSyncManager = P2PSyncManager.getInstance(this.getApplicationContext());
+        }
     }
+
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -75,7 +84,14 @@ public class WifiDirectIntentService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Destroying P2PSync Manager");
-        this.p2pSyncManager.onDestroy();
+        if (this.p2pSyncManager != null) {
+            this.p2pSyncManager.onDestroy();
+        }
+
+        if (this.nsdSyncManager != null) {
+            this.nsdSyncManager.onDestroy();
+        }
+
         mServiceLooper.quit();
     }
 
@@ -87,7 +103,26 @@ public class WifiDirectIntentService extends Service {
 
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.i(TAG, "do actual work");
-        //broadcast result once done
-        this.p2pSyncManager.execute(this.currentJobParams);
+
+        boolean isInternetConnected = SyncUtils.isWifiConnected(this);
+        Log.i(TAG, "isInternetConnected: " + isInternetConnected);
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(P2P_SHARED_PREF, 0); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
+
+        if (isInternetConnected && this.nsdSyncManager != null) {
+            editor.putBoolean("IS_P2P", false);
+            editor.commit();
+            Log.i(TAG, "should start NSD Sync");
+            this.nsdSyncManager.execute(this.currentJobParams);
+        } else {
+            editor.putBoolean("IS_P2P", false);
+            editor.commit();
+            Log.i(TAG, "should start P2P Sync");
+            if (this.p2pSyncManager != null) {
+                this.p2pSyncManager.execute(this.currentJobParams);
+            }
+        }
+
     }
 }

@@ -27,7 +27,7 @@ public class JobUtils {
                 jobScheduler.cancelAll();
             }
             JobInfo.Builder builder = null;
-            if (immediate) {
+            if(immediate) {
                 builder = buildImmediateJob(context);
             } else {
                 builder = buildJob(context);
@@ -64,6 +64,7 @@ public class JobUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder = new JobInfo.Builder(0, serviceComponent)
                     .setMinimumLatency(IMMEDIATE_JOB_TIMINGS)
+//                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                     .setPersisted(false);
         } else {
             builder = new JobInfo.Builder(0, serviceComponent)

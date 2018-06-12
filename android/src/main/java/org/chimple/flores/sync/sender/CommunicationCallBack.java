@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.sender;
 
 import java.net.Socket;
 

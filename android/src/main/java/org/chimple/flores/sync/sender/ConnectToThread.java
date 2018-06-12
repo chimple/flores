@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.sender;
 
 import android.util.Log;
 
@@ -6,34 +6,31 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-public class HandShakerThread extends Thread {
+public class ConnectToThread extends Thread {
+    private static final String TAG = ConnectToThread.class.getSimpleName();
 
-    private static final String TAG = HandShakerThread.class.getSimpleName();
-    private HandShakeInitiatorCallBack callBack;
+    private CommunicationCallBack callBack;
     private final Socket mSocket;
     private String mAddress;
     private int mPort;
     boolean mStopped = false;
-    private int triedSoFarTimes = 0;
 
-    public HandShakerThread(HandShakeInitiatorCallBack callBack, String address, int port, int trialnum) {
+    public ConnectToThread(CommunicationCallBack callBack, String address, int port) {
         this.mAddress = address;
         this.mPort = port;
         this.callBack = callBack;
         this.mSocket = new Socket();
-        this.triedSoFarTimes = trialnum;
+
     }
 
     public void run() {
-        Log.i(TAG, "Starting to connect in HandShakerThread");
-        if (mSocket != null && callBack != null) {
+        Log.i(TAG, "Starting to connect in ConnectToThread");
+        if (this.mSocket != null && this.callBack != null) {
             try {
                 mSocket.bind(null);
                 mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
-                Log.i(TAG, "called connect on HandShakerThread socket");
                 //return success
-                callBack.Connected(mSocket.getInetAddress(), mSocket.getLocalAddress());
-                Log.i(TAG, "called connected on HandShakerThread callback");
+                callBack.Connected(mSocket);
             } catch (IOException e) {
                 Log.i(TAG, "socket connect failed: " + e.toString());
                 try {
@@ -44,13 +41,13 @@ public class HandShakerThread extends Thread {
                     Log.i(TAG, "closing socket 2 failed: " + ee.toString());
                 }
                 if (!mStopped) {
-                    callBack.ConnectionFailed(e.toString(), triedSoFarTimes);
+                    callBack.ConnectionFailed(e.toString());
                 }
             }
         }
     }
 
-    public void cleanUp() {
+    public void Stop() {
         mStopped = true;
         try {
             if (mSocket != null) {

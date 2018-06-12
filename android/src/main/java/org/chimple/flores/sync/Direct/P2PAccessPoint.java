@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.Direct;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.chimple.flores.sync.P2PSyncManager.P2P_SHARED_PREF;
+import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 import static org.chimple.flores.sync.SyncUtils.HandShakeportToUse;
 import static org.chimple.flores.sync.SyncUtils.SERVICE_TYPE;
 
@@ -355,5 +355,9 @@ public class P2PAccessPoint implements HandShakeListenerCallBack, WifiP2pManager
                 }
             }
         }
+    }
+
+    public HandShakeListenerThread getmHandShakeListenerThread() {
+        return mHandShakeListenerThread;
     }
 }

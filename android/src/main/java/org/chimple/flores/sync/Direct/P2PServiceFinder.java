@@ -1,4 +1,4 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.Direct;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.chimple.flores.sync.SyncUtils;
+
 public class P2PServiceFinder {
 
     private static final String TAG = P2PServiceFinder.class.getSimpleName();
@@ -29,8 +31,8 @@ public class P2PServiceFinder {
 
 
     private String SERVICE_TYPE;
-    private List<WifiDirectService> serviceList;
-    private List<WifiDirectService> highPriorityServiceList;
+    private List<P2PSyncService> serviceList;
+    private List<P2PSyncService> highPriorityServiceList;
 
     // P2P
 
@@ -60,8 +62,8 @@ public class P2PServiceFinder {
         this.channel = Channel;
         this.callBack = callBack;
         this.SERVICE_TYPE = serviceType;
-        this.highPriorityServiceList = new ArrayList<WifiDirectService>();
-        this.serviceList = new ArrayList<WifiDirectService>();
+        this.highPriorityServiceList = new ArrayList<P2PSyncService>();
+        this.serviceList = new ArrayList<P2PSyncService>();
         this.initialize();
     }
 
@@ -110,17 +112,16 @@ public class P2PServiceFinder {
 
             public void onDnsSdServiceAvailable(String instanceName, String serviceType, WifiP2pDevice device) {
 
-                Log.i(TAG, "Found Service, :" + instanceName + ", type" + serviceType + ":");
-
                 if (serviceType.startsWith(SERVICE_TYPE)) {
                     boolean addService = true;
+                    Log.i(TAG, "Found Service, :" + instanceName + ", type" + serviceType + ":");
                     for (int i = 0; i < serviceList.size(); i++) {
                         if (serviceList.get(i).getDeviceAddress().equals(device.deviceAddress)) {
                             addService = false;
                         }
                     }
                     if (addService) {
-                        serviceList.add(new WifiDirectService(instanceName, serviceType, device.deviceAddress, device.deviceName));
+                        serviceList.add(SyncUtils.createP2PSyncService(instanceName, serviceType, device.deviceAddress, device.deviceName));
                     }
 
                 } else {
@@ -194,7 +195,7 @@ public class P2PServiceFinder {
     }
 
 
-    public List<WifiDirectService> serviceList() {
+    public List<P2PSyncService> serviceList() {
         return serviceList;
     }
 
@@ -332,11 +333,11 @@ public class P2PServiceFinder {
         Log.i(TAG, status);
     }
 
-    public List<WifiDirectService> getHighPriorityServiceList() {
+    public List<P2PSyncService> getHighPriorityServiceList() {
         return highPriorityServiceList;
     }
 
-    public void setHighPriorityServiceList(List<WifiDirectService> highPriorityServiceList) {
+    public void setHighPriorityServiceList(List<P2PSyncService> highPriorityServiceList) {
         this.highPriorityServiceList = highPriorityServiceList;
     }
 

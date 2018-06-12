@@ -1,8 +1,9 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.sender;
 
 import android.util.Log;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -19,7 +20,11 @@ public class CommunicationThread extends Thread {
         ServerSocket tmp = null;
 
         try {
-            tmp = new ServerSocket(port);
+            tmp = new ServerSocket();
+            tmp.setReuseAddress(true);
+            tmp.bind(new InetSocketAddress(port));
+
+//            tmp = new ServerSocket(port);
             Log.i(TAG, "CommunicationThread ServerSocket created....");
         } catch (IOException e) {
             Log.i(TAG, "new ServerSocket failed: " + e.toString());

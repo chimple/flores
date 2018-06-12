@@ -1,28 +1,29 @@
-package org.chimple.flores.sync;
+package org.chimple.flores.sync.NSD;
+
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import android.util.Log;
+import org.chimple.flores.sync.Direct.HandShakeListenerCallBack;
 
-public class HandShakeListenerThread extends Thread {
-
-    private static final String TAG = HandShakeListenerThread.class.getSimpleName();
+public class NSDHandShakingListenerThread extends Thread {
+    private static final String TAG = NSDHandShakingListenerThread.class.getSimpleName();
     private HandShakeListenerCallBack callBack;
     private final ServerSocket mSocket;
     boolean mStopped = false;
     private int listenerErrorSoFarTimes = 0;
 
-    public HandShakeListenerThread(HandShakeListenerCallBack callBack, int port, int trialnum) {
+    public NSDHandShakingListenerThread(HandShakeListenerCallBack callBack, int port, int trialnum) {
         this.callBack = callBack;
         this.listenerErrorSoFarTimes = trialnum;
         ServerSocket tmp = null;
 
         try {
             tmp = new ServerSocket(port);
-            Log.i(TAG, "HandShakeListenerThread ServerSocket created...");
+            Log.i(TAG, "NSDHandShakingListenerThread ServerSocket created...");
         } catch (Exception e) {
             Log.i(TAG, "new ServerSocket failed: " + e.toString());
         }
@@ -46,14 +47,14 @@ public class HandShakeListenerThread extends Thread {
                     stream.write(hello.getBytes());
                     socket.close();
                 } else if (!mStopped) {
-                    Log.i(TAG, "HandShakeListenerThread failed: Socket is null");
+                    Log.i(TAG, "NSDHandShakingListenerThread failed: Socket is null");
                     callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
                 }
 
             } catch (Exception e) {
                 if (!mStopped) {
                     //return failure
-                    Log.i(TAG, "HandShakeListenerThread accept socket failed: " + e.toString());
+                    Log.i(TAG, "NSDHandShakingListenerThread accept socket failed: " + e.toString());
                     callBack.ListeningFailed(e.toString(), this.listenerErrorSoFarTimes);
                 }
             }
@@ -62,15 +63,15 @@ public class HandShakeListenerThread extends Thread {
     }
 
     public void cleanUp() {
-        Log.i(TAG, "cancelled HandShakeListenerThread");
+        Log.i(TAG, "cancelled NSDHandShakingListenerThread");
         mStopped = true;
         try {
             if (mSocket != null) {
-                Log.i(TAG, "successfully closed HandShakeListenerThread");
+                Log.i(TAG, "successfully closed NSDHandShakingListenerThread");
                 mSocket.close();
             }
         } catch (IOException e) {
-            Log.i(TAG, "closing HandShakeListenerThread socket failed: " + e.toString());
+            Log.i(TAG, "closing NSDHandShakingListenerThread socket failed: " + e.toString());
         }
     }
 }
