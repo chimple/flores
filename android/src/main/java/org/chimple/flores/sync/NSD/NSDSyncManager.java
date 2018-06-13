@@ -153,6 +153,10 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
                     byte[] readBuf = (byte[]) msg.obj;// construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Log.i(TAG, "MESSAGE READ:" + readMessage);
+                    if(readMessage != null) {
+                        readMessage = readMessage.replaceAll("START", "");
+                        readMessage = readMessage.replaceAll("END", "");
+                    }
                     this.p2PStateFlow.processMessages(readMessage);
                 }
                 break;

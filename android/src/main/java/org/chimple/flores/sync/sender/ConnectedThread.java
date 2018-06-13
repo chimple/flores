@@ -71,7 +71,7 @@ public class ConnectedThread extends Thread {
         }
     }
 
-    private void sendSyncTextMessages(StringBuffer sBuffer, byte[] buffer) {
+    private void readExchangeMessages(StringBuffer sBuffer, byte[] buffer) {
         try {
             int bytes = -1;
             if (mmInStream != null) {
@@ -79,49 +79,48 @@ public class ConnectedThread extends Thread {
                     if (bytes > 0) {
                         Log.i(TAG, "ConnectedThread read data: " + bytes + " bytes");
                         String whatGot = new String(buffer, 0, bytes);
-                        String finalMessage = null;
+                        boolean shouldProcess = false;
+                        if (sBuffer == null) {
+                            sBuffer = new StringBuffer();
+                        }
                         if (whatGot != null) {
                             Log.i(TAG, "what we got" + whatGot);
 
-                            if (sBuffer == null) {
-                                sBuffer = new StringBuffer();
-                            }
-
-                            if (whatGot.startsWith("START")) {
-                                Log.i(TAG, "MESSAGE READ:" + whatGot);
-                                if (whatGot.endsWith("END")) {
-                                    sBuffer.append(whatGot);
-                                    finalMessage = sBuffer.toString();
-                                    sBuffer = null;
-                                } else {
-                                    sBuffer.append(whatGot);
-                                }
+                            if (whatGot.startsWith("START") && whatGot.endsWith("END")) {
+                                sBuffer.append(whatGot);
+                                shouldProcess = true;
+                            } else if (whatGot.startsWith("START") && !whatGot.endsWith("END")) {
+                                sBuffer.append(whatGot);
+                                shouldProcess = false;
+                            } else if (!whatGot.startsWith("START") && whatGot.endsWith("END")) {
+                                sBuffer.append(whatGot);
+                                shouldProcess = true;
                             } else {
-                                if (!whatGot.endsWith("END")) {
-                                    sBuffer.append(whatGot);
-                                    Log.i(TAG, "APPEND TO BUFFER READ:" + sBuffer.toString());
-                                } else {
-                                    sBuffer.append(whatGot);
-                                    finalMessage = sBuffer.toString();
-                                    sBuffer = null;
-                                }
+                                sBuffer.append(whatGot);
+                                shouldProcess = false;
                             }
 
-                            if (finalMessage != null) {
-                                finalMessage = finalMessage.replaceAll("START", "");
-                                finalMessage = finalMessage.replaceAll("END", "");
-                                Log.i(TAG, "final data to be processed: " + finalMessage);
-                                mHandler.obtainMessage(MESSAGE_READ, finalMessage.getBytes().length, -1, finalMessage.getBytes()).sendToTarget();
-                                finalMessage = null;
+                            if (shouldProcess) {
+                                String finalMessage = sBuffer.toString();
+                                Log.i(TAG, "finalMessage got:" + finalMessage);
+                                sBuffer = null;
+
+                                if (finalMessage != null) {
+                                    finalMessage = finalMessage.replaceAll("START", "");
+                                    finalMessage = finalMessage.replaceAll("END", "");
+                                    Log.i(TAG, "final data to be processed: " + finalMessage);
+                                    mHandler.obtainMessage(MESSAGE_READ, finalMessage.getBytes().length, -1, finalMessage.getBytes()).sendToTarget();
+                                    finalMessage = null;
+                                }
                             }
                         }
                     } else {
-                        Log.i(TAG, "NOT Available on sendSyncTextMessages .... in bytes");
+                        Log.i(TAG, "NOT Available on readExchangeMessages .... in bytes");
                         break;
                     }
                 }
             } else {
-                Log.i(TAG, "NOT Available on sendSyncTextMessages .... mmInputStream is null");
+                Log.i(TAG, "NOT Available on readExchangeMessages .... mmInputStream is null");
             }
         } catch (Exception e) {
             Log.e(TAG, "ConnectedThread Stopped: ", e);
@@ -139,14 +138,11 @@ public class ConnectedThread extends Thread {
         StringBuffer sBuffer = null;
         while (mRunning) {
             this.initStreamsIfNull();
-            Log.i(TAG, "sendNonSyncInformation:" + sendNonSyncInformation);
-            if (this.isSendNonSyncInformation()) {
-                Log.i(TAG, "BTConnectedThread in sendSyncTextMessages");
-                this.sendSyncTextMessages(sBuffer, buffer);
-            } else {
-                Log.i(TAG, "BTConnectedThread in receiveProfileImage");
-                this.receiveProfileImage();
+            if (sBuffer == null) {
+                sBuffer = new StringBuffer();
             }
+            Log.i(TAG, "BTConnectedThread in readExchangeMessages");
+            this.readExchangeMessages(sBuffer, buffer);
         }
 
         Log.i(TAG, "BTConnectedThread disconnect now !");
@@ -217,87 +213,5 @@ public class ConnectedThread extends Thread {
         } catch (IOException e) {
             Log.e(TAG, "ConnectedThread  socket close failed: ", e);
         }
-    }
-
-    public void Disconnect() {
-        mRunning = false;
-        try {
-            if (mmInStream != null) {
-                mmInStream.close();
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "ConnectedThread  mmInStream close failed: ", e);
-        }
-        try {
-            if (mmOutStream != null) {
-                mmOutStream.close();
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "ConnectedThread  mmOutStream close failed: ", e);
-        }
-    }
-
-    public boolean isSendNonSyncInformation() {
-        return sendNonSyncInformation;
-    }
-
-    public void setSendNonSyncInformation(boolean sendNonSyncInformation) {
-        Log.i(TAG, "updating sendNonSyncInformation to" + sendNonSyncInformation);
-        this.sendNonSyncInformation = sendNonSyncInformation;
-    }
-
-    private void receiveProfileImage() {
-        Log.i(TAG, "in receiveProfileImage....." + (mmContext == null));
-        try {
-            if (mmInStream != null) {
-                File folder = new File(mmContext.getExternalFilesDir(null), "P2P_IMAGES");
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
-                Log.i(TAG, "in receiveProfileImage saving to folder....." + folder.getAbsolutePath());
-                int len;
-                File file = new File(folder, "Receivedimage.jpg");
-                FileOutputStream out = new FileOutputStream(file);
-                byte[] bytes = new byte[1024];
-                BufferedOutputStream bos = new BufferedOutputStream(out);
-                while ((len = mmInStream.read(bytes)) != -1) {
-                    bos.write(bytes, 0, len);
-                }
-                bos.close();
-                Log.i("Reading Byte image", String.valueOf(bytes.length));
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public void sendProfileImage() {
-        Log.i(TAG, "sendProfileImage ...." + mmContext);
-        try {
-            File file = new File(mmContext.getExternalFilesDir(null) + "/Cache", "DefaultImage.jpg");
-            InputStream inputStream = null;
-            inputStream = new FileInputStream(file.getAbsolutePath());
-            Log.i(TAG, "sendProfileImage ....GOT File:" + file.getAbsolutePath());
-            byte[] buf = new byte[1024];
-            int len;
-            try {
-                while ((len = inputStream.read(buf)) != -1) {
-                    mmOutStream.write(buf, 0, len);
-                    Log.d("Writing Byte image", String.valueOf(buf.length) + ":" + buf.toString());
-                }
-                inputStream.close();
-            } catch (IOException e) {
-                Log.d("write error", e.toString());
-                return;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d("SendingImageSync", e.toString());
-        }
-        return;
     }
 }
