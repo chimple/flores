@@ -47,7 +47,7 @@ public interface P2PSyncInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public Long insertP2PSyncInfo(P2PSyncInfo info);
 
-    @Query("SELECT user_id, device_id, message from P2PSyncInfo where message_type = 'Photo'")
+    @Query("SELECT ps.user_id, ps.device_id, ps.message  from (SELECT user_id, max(sequence) as sequence FROM P2PSyncInfo  WHERE message_type = 'Photo' group by user_id) as tmp, P2PSyncInfo ps where ps.user_id = tmp.user_id and ps.sequence = tmp.sequence")
     public P2PUserIdDeviceIdAndMessage[] fetchAllUsers();
 
     @Query("SELECT distinct(user_id) from P2PSyncInfo")
