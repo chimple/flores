@@ -142,31 +142,37 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
 
     @Override
     public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case ConnectedThread.MESSAGE_WRITE:
-                byte[] writeBuf = (byte[]) msg.obj;// construct a string from the buffer
-                String writeMessage = new String(writeBuf);
-                updateStatus(TAG, "Wrote: " + writeMessage);
-                break;
-            case ConnectedThread.MESSAGE_READ:
-                synchronized (P2PSyncManager.class) {
-                    byte[] readBuf = (byte[]) msg.obj;// construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    Log.i(TAG, "MESSAGE READ:" + readMessage);
-                    if(readMessage != null) {
-                        readMessage = readMessage.replaceAll("START", "");
-                        readMessage = readMessage.replaceAll("END", "");
+        try {
+            switch (msg.what) {
+                case ConnectedThread.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;// construct a string from the buffer
+                    String writeMessage = new String(writeBuf);
+                    updateStatus(TAG, "Wrote: " + writeMessage);
+                    break;
+                case ConnectedThread.MESSAGE_READ:
+                    synchronized (NSDSyncManager.class) {
+                        byte[] readBuf = (byte[]) msg.obj;// construct a string from the valid bytes in the buffer
+                        String readMessage = new String(readBuf, 0, msg.arg1);
+                        Log.i(TAG, "MESSAGE READ:" + readMessage);
+                        if (readMessage != null) {
+                            readMessage = readMessage.replaceAll("START", "");
+                            readMessage = readMessage.replaceAll("END", "");
+                        }
+                        this.p2PStateFlow.processMessages(readMessage);
                     }
-                    this.p2PStateFlow.processMessages(readMessage);
+                    break;
+                case ConnectedThread.SOCKET_DISCONNEDTED: {
+                    updateStatus(TAG + "CHAT", "WE are Stopped now.");
+                    stopConnectedThread();
                 }
                 break;
-            case ConnectedThread.SOCKET_DISCONNEDTED: {
-                updateStatus(TAG + "CHAT", "WE are Stopped now.");
-                stopConnectedThread();
             }
-            break;
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Log.i(TAG, " handleMessage failed" + ex.getMessage());
+            return true;
         }
-        return true;
     }
 
     public void execute(final JobParameters currentJobParams) {
