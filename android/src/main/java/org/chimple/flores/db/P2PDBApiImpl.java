@@ -81,12 +81,11 @@ public class P2PDBApiImpl implements P2PDBApi {
 
         maxSequence++;
         P2PSyncInfo info = new P2PSyncInfo(userId, deviceId, maxSequence, recepientUserId, message, messageType);
-        db.p2pSyncDao().insertP2PSyncInfo(info);
+        this.persistP2PSyncMessage(info);
         Log.i(TAG, "inserted data" + info);
     }
 
-    private void persistP2PSyncMessage(P2PSyncInfo message) {
-        db.p2pSyncDao().insertP2PSyncInfo(message);
+    public void persistP2PSyncMessage(P2PSyncInfo message) {
         Log.i(TAG, "got Sync info:" + message.deviceId);
         Log.i(TAG, "got Sync info:" + message.userId);
         Log.i(TAG, "got Sync info:" + message.message);
@@ -94,6 +93,18 @@ public class P2PDBApiImpl implements P2PDBApi {
         Log.i(TAG, "got Sync info:" + message.sequence);
         Log.i(TAG, "got Sync info:" + message.recipientUserId);
         Log.i(TAG, "inserted data" + message);
+
+        List found = db.p2pSyncDao().fetchByUserAndDeviceAndSequence(message.getUserId(), message.getDeviceId(), message.sequence);
+        if(found == null || found.size() == 0) {
+            db.p2pSyncDao().insertP2PSyncInfo(message);
+            Log.i(TAG, "inserted data" + message);
+        } else {
+            Log.i(TAG, "existing data" + message);
+        }
+    }
+
+    public List<P2PSyncInfo> fetchByUserAndDeviceAndSequence(String userId, String deviceId, Long sequence) {
+        return db.p2pSyncDao().fetchByUserAndDeviceAndSequence(userId, deviceId, sequence);
     }
 
     public void persistP2PSyncInfos(String p2pSyncJson) {
@@ -112,7 +123,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             }
         } catch(Exception ex) {
             ex.printStackTrace();
-        }        
+        }
     }
 
 
@@ -344,55 +355,61 @@ public class P2PDBApiImpl implements P2PDBApi {
         return result;
     }
 
+
     private List<P2PSyncInfo> buildSyncInformation(final List<HandShakingInfo> otherHandShakeInfos) {
-        final List<HandShakingInfo> latestInfoFromCurrentDevice = this.queryInitialHandShakingMessage();
+        List<P2PSyncInfo> results = new ArrayList<P2PSyncInfo>();
 
-        Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
-            @Override
-            public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                if(o1.getUserId() != null && o2.getUserId() != null) {
-                    return o1.getUserId().compareTo(o2.getUserId());
-                } else {
-                    return -1;
+        try {
+            final List<HandShakingInfo> latestInfoFromCurrentDevice = this.queryInitialHandShakingMessage();
+
+            Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
+                @Override
+                public int compare(HandShakingInfo o1, HandShakingInfo o2) {
+                    if (o1.getUserId() != null && o2.getUserId() != null) {
+                        return o1.getUserId().compareTo(o2.getUserId());
+                    } else {
+                        return -1;
+                    }
                 }
-            }
-        });
+            });
 
 
-        Collections.sort(otherHandShakeInfos, new Comparator<HandShakingInfo>() {
-            @Override
-            public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                if(o1.getUserId() != null && o2.getUserId() != null) {
-                    return o1.getUserId().compareTo(o2.getUserId());
-                } else {
-                    return -1;
+            Collections.sort(otherHandShakeInfos, new Comparator<HandShakingInfo>() {
+                @Override
+                public int compare(HandShakingInfo o1, HandShakingInfo o2) {
+                    if (o1.getUserId() != null && o2.getUserId() != null) {
+                        return o1.getUserId().compareTo(o2.getUserId());
+                    } else {
+                        return -1;
+                    }
                 }
-            }
-        });
+            });
 
-        final List<HandShakingInfo> validElementsFromOther = new ArrayList<HandShakingInfo>();
-        final List<HandShakingInfo> removeElementsFromInput = new ArrayList<HandShakingInfo>();
+            final List<HandShakingInfo> validElementsFromOther = new ArrayList<HandShakingInfo>();
+            final List<HandShakingInfo> removeElementsFromInput = new ArrayList<HandShakingInfo>();
 
-        CollectionUtils.forAllDo(latestInfoFromCurrentDevice, new Closure<HandShakingInfo>() {
-            @Override
-            public void execute(final HandShakingInfo input) {
-                Log.i(TAG, "processing element" + input);
-                CollectionUtils.find(otherHandShakeInfos, new Predicate<HandShakingInfo>() {
-                    @Override
-                    public boolean evaluate(HandShakingInfo other) {
-                        // if element exists in both list for same device
-                        if (input.getDeviceId() != null && other.getDeviceId() != null
-                                && input.getDeviceId().equals(other.getDeviceId())) {
-                            if (input.getUserId() != null && other.getUserId() != null && input.getUserId().equals(other.getUserId())) {
-                                if (input.getSequence() > other.getSequence()) {
-                                    validElementsFromOther.add(other);
-                                } else {
-                                    removeElementsFromInput.add(input);
+            CollectionUtils.forAllDo(latestInfoFromCurrentDevice, new Closure<HandShakingInfo>() {
+                @Override
+                public void execute(final HandShakingInfo input) {
+                    Log.i(TAG, "processing element" + input);
+                    CollectionUtils.find(otherHandShakeInfos, new Predicate<HandShakingInfo>() {
+                        @Override
+                        public boolean evaluate(HandShakingInfo other) {
+                            // if element exists in both list for same device
+                            if (input.getDeviceId() != null &&
+                                    other.getDeviceId() != null &&
+                                    input.getDeviceId().equals(other.getDeviceId())) {
+                                if (input.getUserId() != null &&
+                                        other.getUserId() != null && input.getUserId().equals(other.getUserId())) {
+                                    if (input.getSequence() > other.getSequence()) {
+                                        validElementsFromOther.add(other);
+                                    } else {
+                                        removeElementsFromInput.add(input);
+                                    }
                                 }
+                            } else {
+                                validElementsFromOther.add(other);
                             }
-                        } else {
-                            validElementsFromOther.add(other);
-                        }
 //                        if (input.getUserId().equals(other.getUserId())) {
 //                            if (input.getSequence() > other.getSequence()) {
 //                                validElementsFromOther.add(other);
@@ -402,71 +419,71 @@ public class P2PDBApiImpl implements P2PDBApi {
 //                        } else {
 //
 //                        }
-                        return false;
+                            return false;
+                        }
+                    });
+                }
+            });
+
+            latestInfoFromCurrentDevice.addAll(validElementsFromOther);
+            latestInfoFromCurrentDevice.removeAll(removeElementsFromInput);
+
+            Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
+                @Override
+                public int compare(HandShakingInfo o1, HandShakingInfo o2) {
+                    if (o1.getUserId() != null && o2.getUserId() != null) {
+                        return (o1.getUserId().compareTo(o2.getUserId()));
+                    } else {
+                        return -1;
                     }
-                });
-            }
-        });
+                }
+            });
 
-        latestInfoFromCurrentDevice.addAll(validElementsFromOther);
-        latestInfoFromCurrentDevice.removeAll(removeElementsFromInput);
 
-        Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
-            @Override
-            public int compare(HandShakingInfo o1, HandShakingInfo o2) {
-                if(o1.getUserId() != null && o2.getUserId() != null) {
-                    return (o1.getUserId().compareTo(o2.getUserId()));
-                } else {
-                    return -1;
+            @SuppressWarnings("unchecked")
+            Map<String, HandShakingInfo> map = new HashMap<String, HandShakingInfo>() {
+                {
+                    IteratorUtils.forEach(latestInfoFromCurrentDevice.iterator(), new Closure() {
+                        @Override
+                        public void execute(Object input) {
+                            HandShakingInfo item = (HandShakingInfo) input;
+                            String key = item.getUserId() + "_" + item.getDeviceId();
+                            if (containsKey(key)) {
+                                HandShakingInfo storedItem = get(key);
+                                if (storedItem.getSequence() > item.getSequence()) {
+                                    storedItem.setStartingSequence(item.getSequence());
+                                } else {
+                                    storedItem.setStartingSequence(storedItem.getSequence());
+                                    storedItem.setSequence(item.getSequence());
+                                }
+                            } else {
+                                put(key, item);
+                            }
+                        }
+                    });
+                }
+            };
+
+
+            // process Map (execute queries and get result)
+
+            Collection<HandShakingInfo> collectionValues = map.values();
+            for (HandShakingInfo i : collectionValues) {
+                P2PSyncInfo[] res = null;
+                if (i.getStartingSequence() != null && i.getSequence() != null) {
+                    res = db.p2pSyncDao().fetchByUserAndDeviceBetweenSequences(i.getUserId(), i.getDeviceId(), i.getStartingSequence(), i.getSequence());
+                } else if (i.getStartingSequence() == null && i.getSequence() != null) {
+                    res = db.p2pSyncDao().fetchByUserAndDeviceUpToSequence(i.getUserId(), i.getDeviceId(), i.getSequence());
+                }
+                if (res != null) {
+                    results.addAll(Arrays.asList(res));
                 }
             }
-        });
-
-
-        @SuppressWarnings("unchecked")
-        Map<String, HandShakingInfo> map = new HashMap<String, HandShakingInfo>() {
-            {
-                IteratorUtils.forEach(latestInfoFromCurrentDevice.iterator(), new Closure() {
-                    @Override
-                    public void execute(Object input) {
-                        HandShakingInfo item = (HandShakingInfo) input;
-                        String key = item.getUserId() + "_" + item.getDeviceId();
-                        if (containsKey(key)) {
-                            HandShakingInfo storedItem = get(key);
-                            if (storedItem.getSequence() > item.getSequence()) {
-                                storedItem.setStartingSequence(item.getSequence());
-                            } else {
-                                storedItem.setStartingSequence(storedItem.getSequence());
-                                storedItem.setSequence(item.getSequence());
-                            }
-                        } else {
-                            put(key, item);
-                        }
-                    }
-                });
-            }
-        };
-
-
-        // process Map (execute queries and get result)
-
-        Collection<HandShakingInfo> collectionValues = map.values();
-        List<P2PSyncInfo> results = new ArrayList<P2PSyncInfo>();
-        for (HandShakingInfo i : collectionValues) {
-            P2PSyncInfo[] res = null;
-            if (i.getStartingSequence() != null && i.getSequence() != null) {
-                res = db.p2pSyncDao().fetchByUserAndDeviceBetweenSequences(i.getUserId(), i.getDeviceId(), i.getStartingSequence(), i.getSequence());
-            } else if (i.getStartingSequence() == null && i.getSequence() != null) {
-                res = db.p2pSyncDao().fetchByUserAndDeviceUpToSequence(i.getUserId(), i.getDeviceId(), i.getSequence());
-            }
-            if (res != null) {
-                results.addAll(Arrays.asList(res));
-            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-
         return results;
     }
-
 
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
@@ -476,8 +493,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         return Arrays.asList(db.p2pSyncDao().getSyncInformationByUserId(userid));
     }
 
-    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String
-                                                                           messageType, List<String> userIds) {
+    public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
         if (userIds != null && userIds.size() > 0) {
             return db.p2pSyncDao().fetchLatestMessagesByMessageType(messageType, userIds);
         } else {
@@ -485,8 +501,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public boolean addMessage(String userId, String recipientId, String
-            messageType, String message) {
+    public boolean addMessage(String userId, String recipientId, String messageType, String message) {
         try {
             SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
             String deviceId = pref.getString("DEVICE_ID", null); // getting String
@@ -507,8 +522,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public boolean addMessage(String userId, String recipientId, String
-            messageType, String message, Boolean status, String sessionId) {
+    public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
         try {
             SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
             String deviceId = pref.getString("DEVICE_ID", null); // getting String
@@ -539,13 +553,11 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public List<P2PSyncInfo> getConversations(String firstUserId, String
-            secondUserId, String messageType) {
+    public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
         return db.p2pSyncDao().fetchConversations(firstUserId, secondUserId, messageType);
     }
 
-    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String
-            secondUserId, String messageType) {
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
         return db.p2pSyncDao().fetchLatestConversations(firstUserId, secondUserId, messageType);
     }
 
@@ -570,8 +582,7 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
-    public boolean upsertProfileForUserIdAndDevice(String userId, String
-            deviceId, String message) {
+    public boolean upsertProfileForUserIdAndDevice(String userId, String deviceId, String message) {
         try {
             P2PSyncInfo userInfo = db.p2pSyncDao().getProfileByUserId(userId, DBSyncManager.MessageTypes.PHOTO.type());
             if (userInfo != null) {
