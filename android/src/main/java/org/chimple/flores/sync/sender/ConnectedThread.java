@@ -106,8 +106,8 @@ public class ConnectedThread extends Thread {
                                 sBuffer = null;
 
                                 if (finalMessage != null) {
-                                    finalMessage = finalMessage.replaceAll("START", "");
-                                    finalMessage = finalMessage.replaceAll("END", "");
+                                    finalMessage = finalMessage.replaceAll("^START", "");
+                                    finalMessage = finalMessage.replaceAll("END$", "");
                                     Log.i(TAG, "final data to be processed: " + finalMessage);
                                     mHandler.obtainMessage(MESSAGE_READ, finalMessage.getBytes().length, -1, finalMessage.getBytes()).sendToTarget();
                                     finalMessage = null;

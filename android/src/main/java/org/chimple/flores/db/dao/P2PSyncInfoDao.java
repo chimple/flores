@@ -16,7 +16,7 @@ import org.chimple.flores.db.entity.P2PUserIdMessage;
 @Dao
 public interface P2PSyncInfoDao {
     @Query("SELECT * FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId")
-    public P2PSyncInfo[] getSyncInformationByUserIdAndDeviceId(String userId, String deviceId);
+    public List<P2PSyncInfo> getSyncInformationByUserIdAndDeviceId(String userId, String deviceId);
 
     @Query("SELECT * FROM P2PSyncInfo WHERE user_id=:userId")
     public P2PSyncInfo[] getSyncInformationByUserId(String userId);
@@ -43,9 +43,16 @@ public interface P2PSyncInfoDao {
     @Query("SELECT * FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId AND sequence <= :sequence")
     public P2PSyncInfo[] fetchByUserAndDeviceUpToSequence(String userId, String deviceId, Long sequence);
 
+    @Query("SELECT * FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId AND sequence = :sequence")
+    public List<P2PSyncInfo> fetchByUserAndDeviceAndSequence(String userId, String deviceId, Long sequence);
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public Long insertP2PSyncInfo(P2PSyncInfo info);
+
+    @Query("SELECT ps.device_id from (SELECT user_id, max(sequence) as sequence FROM P2PSyncInfo  WHERE message_type = 'Photo' group by user_id) as tmp, P2PSyncInfo ps where ps.user_id = tmp.user_id  and ps.sequence = tmp.sequence and ps.user_id =:userId")
+    public String getDeviceForRecipientUserId(String userId);
+
 
     @Query("SELECT ps.user_id, ps.device_id, ps.message  from (SELECT user_id, max(sequence) as sequence FROM P2PSyncInfo  WHERE message_type = 'Photo' group by user_id) as tmp, P2PSyncInfo ps where ps.user_id = tmp.user_id and ps.sequence = tmp.sequence")
     public P2PUserIdDeviceIdAndMessage[] fetchAllUsers();
@@ -60,7 +67,7 @@ public interface P2PSyncInfoDao {
     public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType);
 
 
-    @Query("SELECT * FROM P2PSyncInfo WHERE message_type = :messageType AND ((user_id = :userId and recipient_user_id = :recipientId) or (user_id = :recipientId and recipient_user_id = :userId)) ORDER BY logged_at")
+    @Query("SELECT * FROM P2PSyncInfo WHERE message_type = :messageType AND ((user_id = :userId and recipient_user_id = :recipientId) or (user_id = :recipientId and recipient_user_id = :userId))")
     public List<P2PSyncInfo> fetchConversations(String userId, String recipientId, String messageType);
 
     @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where message_type = :messageType and status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and ((p2p.user_id = :userId and p2p.recipient_user_id = :recipientId) or (p2p.user_id = :recipientId and p2p.recipient_user_id = :userId))")
@@ -68,7 +75,4 @@ public interface P2PSyncInfoDao {
 
     @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and p2p.user_id = :userId")
     public List<P2PSyncInfo> fetchLatestConversationsByUser(String userId);
-
-    @Query("SELECT * FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId AND sequence = :sequence")
-    public List<P2PSyncInfo> fetchByUserAndDeviceAndSequence(String userId, String deviceId, Long sequence);
 }

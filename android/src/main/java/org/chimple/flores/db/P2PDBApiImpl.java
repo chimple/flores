@@ -49,6 +49,7 @@ import org.chimple.flores.db.entity.P2PUserIdMessage;
 import org.chimple.flores.db.entity.ProfileMessage;
 import org.chimple.flores.db.entity.ProfileMessageDeserializer;
 import org.chimple.flores.sync.Direct.P2PSyncManager;
+import org.chimple.flores.scheduler.JobUtils;
 
 import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 
@@ -501,6 +502,12 @@ public class P2PDBApiImpl implements P2PDBApi {
         }
     }
 
+    public void addDeviceToSyncAndStartJobIfNotRunning(String recipientId) {
+        String deviceId = db.p2pSyncDao().getDeviceForRecipientUserId(recipientId);
+        addDeviceToSync(deviceId, true);
+        JobUtils.scheduledJob(this.context, true);
+    }
+
     public boolean addMessage(String userId, String recipientId, String messageType, String message) {
         try {
             SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
@@ -515,6 +522,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             P2PSyncInfo info = new P2PSyncInfo(userId, deviceId, maxSequence, recipientId, message, messageType);
             db.p2pSyncDao().insertP2PSyncInfo(info);
             Log.i(TAG, "inserted data" + info);
+            this.addDeviceToSyncAndStartJobIfNotRunning(recipientId);
             return true;
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -546,6 +554,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             info.setStep(step);
             db.p2pSyncDao().insertP2PSyncInfo(info);
             Log.i(TAG, "inserted data" + info);
+            this.addDeviceToSyncAndStartJobIfNotRunning(recipientId);
             return true;
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
