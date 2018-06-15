@@ -79,12 +79,14 @@ class Flores {
         .then<List<dynamic>>((dynamic result) => result);
   }
 
-  Future<bool> addMessage(String userId, String recipientId, String messageType, String message) async {
+  Future<bool> addMessage(String userId, String recipientId, String messageType, String message, bool status, String sessionId) async {
     final Map<String, String> params = <String, String>{
       'userId': userId,
       'recipientId': recipientId,
       'messageType': messageType,
-      'message': message
+      'message': message,
+      'status': '$status',
+      'sessionId': sessionId
     };
 
     return _methodChannel

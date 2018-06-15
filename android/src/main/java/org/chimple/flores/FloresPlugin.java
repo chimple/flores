@@ -100,9 +100,12 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String recipientId = arg.get("recipientId");
               String messageType = arg.get("messageType");
               String message = arg.get("message");
+              String statusStr = arg.get("status");
+              Boolean status = Boolean.valueOf(statusStr);
+              String sessionId = arg.get("sessionId");
               boolean status =
               DBSyncManager.getInstance(registrar.context())
-                              .addMessage(userId, recipientId, messageType, message);
+                              .addMessage(userId, recipientId, messageType, message, status, sessionId);
               result.success(status);
               break;
           }
