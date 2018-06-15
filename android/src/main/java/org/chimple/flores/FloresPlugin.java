@@ -103,10 +103,10 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String statusStr = arg.get("status");
               Boolean status = Boolean.valueOf(statusStr);
               String sessionId = arg.get("sessionId");
-              boolean status =
+              boolean retStatus =
               DBSyncManager.getInstance(registrar.context())
                               .addMessage(userId, recipientId, messageType, message, status, sessionId);
-              result.success(status);
+              result.success(retStatus);
               break;
           }
           case "getLatestMessages":
