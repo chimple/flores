@@ -15,7 +15,7 @@ public class P2PApplication extends Application {
 
     public static int REGULAR_JOB_TIMINGS_FOR_MIN_LATENCY = 4 * 60 * 1000; // every 4 mins mininum
     public static int REGULAR_JOB_TIMINGS_FOR_PERIOD = 8 * 60 * 1000; // every 8 mins
-    public static int IMMEDIATE_JOB_TIMINGS = 5 * 1000; // in next 5 seconds
+    public static int IMMEDIATE_JOB_TIMINGS = 30 * 1000; // in next 5 seconds
 
     @Override
     public void onCreate() {

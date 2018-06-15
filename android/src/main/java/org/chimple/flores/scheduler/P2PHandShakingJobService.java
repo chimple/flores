@@ -120,7 +120,7 @@ public class P2PHandShakingJobService extends JobService {
                 Log.i(TAG, "on finished job: " + params.getJobId());
                 JobUtils.setJobRunning(false);
                 JobUtils.cancelAllJobs(context);
-                JobUtils.scheduledJob(context, false);
+                JobUtils.scheduledJob(context, true);
                 getApplicationContext().stopService(p2pSyncService);
                 jobFinished(params, false);
             }
