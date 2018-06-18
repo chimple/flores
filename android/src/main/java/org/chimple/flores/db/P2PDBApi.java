@@ -25,6 +25,8 @@ public interface P2PDBApi {
 
     public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType);
 
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String messageType);
+
     public void persistMessage(String userId, String deviceId, String recepientUserId, String message, String messageType);
 
     public String serializeHandShakingMessage();

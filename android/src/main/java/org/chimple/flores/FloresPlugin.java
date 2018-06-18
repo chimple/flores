@@ -161,10 +161,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               Map<String, String> arg = (Map<String, String>)call.arguments;
               String messageType = arg.get("messageType");
               String userId = arg.get("userId");
-              String secondUserId = arg.get("secondUserId");
               List<P2PSyncInfo> messageList =
               DBSyncManager.getInstance(registrar.context())
-                              .getLatestConversations(userId, secondUserId, messageType);
+                              .getLatestConversations(userId, messageType);
               List<Map<String, String>> messages = convertToMap(messageList);
 
               if (messages.size() >= 0) {

@@ -67,15 +67,14 @@ class Flores {
         .then<bool>((dynamic result) => result);
   }
 
-  Future<List<dynamic>> getLatestMessages(String userId, String secondUserId, String messageType) async {
+  Future<List<dynamic>> getLatestConversations(String userId, String messageType) async {
     final Map<String, String> params = <String, String>{
       'userId': userId,
-      'secondUserId': secondUserId,
       'messageType': messageType
     };
 
     return _methodChannel
-        .invokeMethod('getLatestMessages', params)
+        .invokeMethod('getLatestConversations', params)
         .then<List<dynamic>>((dynamic result) => result);
   }
 
