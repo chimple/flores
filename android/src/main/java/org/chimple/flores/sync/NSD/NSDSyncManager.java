@@ -261,6 +261,7 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
                                 //Lets give others chance on creating new group before we come back online
                                 public void run() {
                                     StopNSDConnector();
+                                    Log.i(TAG, "Sending Broadcast for P2P_SYNC_RESULT_RECEIVED Intent");
                                     Intent result = new Intent(P2P_SYNC_RESULT_RECEIVED);
                                     result.putExtra(JOB_PARAMS, currentJobParams);
                                     LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);

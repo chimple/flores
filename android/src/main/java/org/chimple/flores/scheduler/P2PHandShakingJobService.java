@@ -108,6 +108,7 @@ public class P2PHandShakingJobService extends JobService {
         @Override
         public void onReceive(Context context, Intent intent) {
             JobParameters params = intent.getExtras().getParcelable(JOB_PARAMS);
+            Log.i(TAG, "P2PSyncCompletionIntentBroadcastReceiver ...." + params);
             if (params != null) {
                 Log.i(TAG, "on finished job: " + params.getJobId());
                 JobUtils.setJobRunning(false);
