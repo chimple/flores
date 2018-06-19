@@ -570,6 +570,10 @@ public class P2PDBApiImpl implements P2PDBApi {
         return db.p2pSyncDao().fetchLatestConversations(firstUserId, secondUserId, messageType);
     }
 
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String messageType) {
+        return db.p2pSyncDao().fetchLatestConversations(firstUserId, messageType);
+    }
+
     public String readProfilePhoto() {
         SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String

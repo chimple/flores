@@ -88,6 +88,11 @@ public class DBSyncManager {
         return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
     }
 
+    public List<P2PSyncInfo> getLatestConversations(String firstUserId, String messageType) {
+        P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+        return p2pdbapi.getLatestConversations(firstUserId, messageType);
+    }
+
     public boolean upsertUser(String userId, String deviceId, String fileName) {
         P2PDBApi p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
         return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
