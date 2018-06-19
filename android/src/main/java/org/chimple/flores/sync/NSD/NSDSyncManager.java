@@ -83,7 +83,7 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
     public static final String nsdConnectionChangedEvent = "nsd-connection-changed-event";
     public static final String connectedDevice = "CONNECTED_DEVICE";
     public static final String P2P_SHARED_PREF = "p2pShardPref";
-    public static final int EXIT_CURRENT_JOB_TIME = 2 * 60; // 2 mins
+    public static final int EXIT_CURRENT_JOB_TIME = 10 * 60; // 10 mins
 
     public static NSDSyncManager getInstance(Context context) {
         if (instance == null) {
