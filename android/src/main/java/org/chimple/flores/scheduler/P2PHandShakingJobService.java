@@ -61,7 +61,6 @@ public class P2PHandShakingJobService extends JobService {
         } else {
             Log.i(TAG, "Job is already running");
         }
-
         return true;
     }
 
@@ -69,9 +68,7 @@ public class P2PHandShakingJobService extends JobService {
     public boolean onStopJob(JobParameters params) {
         // Stop tracking these job parameters, as we've 'finished' executing.
         Log.i(TAG, "on stop job: " + params.getJobId());
-        JobUtils.setJobRunning(false);
-        // Return false to drop the job.
-        return false;
+        return true;
     }
 
     private void unregisterP2PSyncCompletionIntentBroadcastReceiver() {
@@ -94,11 +91,6 @@ public class P2PHandShakingJobService extends JobService {
         filter.addAction(P2P_SYNC_RESULT_RECEIVED);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         Log.i(TAG, "p2p Sync Completion Receiver registered");
-//        WifiManager wifiManager;
-//        wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-//        if(wifiManager.getWifiState()==WifiManager.WIFI_STATE_DISABLED){
-//            wifiManager.setWifiEnabled(true);
-//        }
     }
 
 
