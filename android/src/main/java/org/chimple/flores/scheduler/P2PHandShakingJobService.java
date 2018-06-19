@@ -114,7 +114,7 @@ public class P2PHandShakingJobService extends JobService {
                 JobUtils.setJobRunning(false);
                 JobUtils.cancelAllJobs(context);
                 JobUtils.scheduledJob(context, true);
-                getApplicationContext().stopService(p2pSyncService);
+                getApplicationContext().stopService(new Intent(p2pSyncService));
                 jobFinished(params, false);
             }
         }
