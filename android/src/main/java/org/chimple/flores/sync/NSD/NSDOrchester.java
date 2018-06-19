@@ -15,7 +15,7 @@ import org.chimple.flores.db.P2PDBApi;
 import org.chimple.flores.db.P2PDBApiImpl;
 import org.chimple.flores.db.entity.P2PSyncDeviceStatus;
 import org.chimple.flores.sync.SyncUtils;
-
+import org.chimple.flores.sync.NSD.NSDSyncManager;
 import static org.chimple.flores.sync.SyncUtils.SERVICE_TYPE;
 
 public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConnectionUpdateCallBack {
