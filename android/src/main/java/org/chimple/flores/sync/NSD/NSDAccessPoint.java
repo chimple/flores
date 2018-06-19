@@ -78,8 +78,7 @@ public class NSDAccessPoint implements HandShakeListenerCallBack {
                     reStartHandShakeListening((trialCountTmp + 1));
                 } else {
                     Log.i(TAG, "NSDAccessPoint listener failed 2 times, starting exit timer");
-                    NSDSyncManager.getInstance(that.context).resetExitTimer();
-                    NSDSyncManager.getInstance(that.context).startExitTimer();
+                    NSDSyncManager.getInstance(that.context).startConnectorsTimer();
                 }
             }
         });

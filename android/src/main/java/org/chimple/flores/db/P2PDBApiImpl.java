@@ -505,7 +505,7 @@ public class P2PDBApiImpl implements P2PDBApi {
     public void addDeviceToSyncAndStartJobIfNotRunning(String recipientId) {
         String deviceId = db.p2pSyncDao().getDeviceForRecipientUserId(recipientId);
         addDeviceToSync(deviceId, true);
-        JobUtils.scheduledJob(this.context, true);
+        // JobUtils.scheduledJob(this.context, true);
     }
 
     public boolean addMessage(String userId, String recipientId, String messageType, String message) {

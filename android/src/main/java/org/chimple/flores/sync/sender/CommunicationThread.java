@@ -15,16 +15,15 @@ public class CommunicationThread extends Thread {
     boolean mStopped = false;
     private int listenerErrorSoFarTimes = 0;
 
-    public CommunicationThread(CommunicationCallBack callback, int port) {
+    public CommunicationThread(CommunicationCallBack callback, int port, int number) {
         this.callBack = callback;
         ServerSocket tmp = null;
-
+        listenerErrorSoFarTimes = number;
         try {
             tmp = new ServerSocket();
             tmp.setReuseAddress(true);
             tmp.bind(new InetSocketAddress(port));
 
-//            tmp = new ServerSocket(port);
             Log.i(TAG, "CommunicationThread ServerSocket created....");
         } catch (IOException e) {
             Log.i(TAG, "new ServerSocket failed: " + e.toString());
@@ -45,14 +44,14 @@ public class CommunicationThread extends Thread {
                     Log.i(TAG, "Incoming test-connection");
                     this.callBack.GotConnection(socket);
                 } else if (!mStopped) {
-                    this.callBack.ListeningFailed("Socket is null");
+                    this.callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
                 }
 
             } catch (Exception e) {
                 if (!mStopped) {
                     //return failure
                     Log.i(TAG, "accept socket failed: " + e.toString());
-                    this.callBack.ListeningFailed(e.toString());
+                    this.callBack.ListeningFailed(e.toString(), this.listenerErrorSoFarTimes);
                 }
             }
         }

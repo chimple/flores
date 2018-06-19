@@ -8,4 +8,5 @@ public interface NSDOrchesterCallBack {
     public void NSDConnectionStateChanged(SyncUtils.ConnectionState newState);
     public void NSDListeningStateChanged(SyncUtils.ReportingState newState);
     public void NSDConnected(String address, boolean isOwner);
+    public void ListeningSocketFailed(String reason);
 }

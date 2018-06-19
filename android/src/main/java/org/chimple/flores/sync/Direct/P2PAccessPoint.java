@@ -323,8 +323,7 @@ public class P2PAccessPoint implements HandShakeListenerCallBack, WifiP2pManager
                     reStartHandShakeListening((trialCountTmp + 1));
                 } else {
                     Log.i(TAG, "P2PAccessPoint listener failed 2 times, starting exit timer");
-                    P2PSyncManager.getInstance(that.context).resetExitTimer();
-                    P2PSyncManager.getInstance(that.context).startExitTimer();
+                    P2PSyncManager.getInstance(that.context).startConnectorsTimer();
                 }
             }
         });
