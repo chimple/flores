@@ -83,7 +83,7 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
     public static final String nsdConnectionChangedEvent = "nsd-connection-changed-event";
     public static final String connectedDevice = "CONNECTED_DEVICE";
     public static final String P2P_SHARED_PREF = "p2pShardPref";
-    public static final int EXIT_CURRENT_JOB_TIME = 5 * 60; // 5 mins
+    public static final int EXIT_CURRENT_JOB_TIME = 3 * 60; // 5 mins
 
     public static NSDSyncManager getInstance(Context context) {
         if (instance == null) {
@@ -163,7 +163,7 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
                     break;
                 case ConnectedThread.SOCKET_DISCONNEDTED: {
                     updateStatus(TAG + "CHAT", "WE are Stopped now.");
-                    stopConnectedThread();
+                    instance.startConnectorsTimer();
                 }
                 break;
             }
@@ -339,7 +339,7 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
     public void connectToClient() {
         stopConnectedThread();
         stopConnectToThread();
-        if (instance.reStartJobTimer != null) {
+        if (instance != null && instance.reStartJobTimer != null) {
             instance.reStartJobTimer.cancel();
         }
 
