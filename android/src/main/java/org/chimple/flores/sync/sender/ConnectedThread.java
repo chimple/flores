@@ -23,14 +23,13 @@ public class ConnectedThread extends Thread {
     public static final int MESSAGE_WRITE = 0x22;
     public static final int SOCKET_DISCONNEDTED = 0x33;
 
-    private volatile boolean sendNonSyncInformation = true;
     private Socket mmSocket = null;
     private Context mmContext = null;
     private InputStream mmInStream = null;
     private OutputStream mmOutStream = null;
     private Handler mHandler = null;
-
     boolean mRunning = true;
+    private int maxWaitLoopnBlockedStatus = 3000; // 3000 loops
 
     public ConnectedThread(Socket socket, Handler handler, Context context) {
         Log.d(TAG, "Creating ConnectedThread");
@@ -43,11 +42,12 @@ public class ConnectedThread extends Thread {
     }
 
     public void initStreamsIfNull() {
-        Log.i(TAG, "initStreamsIfNull ConnectedThread");
+
         if (mmInStream == null) {
             InputStream tmpIn = null;
             try {
                 if (mmSocket != null) {
+                    Log.i(TAG, "inputStream created for ConnectedThread");
                     tmpIn = mmSocket.getInputStream();
                 }
             } catch (IOException e) {
@@ -61,6 +61,7 @@ public class ConnectedThread extends Thread {
             OutputStream tmpOut = null;
             try {
                 if (mmSocket != null) {
+                    Log.i(TAG, "outputStream created for ConnectedThread");
                     tmpOut = mmSocket.getOutputStream();
                 }
             } catch (IOException e) {
@@ -71,57 +72,64 @@ public class ConnectedThread extends Thread {
         }
     }
 
-    private void readExchangeMessages(StringBuffer sBuffer, byte[] buffer) {
+    private void readExchangeMessages(StringBuffer sBuffer, byte[] buffer, int count) {
         try {
             int bytes = -1;
-            if (mmInStream != null) {
-                while ((bytes = mmInStream.read(buffer)) != -1) {
-                    if (bytes > 0) {
-                        Log.i(TAG, "ConnectedThread read data: " + bytes + " bytes");
-                        String whatGot = new String(buffer, 0, bytes);
-                        boolean shouldProcess = false;
-                        if (sBuffer == null) {
-                            sBuffer = new StringBuffer();
-                        }
-                        if (whatGot != null) {
-                            Log.i(TAG, "what we got" + whatGot);
-
-                            if (whatGot.startsWith("START") && whatGot.endsWith("END")) {
-                                sBuffer.append(whatGot);
-                                shouldProcess = true;
-                            } else if (whatGot.startsWith("START") && !whatGot.endsWith("END")) {
-                                sBuffer.append(whatGot);
-                                shouldProcess = false;
-                            } else if (!whatGot.startsWith("START") && whatGot.endsWith("END")) {
-                                sBuffer.append(whatGot);
-                                shouldProcess = true;
-                            } else {
-                                sBuffer.append(whatGot);
-                                shouldProcess = false;
-                            }
-
-                            if (shouldProcess) {
-                                String finalMessage = sBuffer.toString();
-                                Log.i(TAG, "finalMessage got:" + finalMessage);
-                                sBuffer = null;
-
-                                if (finalMessage != null) {
-                                    finalMessage = finalMessage.replaceAll("^START", "");
-                                    finalMessage = finalMessage.replaceAll("END$", "");
-                                    Log.i(TAG, "final data to be processed: " + finalMessage);
-                                    mHandler.obtainMessage(MESSAGE_READ, finalMessage.getBytes().length, -1, finalMessage.getBytes()).sendToTarget();
-                                    finalMessage = null;
-                                }
-                            }
-                        }
-                    } else {
-                        Log.i(TAG, "NOT Available on readExchangeMessages .... in bytes");
-                        break;
-                    }
-                }
-            } else {
-                Log.i(TAG, "NOT Available on readExchangeMessages .... mmInputStream is null");
+            if(count > maxWaitLoopnBlockedStatus) {
+                Log.i(TAG, "in readExchangeMessages reached max blocking read...");
+                Stop();
+                mHandler.obtainMessage(SOCKET_DISCONNEDTED, -1, -1, "disconnected may be due to blocked").sendToTarget();
             }
+
+            while ((bytes = mmInStream.read(buffer)) >= 0) {
+                Log.i(TAG, "in readExchangeMessages in blocking read...");
+                if (bytes > 0) {
+                    count = 0;
+                    Log.i(TAG, "ConnectedThread read data: " + bytes + " bytes");
+                    String whatGot = new String(buffer, 0, bytes);
+                    boolean shouldProcess = false;
+                    if (sBuffer == null) {
+                        sBuffer = new StringBuffer();
+                    }
+                    if (whatGot != null) {
+                        Log.i(TAG, "what we got" + whatGot);
+
+                        if (whatGot.startsWith("START") && whatGot.endsWith("END")) {
+                            sBuffer.append(whatGot);
+                            shouldProcess = true;
+                        } else if (whatGot.startsWith("START") && !whatGot.endsWith("END")) {
+                            sBuffer.append(whatGot);
+                            shouldProcess = false;
+                        } else if (!whatGot.startsWith("START") && whatGot.endsWith("END")) {
+                            sBuffer.append(whatGot);
+                            shouldProcess = true;
+                        } else {
+                            sBuffer.append(whatGot);
+                            shouldProcess = false;
+                        }
+
+                        if (shouldProcess) {
+                            String finalMessage = sBuffer.toString();
+                            Log.i(TAG, "finalMessage got:" + finalMessage);
+                            sBuffer = null;
+
+                            if (finalMessage != null) {
+                                finalMessage = finalMessage.replaceAll("^START", "");
+                                finalMessage = finalMessage.replaceAll("END$", "");
+                                Log.i(TAG, "final data to be processed: " + finalMessage);
+                                mHandler.obtainMessage(MESSAGE_READ, finalMessage.getBytes().length, -1, finalMessage.getBytes()).sendToTarget();
+                                finalMessage = null;
+                            }
+                        }
+                    }
+                } else {
+                    count = 0;
+                    Stop();
+                    mHandler.obtainMessage(SOCKET_DISCONNEDTED, -1, -1, "Disconnected").sendToTarget();
+                    break;
+                }
+            }
+
         } catch (Exception e) {
             Log.e(TAG, "ConnectedThread Stopped: ", e);
             Stop();
@@ -136,13 +144,22 @@ public class ConnectedThread extends Thread {
         byte[] buffer = new byte[1048576 * 10];
         int bytes;
         StringBuffer sBuffer = null;
+        int count = 0;
         while (mRunning) {
-            this.initStreamsIfNull();
-            if (sBuffer == null) {
-                sBuffer = new StringBuffer();
+            try {
+                this.initStreamsIfNull();
+                if (sBuffer == null) {
+                    sBuffer = new StringBuffer();
+                }
+                count++;
+                Log.i(TAG, "BTConnectedThread in readExchangeMessages:" + count);
+                this.readExchangeMessages(sBuffer, buffer, count);
+            } catch (Exception e) {
+                Log.e(TAG, "ConnectedThread disconnected: ", e);
+                Stop();
+                mHandler.obtainMessage(SOCKET_DISCONNEDTED, -1, -1, e).sendToTarget();
+                break;
             }
-            Log.i(TAG, "BTConnectedThread in readExchangeMessages");
-            this.readExchangeMessages(sBuffer, buffer);
         }
 
         Log.i(TAG, "BTConnectedThread disconnect now !");
