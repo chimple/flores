@@ -139,6 +139,7 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
     @Override
     public void NSDConnectionFailed(String reason, int trialCount) {
         Log.i(TAG, "NSDConnectionFailed:" + reason);
+        this.callBack.ListeningSocketFailed(reason);
     }
 
     @Override
@@ -211,7 +212,6 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
                     deviceIds.add(deviceUUID);
                     nsdServiceList.put(deviceUUID, service);
                 }
-
                 Log.i(TAG, "Selecting from deviceIds: " + deviceIds);
                 P2PSyncDeviceStatus status = api.getLatestDeviceToSyncFromDevices(deviceIds);
                 NSDSyncService selItem = null;
@@ -254,5 +254,3 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
         this.callBack.NSDDiscovertyStateChanged(newState);
     }
 }
-
-
