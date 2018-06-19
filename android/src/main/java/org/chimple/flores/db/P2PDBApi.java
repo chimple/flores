@@ -37,8 +37,6 @@ public interface P2PDBApi {
 
     public boolean upsertProfile();
 
-    public boolean persistProfileMessage(String photoJson);
-
     public void addDeviceToSync(String deviceId, boolean syncImmediately);
 
     public List<P2PSyncDeviceStatus> getAllSyncDevices();

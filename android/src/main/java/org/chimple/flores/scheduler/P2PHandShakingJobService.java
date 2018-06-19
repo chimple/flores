@@ -77,12 +77,6 @@ public class P2PHandShakingJobService extends JobService {
             receiver = null;
             Log.i(TAG, "p2p Sync Completion Receiver unregistered");
         }
-
-//        WifiManager wifiManager;
-//        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-//        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
-//            wifiManager.setWifiEnabled(false);
-//        }
     }
 
     private void registerP2PSyncCompletionIntentBroadcastReceiver() {

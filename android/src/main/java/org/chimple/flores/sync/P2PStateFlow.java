@@ -96,9 +96,11 @@ public class P2PStateFlow {
 
     public void processMessages(String receivedMessage) {
         if (receivedMessage != null) {
-            if (!handShakingInformationReceived) {
+            String handShakeMessage = "\"message_type\":\"handshaking\"";
+            boolean isHandShakingMessage = receivedMessage.contains(handShakeMessage);
+            if (!handShakingInformationReceived && isHandShakingMessage) {
                 this.transit(RECEIVE_HANDSHAKING_INFORMATION, receivedMessage);
-            } else if (!allSyncInformationReceived) {
+            } else if (!allSyncInformationReceived && !isHandShakingMessage) {
                 this.transit(RECEIVE_DB_SYNC_INFORMATION, receivedMessage);
             }
         }

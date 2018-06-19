@@ -229,7 +229,8 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
                         stopServiceSearcher();
                         setConnectionState(SyncUtils.ConnectionState.Connecting);
 
-                        NSDSyncManager.getInstance(context).updateInSharedPreference(NSDSyncManager.connectedDevice, deviceUUID);
+                        NSDSyncManager.CURRENT_CONNECTED_DEVICE = deviceUUID;
+
                         String host = selItem.getDeviceAddress().getHostAddress();
                         int port = selItem.getPort();
                         Log.i(TAG, "Starting to connect now to host:" + host + "and port:" + port);
@@ -246,9 +247,7 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
             }
         }
     }
-
-    //NSD
-
+    
     @Override
     public void serviceUpdateStatus(SyncUtils.DiscoveryState newState) {
         this.callBack.NSDDiscovertyStateChanged(newState);

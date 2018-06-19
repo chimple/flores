@@ -75,13 +75,13 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     private Map<String, P2PSyncService> neighbours = null;
 
     //    public static final String profileFileExtension = ".txt";
+    public static String CURRENT_CONNECTED_DEVICE = null;
     public static final String profileFileExtension = ".jpg";
     public static final String customStatusUpdateEvent = "custom-status-update-event";
     public static final String customTimerStatusUpdateEvent = "custom-timer-status-update-event";
     public static final String p2pConnectionChangedEvent = "p2p-connection-changed-event";
-    public static final String connectedDevice = "CONNECTED_DEVICE";
     public static final String P2P_SHARED_PREF = "p2pShardPref";
-    public static final int EXIT_CURRENT_JOB_TIME = 10 * 60; // 10 mins
+    public static final int EXIT_CURRENT_JOB_TIME = 10 * 60; // 4 mins
 
     private boolean isShutDownJobStarted = false;
     private CountDownTimer shutDownSyncJobTimer;
@@ -173,7 +173,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             // Get extra data included in the Intent
             synchronized (this) {
                 P2PDBApi api = P2PDBApiImpl.getInstance(instance.getContext());
-                String deviceId = instance.fetchFromSharedPreference(P2PSyncManager.connectedDevice);
+                String deviceId = P2PSyncManager.CURRENT_CONNECTED_DEVICE;
                 if (deviceId != null) {
                     api.syncCompleted(deviceId);
                 }
@@ -187,7 +187,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                         Log.i(TAG, ".... calling start connect to next client ....");
                         instance.connectToClient();
                     }
-                }, 1000);
+                }, 1);
             }
         }
     };
@@ -677,5 +677,6 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
     public void removeClientIPAddressToConnect() {
         this.clientIPAddressToConnect = null;
+        P2PSyncManager.CURRENT_CONNECTED_DEVICE = null;
     }
 }

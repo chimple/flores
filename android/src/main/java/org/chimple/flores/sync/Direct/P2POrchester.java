@@ -395,8 +395,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                             final String networkSSID = separated[2];
                             final String networkPass = separated[3];
                             final String ipAddress = separated[4];
-
-                            P2PSyncManager.getInstance(context).updateInSharedPreference(P2PSyncManager.connectedDevice, deviceUUID);
+                            P2PSyncManager.CURRENT_CONNECTED_DEVICE = deviceUUID;                            
 
                             Log.i(TAG, "Starting to connect now.");
                             mWifiConnection = new P2PWifiConnector(that.context, that);
