@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Activity;
+import android.os.Bundle;
 import android.util.Log;
 import android.content.Context;
 import android.os.Build.VERSION;
@@ -35,11 +37,16 @@ import org.chimple.flores.scheduler.JobUtils;
  */
 public class FloresPlugin implements MethodCallHandler, StreamHandler {
     private static final String TAG = FloresPlugin.class.getName();
+    private static MethodChannel methodChannel;
   /**
    * Plugin registration.
    */
   public static void registerWith(PluginRegistry.Registrar registrar) {
-    final MethodChannel methodChannel = new MethodChannel(registrar.messenger(), "chimple.org/flores");
+      if (methodChannel != null) {
+          throw new IllegalStateException("You should not call registerWith more than once.");
+      }
+      methodChannel = new MethodChannel(registrar.messenger(), "chimple.org/flores");
+
     final EventChannel eventChannel =
         new EventChannel(registrar.messenger(), "chimple.org/flores_event");
     final FloresPlugin instance = new FloresPlugin(registrar);
@@ -232,4 +239,31 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
     return messages;
   }
 
+    /**
+     * Handle the incoming message and immediately closes the activity.
+     *
+     * <p>Needs to be invocable by Android system; hence it is public.
+     */
+    public static class MessageReceivedActivity extends Activity {
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            // Get the Intent that started this activity and extract the string
+            Intent intent = getIntent();
+            String userId = intent.getStringExtra("userId");
+            String message = intent.getStringExtra("message");
+            String deviceId = intent.getStringExtra("deviceId");
+            String messageType = intent.getStringExtra("messageType");
+            String recipientUserId = intent.getStringExtra("recipientUserId");
+            String sessionId = intent.getStringExtra("sessionId");
+            Long id = intent.getLongExtra("id", 0);
+            Long loggedAt = intent.getLongExtra("loggedAt", 0);
+            Long sequence = intent.getLongExtra("sequence", 0);
+            boolean status = intent.getBooleanExtra("status", true);
+            Long step = intent.getLongExtra("step", 0);
+            methodChannel.invokeMethod("messageReceived", message);
+            finish();
+        }
+    }
 }
