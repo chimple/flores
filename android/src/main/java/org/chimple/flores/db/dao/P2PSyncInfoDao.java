@@ -60,6 +60,9 @@ public interface P2PSyncInfoDao {
     @Query("SELECT distinct(user_id) from P2PSyncInfo")
     public String[] fetchAllNeighours();
 
+    @Query("SELECT MAX(step) FROM P2PSyncInfo WHERE session_id=:sessionId GROUP BY session_id")
+    public Long getLatestStepSessionId(String sessionId);
+
     @Query("SELECT tmp.user_id, ps.message from (SELECT user_id, max(sequence) as sequence FROM P2PSyncInfo  WHERE message_type = :messageType AND user_id in (:userIds) group by user_id)  as tmp, P2PSyncInfo ps where ps.user_id = tmp.user_id and ps.sequence = tmp.sequence")
     public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds);
 

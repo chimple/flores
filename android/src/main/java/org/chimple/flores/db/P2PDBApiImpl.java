@@ -546,7 +546,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             }
             maxSequence++;
 
-            Long step = db.p2pSyncDao().getLatestStepForUserIdAndSessionId(userId, sessionId);
+            Long step = db.p2pSyncDao().getLatestStepSessionId(sessionId);
             if (step == null) {
                 step = 0L;
             }
