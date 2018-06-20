@@ -102,6 +102,7 @@ public class P2PDBApiImpl implements P2PDBApi {
 
             try {
                 if(userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) {
+                    Log.i(TAG, "messageReceived intent constructing for user" + userId);
                     Intent intent = new Intent("org.chimple.flores.FloresPlugin$MessageReceivedActivity");
                     intent.putExtra("userId", message.userId);
                     intent.putExtra("deviceId", message.deviceId);
@@ -114,6 +115,7 @@ public class P2PDBApiImpl implements P2PDBApi {
                     intent.putExtra("sessionId", message.sessionId);
                     intent.putExtra("step", message.step);
                     LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
+                    Log.i(TAG, "messageReceived intent sent successfully");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
