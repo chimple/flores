@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.util.Log;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -101,8 +103,8 @@ public class P2PDBApiImpl implements P2PDBApi {
             Log.i(TAG, "inserted data" + message);
 
             try {
-                if(userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) {
-                    Log.i(TAG, "messageReceived intent constructing for user" + userId);
+                if(message.userId != null && message.recipientUserId != null && message.userId.equals(message.getRecipientUserId())) {
+                    Log.i(TAG, "messageReceived intent constructing for user" + message.userId);
                     Intent intent = new Intent("org.chimple.flores.FloresPlugin$MessageReceivedActivity");
                     intent.putExtra("userId", message.userId);
                     intent.putExtra("deviceId", message.deviceId);
