@@ -319,10 +319,7 @@ public class NSDServiceFinder {
                 mNsdManager.stopServiceDiscovery(mDiscoveryListener);
             } catch (Exception e) {
                 Log.i(TAG, "stopDiscovery failed: " + e.getMessage());
-            } finally {
-                mDiscoveryListener = null;
             }
-
         }
     }
 
