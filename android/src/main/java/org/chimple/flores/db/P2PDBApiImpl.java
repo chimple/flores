@@ -451,6 +451,15 @@ public class P2PDBApiImpl implements P2PDBApi {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        Iterator itResult = results.iterator();
+        while (itResult.hasNext()) {
+            P2PSyncInfo temp = (P2PSyncInfo) itResult.next();
+            Log.i(TAG, "Sync Info to be send deviceId:" + temp.getDeviceId());
+            Log.i(TAG, "Sync Info to be send userId:" + temp.getDeviceId());
+            Log.i(TAG, "Sync Info to be send messageType:" + temp.getMessageType());
+        }
+
         return results;
     }
 
@@ -634,7 +643,30 @@ class P2PSyncInfoDeserializer implements JsonDeserializer<P2PSyncInfo> {
         }
         final String receivedMessage = message == null ? "" : message;
 
+        String sessionId = null;
+        final JsonElement jsonSessionId = jsonObject.get("sessionId");
+        if (jsonSessionId != null) {
+            sessionId = jsonSessionId.getAsString();
+        }
+
+        Boolean status = null;
+        final JsonElement jsonStatus = jsonObject.get("status");
+        if (jsonStatus != null) {
+            status = jsonStatus.getAsBoolean();
+        }
+
+        Long step = null;
+        final JsonElement jsonStep = jsonObject.get("step");
+        if (jsonStep != null) {
+            step = jsonStep.getAsLong();
+        }
+
+
         final P2PSyncInfo p2PSyncInfo = new P2PSyncInfo(userId, deviceId, sequence, recipientUserId, receivedMessage, messageType);
+        p2PSyncInfo.setSessionId(sessionId);
+        p2PSyncInfo.setStatus(status);
+        p2PSyncInfo.setStep(step);
+
         return p2PSyncInfo;
     }
 }
