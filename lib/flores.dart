@@ -27,6 +27,7 @@ class Flores {
 
   void initialize(MessageReceivedHandler handler) {
     _methodChannel.setMethodCallHandler((MethodCall call) {
+      print('MessageReceivedHandler: ${call.method} ${call.arguments}');
       assert(call.method == 'messageReceived');
       handler(call.arguments);
     });
