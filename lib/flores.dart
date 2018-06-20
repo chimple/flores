@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
 
+typedef void MessageReceivedHandler(String message);
+
 class Flores {
   factory Flores() {
     if (_instance == null) {
@@ -22,6 +24,13 @@ class Flores {
 
   final MethodChannel _methodChannel;
   final EventChannel _eventChannel;
+
+  void initialize(MessageReceivedHandler handler) {
+    _methodChannel.setMethodCallHandler((MethodCall call) {
+      assert(call.method == 'messageReceived');
+      handler(call.arguments);
+    });
+  }
 
   Future<List<dynamic>> get users async => _methodChannel
       .invokeMethod('getUsers')
