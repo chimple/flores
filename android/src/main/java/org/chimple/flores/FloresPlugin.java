@@ -262,6 +262,8 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
             Long sequence = intent.getLongExtra("sequence", 0);
             boolean status = intent.getBooleanExtra("status", true);
             Long step = intent.getLongExtra("step", 0);
+            Log.i(TAG, "MessageReceivedActivity: "+message);
+
             methodChannel.invokeMethod("messageReceived", message);
             finish();
         }
