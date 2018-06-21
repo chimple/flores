@@ -77,7 +77,7 @@ public class HandShakingInfo {
         if (this == info) {
             return true;
         } else {
-            return (this.userId.equals(info.userId) && this.deviceId == info.deviceId && this.sequence == info.sequence);
+            return (this.userId.equals(info.userId) && this.deviceId.equals(info.deviceId) && this.sequence.longValue() == info.sequence.longValue());
         }
     }
 

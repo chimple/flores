@@ -8,6 +8,8 @@ import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.ArrayList;
+
 
 public class HandShakingMessageDeserializer implements JsonDeserializer<HandShakingMessage> {
     @Override
@@ -21,7 +23,7 @@ public class HandShakingMessageDeserializer implements JsonDeserializer<HandShak
             messageType = jsonMessageType.getAsString();
         }
         HandShakingInfo[] infos = context.deserialize(jsonObject.get("infos"), HandShakingInfo[].class);
-        final HandShakingMessage handShakingMessage = new HandShakingMessage(messageType, Arrays.asList(infos));
+        final HandShakingMessage handShakingMessage = new HandShakingMessage(messageType, new ArrayList(Arrays.asList(infos)));
         return handShakingMessage;
     }
 }

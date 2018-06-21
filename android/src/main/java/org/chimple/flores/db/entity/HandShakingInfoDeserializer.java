@@ -15,13 +15,23 @@ public class HandShakingInfoDeserializer implements JsonDeserializer<HandShaking
 
         final JsonObject jsonObject = json.getAsJsonObject();
         final JsonElement jsonUserId = jsonObject.get("userId");
-        final String userId = jsonUserId.getAsString();
 
+        String userId = null;
+        if(jsonUserId != null) {
+            userId = jsonUserId.getAsString();
+        }
+
+        String deviceId = null;
         final JsonElement jsonDeviceId = jsonObject.get("deviceId");
-        final String deviceId = jsonDeviceId.getAsString();
+        if(jsonDeviceId != null) {
+            deviceId = jsonDeviceId.getAsString();
+        }
 
+        Long sequence = 0L;
         final JsonElement jsonSequence = jsonObject.get("sequence");
-        final Long sequence = jsonSequence.getAsLong();
+        if(jsonSequence != null) {
+            sequence = jsonSequence.getAsLong();
+        }
 
         final HandShakingInfo handShakingInfo = new HandShakingInfo(userId, deviceId, sequence);
         return handShakingInfo;

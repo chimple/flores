@@ -32,7 +32,7 @@ public interface P2PSyncInfoDao {
     public Long getLatestStepForUserIdAndSessionId(String userId, String sessionId);
 
 
-    @Query("SELECT user_id, device_id, MAX(sequence) as sequence FROM P2PSyncInfo GROUP BY user_id, device_id")
+    @Query("SELECT user_id, device_id, MAX(sequence) as sequence FROM P2PSyncInfo where user_id is not null and device_id is not null GROUP BY user_id, device_id")
     public P2PLatestInfoByUserAndDevice[] getLatestInfoAvailableByUserIdAndDeviceId();
 
 

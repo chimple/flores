@@ -187,7 +187,7 @@ public class NSDServiceFinder {
                 public void onDiscoveryStopped(String serviceType) {
                     Log.i(TAG, "Discovery stopped: " + serviceType);
                     discoveryState = SyncUtils.DiscoveryState.NSDDiscoveryServiceStopped;
-                    that.callBack.serviceUpdateStatus(discoveryState);
+                    that.callBack.serviceUpdateStatus(discoveryState);                    
                 }
 
                 @Override

@@ -11,7 +11,7 @@ public class P2PApplication extends Application {
     private static Context context;
     private P2PApplication that;
     public static AppDatabase db;
-//    String USERID_UUID;
+    // public static boolean addOnceMessages = false;
 
     public static int REGULAR_JOB_TIMINGS_FOR_MIN_LATENCY = 30 * 1000; // every 4 mins mininum
     public static int REGULAR_JOB_TIMINGS_FOR_PERIOD = 30 * 1000; // every 8 mins
@@ -34,7 +34,7 @@ public class P2PApplication extends Application {
                 // Initialize all of the important frameworks and objects
 //                that.createShardProfilePreferences();
                 P2PContext.getInstance().initialize(P2PApplication.this);
-                //TODO: for now force the creation here
+                // TODO: for now force the creation here
                 db = AppDatabase.getInstance(P2PApplication.this);
 
                 Log.i(TAG, "app database instance" + String.valueOf(db));

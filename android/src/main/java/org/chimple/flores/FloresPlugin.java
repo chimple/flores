@@ -92,13 +92,13 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String deviceId = arg.get("deviceId");
               String message = arg.get("message");
               boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
-              //DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "Hello" + userId, true, "session3" + userId);
-              //DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "😜" + userId, true, "session4" + userId);
+            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r3" + userId, "Chat", "Good Day 🎮" + userId, true, "session 3" + userId);
+            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r4" + userId, "Chat", "🍤🍉" + userId, true, "session 4" + userId);
 
-              //DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "Hi" + userId, true, "session1" + userId);
-              //DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "😸" + userId, true, "session2" + userId);
+            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "Hi" + userId, true, "session1" + userId);
+            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "😸" + userId, true, "session2" + userId);
 
-              //DBSyncManager.getInstance(registrar.context()).loggedInUser(userId, deviceId);
+            //   DBSyncManager.getInstance(registrar.context()).loggedInUser(userId, deviceId);
               result.success(status);
               break;
           }

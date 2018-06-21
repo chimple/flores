@@ -38,6 +38,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 
 import org.chimple.flores.db.entity.HandShakingInfo;
 import org.chimple.flores.db.entity.HandShakingInfoDeserializer;
@@ -52,6 +56,7 @@ import org.chimple.flores.db.entity.ProfileMessage;
 import org.chimple.flores.db.entity.ProfileMessageDeserializer;
 import org.chimple.flores.sync.Direct.P2PSyncManager;
 import org.chimple.flores.scheduler.JobUtils;
+import org.chimple.flores.application.P2PApplication;
 
 import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 
@@ -141,6 +146,13 @@ public class P2PDBApiImpl implements P2PDBApi {
                 for (P2PSyncInfo info : infos) {
                     this.persistP2PSyncMessage(info);
                 }
+
+                // if(!P2PApplication.addOnceMessages) {
+                //     Log.i(TAG, "adding few new messages" + P2PApplication.addOnceMessages);
+                //     DBSyncManager.getInstance(this.context).addMessage("SUN", "SUNNY", "Chat", "🍻🍷🥂" + "SUN", true, "sessionSSS" + "-SUN");
+                //     P2PApplication.addOnceMessages = true;
+                // }
+                   
                 db.setTransactionSuccessful();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -229,7 +241,9 @@ public class P2PDBApiImpl implements P2PDBApi {
             List<HandShakingInfo> handShakingInfos = new ArrayList<HandShakingInfo>();
             P2PLatestInfoByUserAndDevice[] infos = db.p2pSyncDao().getLatestInfoAvailableByUserIdAndDeviceId();
             for (P2PLatestInfoByUserAndDevice info : infos) {
-                handShakingInfos.add(new HandShakingInfo(info.userId, info.deviceId, info.sequence));
+                if (info.userId != null && info.deviceId != null) {
+                    handShakingInfos.add(new HandShakingInfo(info.userId, info.deviceId, info.sequence));
+                }                
             }
 
             Gson gson = this.registerHandShakingMessageBuilder();
@@ -262,6 +276,15 @@ public class P2PDBApiImpl implements P2PDBApi {
 
     public String buildAllSyncMessages(String handShakeJson) {
         List<HandShakingInfo> infos = deSerializeHandShakingInformationFromJson(handShakeJson);
+        if (infos != null) {
+            Iterator<HandShakingInfo> itInfos = infos.iterator();
+            while (itInfos.hasNext()) {
+                HandShakingInfo i = (HandShakingInfo) itInfos.next();
+                if (i.getDeviceId() == null || i.getUserId() == null) {
+                    itInfos.remove();
+                }
+            }
+        }
         List<P2PSyncInfo> output = this.buildSyncInformation(infos);
         String json = this.convertP2PSyncInfoToJson(output);
         Log.i(TAG, "SYNC JSON:" + json);
@@ -272,7 +295,9 @@ public class P2PDBApiImpl implements P2PDBApi {
         List<HandShakingInfo> handShakingInfos = new ArrayList<HandShakingInfo>();
         P2PLatestInfoByUserAndDevice[] infos = db.p2pSyncDao().getLatestInfoAvailableByUserIdAndDeviceId();
         for (P2PLatestInfoByUserAndDevice info : infos) {
-            handShakingInfos.add(new HandShakingInfo(info.userId, info.deviceId, info.sequence));
+            if (info.userId != null && info.deviceId != null) {
+                handShakingInfos.add(new HandShakingInfo(info.userId, info.deviceId, info.sequence));
+            }                
         }
         return handShakingInfos;
     }
@@ -379,50 +404,18 @@ public class P2PDBApiImpl implements P2PDBApi {
                 }
             });
 
-            final List<HandShakingInfo> validElementsFromOther = new ArrayList<HandShakingInfo>();
-            final List<HandShakingInfo> removeElementsFromInput = new ArrayList<HandShakingInfo>();
+            Set<HandShakingInfo> temp = new HashSet<>(latestInfoFromCurrentDevice);
+            latestInfoFromCurrentDevice.removeAll(otherHandShakeInfos);
+            otherHandShakeInfos.removeAll(temp);
+            temp.clear();
 
-            CollectionUtils.forAllDo(latestInfoFromCurrentDevice, new Closure<HandShakingInfo>() {
-                @Override
-                public void execute(final HandShakingInfo input) {
-                    Log.i(TAG, "processing element" + input);
-                    CollectionUtils.find(otherHandShakeInfos, new Predicate<HandShakingInfo>() {
-                        @Override
-                        public boolean evaluate(HandShakingInfo other) {
-                            // if element exists in both list for same device
-                            if (input.getDeviceId() != null &&
-                                    other.getDeviceId() != null &&
-                                    input.getDeviceId().equals(other.getDeviceId())) {
-                                if (input.getUserId() != null &&
-                                        other.getUserId() != null && input.getUserId().equals(other.getUserId())) {
-                                    if (input.getSequence() > other.getSequence()) {
-                                        validElementsFromOther.add(other);
-                                    } else {
-                                        removeElementsFromInput.add(input);
-                                    }
-                                }
-                            } else {
-                                validElementsFromOther.add(other);
-                            }
-//                        if (input.getUserId().equals(other.getUserId())) {
-//                            if (input.getSequence() > other.getSequence()) {
-//                                validElementsFromOther.add(other);
-//                            } else {
-//                                removeElementsFromInput.add(input);
-//                            }
-//                        } else {
-//
-//                        }
-                            return false;
-                        }
-                    });
-                }
-            });
+            Set<HandShakingInfo> finalSetToProcess = new LinkedHashSet<HandShakingInfo>();
+            finalSetToProcess.addAll(latestInfoFromCurrentDevice);
+            finalSetToProcess.addAll(otherHandShakeInfos);
 
-            latestInfoFromCurrentDevice.addAll(validElementsFromOther);
-            latestInfoFromCurrentDevice.removeAll(removeElementsFromInput);
+            final List finalList = new ArrayList(finalSetToProcess);
 
-            Collections.sort(latestInfoFromCurrentDevice, new Comparator<HandShakingInfo>() {
+            Collections.sort(finalList, new Comparator<HandShakingInfo>() {
                 @Override
                 public int compare(HandShakingInfo o1, HandShakingInfo o2) {
                     if (o1.getUserId() != null && o2.getUserId() != null) {
@@ -437,7 +430,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             @SuppressWarnings("unchecked")
             Map<String, HandShakingInfo> map = new HashMap<String, HandShakingInfo>() {
                 {
-                    IteratorUtils.forEach(latestInfoFromCurrentDevice.iterator(), new Closure() {
+                    IteratorUtils.forEach(finalList.iterator(), new Closure() {
                         @Override
                         public void execute(Object input) {
                             HandShakingInfo item = (HandShakingInfo) input;
@@ -484,9 +477,8 @@ public class P2PDBApiImpl implements P2PDBApi {
             Log.i(TAG, "Sync Info to be send userId:" + temp.getDeviceId());
             Log.i(TAG, "Sync Info to be send messageType:" + temp.getMessageType());
         }
-
         return results;
-    }
+    }    
 
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         return Arrays.asList(db.p2pSyncDao().fetchAllUsers());
