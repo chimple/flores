@@ -249,6 +249,8 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            Log.i(TAG, "messageReceivedActivity created");
+
             // Get the Intent that started this activity and extract the string
             Intent intent = getIntent();
             String userId = intent.getStringExtra("userId");
@@ -262,7 +264,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
             Long sequence = intent.getLongExtra("sequence", 0);
             boolean status = intent.getBooleanExtra("status", true);
             Long step = intent.getLongExtra("step", 0);
-            Log.i(TAG, "MessageReceivedActivity: "+message);
+            Log.i(TAG, "messageReceivedActivity: "+message);
 
             methodChannel.invokeMethod("messageReceived", message);
             finish();
