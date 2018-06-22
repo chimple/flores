@@ -60,6 +60,11 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
 
   private final PluginRegistry.Registrar registrar;
 
+  public static void onMessageReceived(P2PSyncInfo message) {
+    Log.i(TAG, "messageReceived: "+message);
+    methodChannel.invokeMethod("messageReceived", message.message);
+  }
+
   @Override
   public void onMethodCall(MethodCall call, Result result) {
       switch (call.method) {
