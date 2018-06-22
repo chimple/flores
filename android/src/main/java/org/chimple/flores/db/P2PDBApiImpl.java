@@ -106,10 +106,12 @@ public class P2PDBApiImpl implements P2PDBApi {
         if(found == null || found.size() == 0) {
             db.p2pSyncDao().insertP2PSyncInfo(message);
             Log.i(TAG, "inserted data" + message);
+            SharedPreferences pref = this.context.getSharedPreferences(P2P_SHARED_PREF, 0);
+            String userId = pref.getString("USER_ID", null); // getting String
 
             try {
-                if(message.userId != null && message.recipientUserId != null && message.userId.equals(message.getRecipientUserId())) {
-                    Log.i(TAG, "messageReceived intent constructing for user" + message.userId);
+                if(userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) {
+                    Log.i(TAG, "messageReceived intent constructing for user" + userId);
                     Intent intent = new Intent("org.chimple.flores.FloresPlugin$MessageReceivedActivity");
                     intent.putExtra("userId", message.userId);
                     intent.putExtra("deviceId", message.deviceId);
