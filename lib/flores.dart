@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
 
-typedef void MessageReceivedHandler(String message);
+typedef void MessageReceivedHandler(Map<dynamic, dynamic> message);
 
 class Flores {
   factory Flores() {
