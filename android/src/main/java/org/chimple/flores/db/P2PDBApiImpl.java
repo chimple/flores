@@ -57,6 +57,7 @@ import org.chimple.flores.db.entity.ProfileMessageDeserializer;
 import org.chimple.flores.sync.Direct.P2PSyncManager;
 import org.chimple.flores.scheduler.JobUtils;
 import org.chimple.flores.application.P2PApplication;
+import org.chimple.flores.*;
 
 import static org.chimple.flores.sync.Direct.P2PSyncManager.P2P_SHARED_PREF;
 
@@ -112,7 +113,8 @@ public class P2PDBApiImpl implements P2PDBApi {
             try {
                 if(userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) {
                     Log.i(TAG, "messageReceived intent constructing for user" + userId);
-                    Intent intent = new Intent("org.chimple.flores.FloresPlugin$MessageReceivedActivity");
+                    //Intent intent = new Intent("org.chimple.flores.FloresPlugin$MessageReceivedActivity");                
+                    Intent intent = new Intent(this.context, FloresPlugin.MessageReceivedActivity.class);
                     intent.putExtra("userId", message.userId);
                     intent.putExtra("deviceId", message.deviceId);
                     intent.putExtra("message", message.message);
@@ -123,7 +125,10 @@ public class P2PDBApiImpl implements P2PDBApi {
                     intent.putExtra("messageType", message.messageType);
                     intent.putExtra("sessionId", message.sessionId);
                     intent.putExtra("step", message.step);
-                    LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    this.context.startActivity(intent);
+    
+                    //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
                     Log.i(TAG, "messageReceived intent sent successfully");
                 }
             } catch (Exception ex) {
