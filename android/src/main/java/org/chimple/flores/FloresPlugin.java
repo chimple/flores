@@ -1,21 +1,15 @@
 package org.chimple.flores;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
-import android.content.Context;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Environment;
 
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
@@ -62,7 +56,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
 
   public static void onMessageReceived(P2PSyncInfo message) {
     Log.i(TAG, "messageReceived: "+message);
-    methodChannel.invokeMethod("messageReceived", message.message);
+    methodChannel.invokeMethod("messageReceived", convertToMap(message));
   }
 
   @Override
@@ -166,7 +160,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               DBSyncManager.getInstance(registrar.context())
                               .getConversations(userId, secondUserId, messageType);
               Log.i(TAG, "getConversations: "+messageType+userId+secondUserId);
-              List<Map<String, String>> messages = convertToMap(messageList);
+              List<Map<String, String>> messages = convertToListOfMaps(messageList);
               Log.i(TAG, messages.toString());
               if (messages.size() >= 0) {
                   result.success(messages);
@@ -183,7 +177,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               List<P2PSyncInfo> messageList =
               DBSyncManager.getInstance(registrar.context())
                               .getLatestConversations(userId, messageType);
-              List<Map<String, String>> messages = convertToMap(messageList);
+              List<Map<String, String>> messages = convertToListOfMaps(messageList);
 
               if (messages.size() >= 0) {
                   result.success(messages);
@@ -217,32 +211,38 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
   @Override
   public void onCancel(Object arguments) {}
 
-  public List<Map<String, String>> convertToMap(List<P2PSyncInfo> messageList) {
+  static private List<Map<String, String>> convertToListOfMaps(List<P2PSyncInfo> messageList) {
       List<Map<String, String>> messages = new ArrayList<Map<String, String>>();
       for (P2PSyncInfo m: messageList
               ) {
-          Map<String, String> message = new HashMap<String, String>();
-          message.put("userId", m.userId);
-          message.put("message", m.message);
-          message.put("messageType", m.messageType);
-          message.put("deviceId", m.deviceId);
-          message.put("recipientUserId", m.recipientUserId);
-          message.put("sessionId", m.sessionId);
-          if(m.id != null)
-            message.put("id", m.id.toString());
-          if(m.loggedAt != null)
-            message.put("loggedAt", Long.toString(m.loggedAt.getTime()));
-          if(m.sequence != null)
-            message.put("sequence", m.sequence.toString());
-          if(m.status != null)
-            message.put("status", m.status.toString());
-          if(m.step != null)
-            message.put("step", m.step.toString());
-          Log.i(TAG, "convertToMap: "+message.toString());
+          Map<String, String> message = convertToMap(m);
           messages.add(message);
       }
     return messages;
   }
+
+    @NonNull
+    static private Map<String, String> convertToMap(P2PSyncInfo m) {
+        Map<String, String> message = new HashMap<String, String>();
+        message.put("userId", m.userId);
+        message.put("message", m.message);
+        message.put("messageType", m.messageType);
+        message.put("deviceId", m.deviceId);
+        message.put("recipientUserId", m.recipientUserId);
+        message.put("sessionId", m.sessionId);
+        if(m.id != null)
+          message.put("id", m.id.toString());
+        if(m.loggedAt != null)
+          message.put("loggedAt", Long.toString(m.loggedAt.getTime()));
+        if(m.sequence != null)
+          message.put("sequence", m.sequence.toString());
+        if(m.status != null)
+          message.put("status", m.status.toString());
+        if(m.step != null)
+          message.put("step", m.step.toString());
+        Log.i(TAG, "convertToMap: "+message.toString());
+        return message;
+    }
 
     /**
      * Handle the incoming message and immediately closes the activity.
