@@ -125,6 +125,7 @@ public class P2PDBApiImpl implements P2PDBApi {
                     intent.putExtra("messageType", message.messageType);
                     intent.putExtra("sessionId", message.sessionId);
                     intent.putExtra("step", message.step);
+                    Log.i(TAG, "sending intent by starting activity");
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     this.context.startActivity(intent);
     
