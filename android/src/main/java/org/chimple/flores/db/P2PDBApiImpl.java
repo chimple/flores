@@ -111,7 +111,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             String userId = pref.getString("USER_ID", null); // getting String
 
             try {
-                if(userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) {
+                if((userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) || message.messageType.equals("Photo")) {
                     Log.i(TAG, "messageReceived intent constructing for user" + userId);
                     //Intent intent = new Intent("org.chimple.flores.FloresPlugin$MessageReceivedActivity");                
                     // Intent intent = new Intent(this.context, FloresPlugin.MessageReceivedActivity.class);
