@@ -118,7 +118,7 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
                 timeCounter = timeCounter + 1;
                 totalTimeTillJobStarted = totalTimeTillJobStarted + 1;
 
-                if (instance != null) {
+                if (instance != null && instance.mHandler != null) {
                     instance.broadcastCustomTimerStatusUpdateEvent();
                     instance.mHandler.postDelayed(mStatusChecker, mInterval);
                 }
