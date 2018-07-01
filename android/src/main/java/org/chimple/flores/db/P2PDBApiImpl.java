@@ -26,6 +26,7 @@ import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
+import com.google.gson.stream.JsonWriter;
 
 import org.chimple.flores.db.entity.HandShakingInfo;
 import org.chimple.flores.db.entity.HandShakingInfoDeserializer;
