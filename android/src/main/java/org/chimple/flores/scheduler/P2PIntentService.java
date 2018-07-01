@@ -86,10 +86,12 @@ public class P2PIntentService extends Service {
         Log.i(TAG, "Destroying P2PSync Manager");
         if (this.p2pSyncManager != null) {
             this.p2pSyncManager.onDestroy();
+            this.p2pSyncManager = null;
         }
 
         if (this.nsdSyncManager != null) {
             this.nsdSyncManager.onDestroy();
+            this.nsdSyncManager = null;
         }
 
         mServiceLooper.quit();

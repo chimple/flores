@@ -17,6 +17,7 @@ public class NSDHandShakerThread extends Thread {
     private int triedSoFarTimes = 0;
 
     public NSDHandShakerThread(NSDHandShakeInitiatorCallBack callBack, String address, int port, int trialnum) {
+        setName("NSDHandShakerThread");
         this.mAddress = address;
         this.mPort = port;
         this.callBack = callBack;
@@ -28,17 +29,19 @@ public class NSDHandShakerThread extends Thread {
     }
 
     public void run() {
-        Log.i(TAG, "Starting to connect in NSDHandShakerThread");
-        if (mSocket != null && callBack != null) {
+        while (!interrupted()) {
             try {
-                mSocket.bind(null);
-                mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
-                Log.i(TAG, "called connect on NSDHandShakerThread socket");
-                //return success
-                callBack.NSDConnected(mSocket.getInetAddress(), mSocket.getLocalAddress());
-                Log.i(TAG, "called connected on NSDHandShakerThread callback");
-            } catch (IOException e) {
+                if (mSocket != null && callBack != null) {
+                    mSocket.bind(null);
+                    mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
+                    Log.i(TAG, "called connect on NSDHandShakerThread socket");
+                    //return success
+                    callBack.NSDConnected(mSocket.getInetAddress(), mSocket.getLocalAddress());
+                    Log.i(TAG, "called connected on NSDHandShakerThread callback");
+                }
+            } catch (Exception e) {
                 Log.i(TAG, "socket connect failed: " + e.toString());
+                interrupt();
                 try {
                     if (mSocket != null) {
                         mSocket.close();
@@ -55,6 +58,7 @@ public class NSDHandShakerThread extends Thread {
 
     public void cleanUp() {
         mStopped = true;
+        interrupt();
         try {
             if (mSocket != null) {
                 mSocket.close();

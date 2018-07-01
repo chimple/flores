@@ -17,6 +17,7 @@ public class NSDHandShakingListenerThread extends Thread {
     private int listenerErrorSoFarTimes = 0;
 
     public NSDHandShakingListenerThread(HandShakeListenerCallBack callBack, int port, int trialnum) {
+        setName("NSDHandShakingListenerThread");
         this.callBack = callBack;
         this.listenerErrorSoFarTimes = trialnum;
         ServerSocket tmp = null;
@@ -31,40 +32,42 @@ public class NSDHandShakingListenerThread extends Thread {
     }
 
     public void run() {
-
-        if (callBack != null) {
-            Log.i(TAG, "starting to listen");
-            Socket socket = null;
+        while (!interrupted()) {
             try {
-                if (mSocket != null) {
-                    socket = mSocket.accept();
+                if (callBack != null) {
+                    Log.i(TAG, "starting to listen");
+                    Socket socket = null;
+                    if (mSocket != null) {
+                        socket = mSocket.accept();
+                    }
+                    if (socket != null) {
+                        Log.i(TAG, "handshaking connection established");
+                        callBack.GotConnection(socket.getInetAddress(), socket.getLocalAddress());
+                        OutputStream stream = socket.getOutputStream();
+                        String hello = "shakeback";
+                        stream.write(hello.getBytes());
+                        socket.close();
+                    } else if (!mStopped) {
+                        Log.i(TAG, "NSDHandShakingListenerThread failed: Socket is null");
+                        callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
+                    }
                 }
-                if (socket != null) {
-                    Log.i(TAG, "handshaking connection established");
-                    callBack.GotConnection(socket.getInetAddress(), socket.getLocalAddress());
-                    OutputStream stream = socket.getOutputStream();
-                    String hello = "shakeback";
-                    stream.write(hello.getBytes());
-                    socket.close();
-                } else if (!mStopped) {
-                    Log.i(TAG, "NSDHandShakingListenerThread failed: Socket is null");
-                    callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
-                }
-
             } catch (Exception e) {
+                interrupt();
                 if (!mStopped) {
                     //return failure
                     Log.i(TAG, "NSDHandShakingListenerThread accept socket failed: " + e.toString());
                     callBack.ListeningFailed(e.toString(), this.listenerErrorSoFarTimes);
                 }
+
             }
         }
-
     }
 
     public void cleanUp() {
         Log.i(TAG, "cancelled NSDHandShakingListenerThread");
         mStopped = true;
+        interrupt();
         try {
             if (mSocket != null) {
                 Log.i(TAG, "successfully closed NSDHandShakingListenerThread");

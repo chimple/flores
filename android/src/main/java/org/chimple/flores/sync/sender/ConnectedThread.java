@@ -29,9 +29,10 @@ public class ConnectedThread extends Thread {
     private OutputStream mmOutStream = null;
     private Handler mHandler = null;
     boolean mRunning = true;
-    private int maxWaitLoopnBlockedStatus = 3000; // 3000 loops
+    private int maxWaitLoopnBlockedStatus = 1000; // 1000 loops
 
     public ConnectedThread(Socket socket, Handler handler, Context context) {
+        setName("ConnectedThread");
         Log.d(TAG, "Creating ConnectedThread");
         mHandler = handler;
         mmSocket = socket;
@@ -75,7 +76,7 @@ public class ConnectedThread extends Thread {
     private void readExchangeMessages(StringBuffer sBuffer, byte[] buffer, int count) {
         try {
             int bytes = -1;
-            if(count > maxWaitLoopnBlockedStatus) {
+            if (count > maxWaitLoopnBlockedStatus) {
                 Log.i(TAG, "in readExchangeMessages reached max blocking read...");
                 Stop();
                 mHandler.obtainMessage(SOCKET_DISCONNEDTED, -1, -1, "disconnected may be due to blocked").sendToTarget();
@@ -139,30 +140,31 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        Log.i(TAG, "BTConnectedThread started");
-
-        byte[] buffer = new byte[1048576 * 10];
-        int bytes;
-        StringBuffer sBuffer = null;
-        int count = 0;
-        while (mRunning) {
+        while (!interrupted()) {
             try {
-                this.initStreamsIfNull();
-                if (sBuffer == null) {
-                    sBuffer = new StringBuffer();
+                Log.i(TAG, "BTConnectedThread started");
+                byte[] buffer = new byte[1048576 * 10];
+                int bytes;
+                StringBuffer sBuffer = null;
+                int count = 0;
+                while (mRunning) {
+                    this.initStreamsIfNull();
+                    if (sBuffer == null) {
+                        sBuffer = new StringBuffer();
+                    }
+                    count++;
+                    Log.i(TAG, "BTConnectedThread in readExchangeMessages:" + count);
+                    this.readExchangeMessages(sBuffer, buffer, count);
                 }
-                count++;
-                Log.i(TAG, "BTConnectedThread in readExchangeMessages:" + count);
-                this.readExchangeMessages(sBuffer, buffer, count);
+                Log.i(TAG, "BTConnectedThread disconnect now !");
             } catch (Exception e) {
                 Log.e(TAG, "ConnectedThread disconnected: ", e);
                 Stop();
                 mHandler.obtainMessage(SOCKET_DISCONNEDTED, -1, -1, e).sendToTarget();
                 break;
+
             }
         }
-
-        Log.i(TAG, "BTConnectedThread disconnect now !");
     }
 
 
@@ -207,6 +209,7 @@ public class ConnectedThread extends Thread {
 
     public void Stop() {
         mRunning = false;
+        interrupt();
         try {
             if (mmInStream != null) {
                 mmInStream.close();
