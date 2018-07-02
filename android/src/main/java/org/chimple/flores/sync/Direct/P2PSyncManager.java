@@ -119,12 +119,13 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                 // call function to update timer
                 timeCounter = timeCounter + 1;
                 totalTimeTillJobStarted = totalTimeTillJobStarted + 1;
-                if (instance != null) {
+
+                if (instance != null && instance.mHandler != null) {
                     instance.broadcastCustomTimerStatusUpdateEvent();
                     instance.mHandler.postDelayed(mStatusChecker, mInterval);
                 }
 
-//                Log.i(TAG, "Will start shutdown job in: " + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
+                Log.i(TAG, "Will start shutdown job in: " + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
 
                 if (totalTimeTillJobStarted > EXIT_CURRENT_JOB_TIME  && !isShutDownJobStarted  && instance != null) {
                     instance.startShutDownTimer();
@@ -265,7 +266,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                 boolean shouldStart = false;
                 @Override
                 public void run() {
-                    reStartJobTimer = new CountDownTimer(5000, 1000) {
+                    reStartJobTimer = new CountDownTimer(20000, 1000) {
                         public void onTick(long millisUntilFinished) {
                         }
 
@@ -277,7 +278,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                             handler.postDelayed(new Runnable() {
                                 //Lets give others chance on creating new group before we come back online
                                 public void run() {
-                                    if(EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted > 20) {
+                                    if(EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted > 30) {
                                         shouldStart = true;
                                     } else {
                                         shouldStart = false;
@@ -288,7 +289,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                                         StartConnector();
                                     }
                                 }
-                            }, 10000);
+                            }, 1);
                         }
                     };
 
