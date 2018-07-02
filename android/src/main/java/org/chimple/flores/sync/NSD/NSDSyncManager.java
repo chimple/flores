@@ -434,6 +434,8 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
         LocalBroadcastManager.getInstance(this.context).unregisterReceiver(networkConnectionChangedReceiver);
         this.StopNSDConnector();
         this.mStatusChecker = null;
+        NSDSyncManager.instance.dbSyncManager = null;
+        NSDSyncManager.instance.p2PStateFlow = null;
         NSDSyncManager.instance = null;
         updateStatus(TAG, "onDestroy");
     }
@@ -671,7 +673,9 @@ public class NSDSyncManager implements NSDOrchesterCallBack, CommunicationCallBa
                     // thus to avoid it, we are delaying the service discovery start here
                     public void run() {
                         Log.i(TAG, ".... calling start connect to next client ....");
-                        instance.connectToClient();
+                        if(instance != null) {
+                            instance.connectToClient();
+                        }                    
                     }
                 }, 1);
             }

@@ -16,6 +16,7 @@ public class ConnectToThread extends Thread {
     boolean mStopped = false;
 
     public ConnectToThread(CommunicationCallBack callBack, String address, int port) {
+        setName("ConnectToThread");
         this.mAddress = address;
         this.mPort = port;
         this.callBack = callBack;

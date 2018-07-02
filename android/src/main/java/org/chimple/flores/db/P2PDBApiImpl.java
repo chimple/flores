@@ -26,6 +26,7 @@ import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
+import com.google.gson.stream.JsonWriter;
 
 import org.chimple.flores.db.entity.HandShakingInfo;
 import org.chimple.flores.db.entity.HandShakingInfoDeserializer;
@@ -294,7 +295,7 @@ public class P2PDBApiImpl implements P2PDBApi {
             }
         }
         List<P2PSyncInfo> output = this.buildSyncInformation(infos);
-        String json = this.convertP2PSyncInfoToJson(output);
+        String json = this.convertP2PSyncInfoToJsonUsingStreaming(output);
         Log.i(TAG, "SYNC JSON:" + json);
         return json;
     }
@@ -332,6 +333,27 @@ public class P2PDBApiImpl implements P2PDBApi {
         Gson gson = gsonBuilder.create();
 
         return gson;
+    }
+
+    public String convertP2PSyncInfoToJsonUsingStreaming(List<P2PSyncInfo> objList)  {
+        String json = "";
+        try {
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            OutputStreamWriter outputStreamWriter=new OutputStreamWriter(baos,"UTF-8");
+            JsonWriter writer = new JsonWriter(outputStreamWriter);
+            writer.setIndent("");
+            writer.beginArray();
+            Gson gson = this.registerP2PSyncInfoBuilder();
+            for (P2PSyncInfo myobj : objList) {
+                gson.toJson(myobj, P2PSyncInfo.class, writer);
+            }
+            writer.endArray();
+            writer.close();
+            json = baos.toString("UTF-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 
     public String convertP2PSyncInfoToJson(List<P2PSyncInfo> infos) {

@@ -16,6 +16,7 @@ public class CommunicationThread extends Thread {
     private int listenerErrorSoFarTimes = 0;
 
     public CommunicationThread(CommunicationCallBack callback, int port, int number) {
+        setName("CommunicationThread");
         this.callBack = callback;
         ServerSocket tmp = null;
         listenerErrorSoFarTimes = number;
@@ -32,27 +33,30 @@ public class CommunicationThread extends Thread {
     }
 
     public void run() {
+        try {
+            while(!interrupted()) {
+                if (this.callBack != null) {
+                    Log.i(TAG, "starting to listen");
+                    Socket socket = null;
 
-        if (this.callBack != null) {
-            Log.i(TAG, "starting to listen");
-            Socket socket = null;
-            try {
-                if (mSocket != null) {
-                    socket = mSocket.accept();
-                }
-                if (socket != null) {
-                    Log.i(TAG, "Incoming test-connection");
-                    this.callBack.GotConnection(socket);
-                } else if (!mStopped) {
-                    this.callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
-                }
+                    if (mSocket != null) {
+                        socket = mSocket.accept();
+                    }
+                    if (socket != null) {
+                        Log.i(TAG, "Incoming test-connection");
+                        this.callBack.GotConnection(socket);
+                    } else if (!mStopped) {
+                        this.callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
+                    }
 
-            } catch (Exception e) {
-                if (!mStopped) {
-                    //return failure
-                    Log.i(TAG, "accept socket failed: " + e.toString());
-                    this.callBack.ListeningFailed(e.toString(), this.listenerErrorSoFarTimes);
                 }
+            }
+        } catch (Exception e) {
+            interrupted();
+            if (!mStopped) {
+                //return failure
+                Log.i(TAG, "accept socket failed: " + e.toString());
+                this.callBack.ListeningFailed(e.toString(), this.listenerErrorSoFarTimes);
             }
         }
     }
@@ -60,6 +64,7 @@ public class CommunicationThread extends Thread {
     public void Stop() {
         Log.i(TAG, "communication cancelled");
         mStopped = true;
+        interrupt();
         try {
             if (mSocket != null) {
                 mSocket.close();
@@ -68,5 +73,6 @@ public class CommunicationThread extends Thread {
         } catch (IOException e) {
             Log.i(TAG, "closing socket failed: " + e.toString());
         }
+
     }
 }

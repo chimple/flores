@@ -17,6 +17,7 @@ public class HandShakerThread extends Thread {
     private int triedSoFarTimes = 0;
 
     public HandShakerThread(HandShakeInitiatorCallBack callBack, String address, int port, int trialnum) {
+        setName("HandShakerThread");
         this.mAddress = address;
         this.mPort = port;
         this.callBack = callBack;
@@ -25,15 +26,17 @@ public class HandShakerThread extends Thread {
     }
 
     public void run() {
-        Log.i(TAG, "Starting to connect in HandShakerThread");
-        if (mSocket != null && callBack != null) {
+        while (!interrupted()) {
             try {
-                mSocket.bind(null);
-                mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
-                Log.i(TAG, "called connect on HandShakerThread socket");
-                //return success
-                callBack.Connected(mSocket.getInetAddress(), mSocket.getLocalAddress());
-                Log.i(TAG, "called connected on HandShakerThread callback");
+                Log.i(TAG, "Starting to connect in HandShakerThread");
+                if (mSocket != null && callBack != null) {
+                    mSocket.bind(null);
+                    mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
+                    Log.i(TAG, "called connect on HandShakerThread socket");
+                    //return success
+                    callBack.Connected(mSocket.getInetAddress(), mSocket.getLocalAddress());
+                    Log.i(TAG, "called connected on HandShakerThread callback");
+                }
             } catch (IOException e) {
                 Log.i(TAG, "socket connect failed: " + e.toString());
                 try {
@@ -46,12 +49,14 @@ public class HandShakerThread extends Thread {
                 if (!mStopped) {
                     callBack.ConnectionFailed(e.toString(), triedSoFarTimes);
                 }
+                interrupt();
             }
         }
     }
 
     public void cleanUp() {
         mStopped = true;
+        interrupt();
         try {
             if (mSocket != null) {
                 mSocket.close();
