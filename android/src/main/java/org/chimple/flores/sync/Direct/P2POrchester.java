@@ -153,15 +153,16 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     }
 
     private void startHandShakerThread(String Address, int trialNum) {
+        if (handShakeThread != null){
+            stopHandShakerThread();
+        }
         Log.i(TAG, "startHandShakerThread addreess: " + Address + ", port : " + HandShakeportToUse);
-
         handShakeThread = new HandShakerThread(that, Address, HandShakeportToUse, trialNum);
         handShakeThread.start();
     }
 
     private void stopHandShakerThread() {
         Log.i(TAG, "stopHandShakerThread");
-
         if (handShakeThread != null) {
             handShakeThread.cleanUp();
             handShakeThread = null;
