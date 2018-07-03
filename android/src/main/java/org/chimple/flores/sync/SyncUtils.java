@@ -24,7 +24,7 @@ import org.chimple.flores.sync.NSD.NSDSyncService;
 public class SyncUtils {
 
     public static final int HandShakeportToUse = 38777;
-    public static final String SERVICE_TYPE = "_MAUI_p2p_four._tcp";
+    public static final String SERVICE_TYPE = "_MAUI_p2p_six._tcp";
 
     public enum DiscoveryState {
         NONE,
