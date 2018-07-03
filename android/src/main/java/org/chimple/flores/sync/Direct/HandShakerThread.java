@@ -26,37 +26,33 @@ public class HandShakerThread extends Thread {
     }
 
     public void run() {
-        while (!interrupted()) {
+        try {
+            Log.i(TAG, "Starting to connect in HandShakerThread");
+            if (mSocket != null && callBack != null) {
+                mSocket.bind(null);
+                mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
+                Log.i(TAG, "called connect on HandShakerThread socket");
+                //return success
+                callBack.Connected(mSocket.getInetAddress(), mSocket.getLocalAddress());
+                Log.i(TAG, "called connected on HandShakerThread callback");
+            }
+        } catch (IOException e) {
+            Log.i(TAG, "socket connect failed: " + e.toString());
             try {
-                Log.i(TAG, "Starting to connect in HandShakerThread");
-                if (mSocket != null && callBack != null) {
-                    mSocket.bind(null);
-                    mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
-                    Log.i(TAG, "called connect on HandShakerThread socket");
-                    //return success
-                    callBack.Connected(mSocket.getInetAddress(), mSocket.getLocalAddress());
-                    Log.i(TAG, "called connected on HandShakerThread callback");
+                if (mSocket != null) {
+                    mSocket.close();
                 }
-            } catch (IOException e) {
-                Log.i(TAG, "socket connect failed: " + e.toString());
-                try {
-                    if (mSocket != null) {
-                        mSocket.close();
-                    }
-                } catch (IOException ee) {
-                    Log.i(TAG, "closing socket 2 failed: " + ee.toString());
-                }
-                if (!mStopped) {
-                    callBack.ConnectionFailed(e.toString(), triedSoFarTimes);
-                }
-                interrupt();
+            } catch (IOException ee) {
+                Log.i(TAG, "closing socket 2 failed: " + ee.toString());
+            }
+            if (!mStopped) {
+                callBack.ConnectionFailed(e.toString(), triedSoFarTimes);
             }
         }
     }
 
     public void cleanUp() {
         mStopped = true;
-        interrupt();
         try {
             if (mSocket != null) {
                 mSocket.close();

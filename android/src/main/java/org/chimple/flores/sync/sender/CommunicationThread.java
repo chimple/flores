@@ -34,23 +34,23 @@ public class CommunicationThread extends Thread {
 
     public void run() {
         try {
-            while(!interrupted()) {
-                if (this.callBack != null) {
-                    Log.i(TAG, "starting to listen");
-                    Socket socket = null;
 
-                    if (mSocket != null) {
-                        socket = mSocket.accept();
-                    }
-                    if (socket != null) {
-                        Log.i(TAG, "Incoming test-connection");
-                        this.callBack.GotConnection(socket);
-                    } else if (!mStopped) {
-                        this.callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
-                    }
+            if (this.callBack != null) {
+                Log.i(TAG, "starting to listen");
+                Socket socket = null;
 
+                if (mSocket != null) {
+                    socket = mSocket.accept();
                 }
+                if (socket != null) {
+                    Log.i(TAG, "Incoming test-connection");
+                    this.callBack.GotConnection(socket);
+                } else if (!mStopped) {
+                    this.callBack.ListeningFailed("Socket is null", this.listenerErrorSoFarTimes);
+                }
+
             }
+
         } catch (Exception e) {
             interrupted();
             if (!mStopped) {
@@ -64,7 +64,6 @@ public class CommunicationThread extends Thread {
     public void Stop() {
         Log.i(TAG, "communication cancelled");
         mStopped = true;
-        interrupt();
         try {
             if (mSocket != null) {
                 mSocket.close();

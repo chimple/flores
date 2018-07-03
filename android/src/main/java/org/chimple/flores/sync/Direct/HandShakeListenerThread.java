@@ -31,7 +31,6 @@ public class HandShakeListenerThread extends Thread {
     }
 
     public void run() {
-        while (!interrupted()) {
             try {
                 if (callBack != null) {
                     Log.i(TAG, "starting to listen");
@@ -57,15 +56,12 @@ public class HandShakeListenerThread extends Thread {
                     Log.i(TAG, "HandShakeListenerThread accept socket failed: " + e.toString());
                     callBack.ListeningFailed(e.toString(), this.listenerErrorSoFarTimes);
                 }
-                interrupt();
             }
-        }
     }
 
     public void cleanUp() {
         Log.i(TAG, "cancelled HandShakeListenerThread");
         mStopped = true;
-        interrupt();
         try {
             if (mSocket != null) {
                 Log.i(TAG, "successfully closed HandShakeListenerThread");

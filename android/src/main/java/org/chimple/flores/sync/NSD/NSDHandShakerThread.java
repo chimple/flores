@@ -29,36 +29,33 @@ public class NSDHandShakerThread extends Thread {
     }
 
     public void run() {
-        while (!interrupted()) {
+        try {
+            if (mSocket != null && callBack != null) {
+                mSocket.bind(null);
+                mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
+                Log.i(TAG, "called connect on NSDHandShakerThread socket");
+                //return success
+                callBack.NSDConnected(mSocket.getInetAddress(), mSocket.getLocalAddress());
+                Log.i(TAG, "called connected on NSDHandShakerThread callback");
+            }
+        } catch (Exception e) {
+            Log.i(TAG, "socket connect failed: " + e.toString());
+            interrupt();
             try {
-                if (mSocket != null && callBack != null) {
-                    mSocket.bind(null);
-                    mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
-                    Log.i(TAG, "called connect on NSDHandShakerThread socket");
-                    //return success
-                    callBack.NSDConnected(mSocket.getInetAddress(), mSocket.getLocalAddress());
-                    Log.i(TAG, "called connected on NSDHandShakerThread callback");
+                if (mSocket != null) {
+                    mSocket.close();
                 }
-            } catch (Exception e) {
-                Log.i(TAG, "socket connect failed: " + e.toString());
-                interrupt();
-                try {
-                    if (mSocket != null) {
-                        mSocket.close();
-                    }
-                } catch (IOException ee) {
-                    Log.i(TAG, "closing socket 2 failed: " + ee.toString());
-                }
-                if (!mStopped) {
-                    callBack.NSDConnectionFailed(e.toString(), triedSoFarTimes);
-                }
+            } catch (IOException ee) {
+                Log.i(TAG, "closing socket 2 failed: " + ee.toString());
+            }
+            if (!mStopped) {
+                callBack.NSDConnectionFailed(e.toString(), triedSoFarTimes);
             }
         }
     }
 
     public void cleanUp() {
         mStopped = true;
-        interrupt();
         try {
             if (mSocket != null) {
                 mSocket.close();

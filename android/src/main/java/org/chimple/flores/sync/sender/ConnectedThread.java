@@ -140,31 +140,30 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        while (!interrupted()) {
+        Log.i(TAG, "BTConnectedThread started");
+
+        byte[] buffer = new byte[1048576 * 10];
+        int bytes;
+        StringBuffer sBuffer = null;
+        int count = 0;
+        while (mRunning) {
             try {
-                Log.i(TAG, "BTConnectedThread started");
-                byte[] buffer = new byte[1048576 * 10];
-                int bytes;
-                StringBuffer sBuffer = null;
-                int count = 0;
-                while (mRunning) {
-                    this.initStreamsIfNull();
-                    if (sBuffer == null) {
-                        sBuffer = new StringBuffer();
-                    }
-                    count++;
-                    Log.i(TAG, "BTConnectedThread in readExchangeMessages:" + count);
-                    this.readExchangeMessages(sBuffer, buffer, count);
+                this.initStreamsIfNull();
+                if (sBuffer == null) {
+                    sBuffer = new StringBuffer();
                 }
-                Log.i(TAG, "BTConnectedThread disconnect now !");
+                count++;
+                Log.i(TAG, "BTConnectedThread in readExchangeMessages:" + count);
+                this.readExchangeMessages(sBuffer, buffer, count);
             } catch (Exception e) {
                 Log.e(TAG, "ConnectedThread disconnected: ", e);
                 Stop();
                 mHandler.obtainMessage(SOCKET_DISCONNEDTED, -1, -1, e).sendToTarget();
                 break;
-
             }
         }
+
+        Log.i(TAG, "BTConnectedThread disconnect now !");
     }
 
 
@@ -209,7 +208,6 @@ public class ConnectedThread extends Thread {
 
     public void Stop() {
         mRunning = false;
-        interrupt();
         try {
             if (mmInStream != null) {
                 mmInStream.close();

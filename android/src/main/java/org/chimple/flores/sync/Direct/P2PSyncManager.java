@@ -124,7 +124,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                     instance.mHandler.postDelayed(mStatusChecker, mInterval);
                 }
 
-//                Log.i(TAG, "Will start shutdown job in: " + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
+                Log.i(TAG, "Will start shutdown job in: " + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
 
                 if (totalTimeTillJobStarted > EXIT_CURRENT_JOB_TIME  && !isShutDownJobStarted  && instance != null) {
                     instance.startShutDownTimer();
@@ -412,7 +412,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             updateStatus("Data state", "All addresses connected, will start exit timer now.");
             // lets just see if we get more connections coming in before the timeout comes
             Log.i(TAG, "Data state" + "All addresses connected, will start exit timer now.");
-            this.startConnectorsTimer();
+            this.startShutDownTimer();
         }
     }
 
