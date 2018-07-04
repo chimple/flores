@@ -51,6 +51,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     public static final String allMessageExchangedForP2P = "p2p-all-messages-exchanged";
 
     public P2POrchester(Context context, P2POrchesterCallBack callBack, Handler handler) {
+        Log.i(TAG, "in P2P Orchester constructor");
         this.context = context;
         this.callBack = callBack;
         this.mHandler = handler;
@@ -415,24 +416,29 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     }
 
     public boolean gotPeersList(Collection<WifiP2pDevice> list) {
-
         boolean cont = true;
-        if (mWifiConnection != null) {
-            Log.i(TAG, "gotPeersList, while connecting!!");
-            cont = false;
-        } else {
-            this.serviceFoundTimeOutTimer.cancel();
-            this.serviceFoundTimeOutTimer.start();
-            Log.i(TAG + " SS:", "Found " + list.size() + " peers.");
-            int numm = 0;
-            for (WifiP2pDevice peer : list) {
-                numm++;
-                Log.i(TAG + " SS:", "Peer(" + numm + "): " + peer.deviceName + " " + peer.deviceAddress);
+        try {
+            if (mWifiConnection != null) {
+                Log.i(TAG, "gotPeersList, while connecting!!");
+                cont = false;
+            } else {
+                this.serviceFoundTimeOutTimer.cancel();
+                this.serviceFoundTimeOutTimer.start();
+                Log.i(TAG + " SS:", "Found " + list.size() + " peers.");
+                int numm = 0;
+                for (WifiP2pDevice peer : list) {
+                    numm++;
+                    Log.i(TAG + " SS:", "Peer(" + numm + "): " + peer.deviceName + " " + peer.deviceAddress);
+                }
+    
+                setConnectionState(SyncUtils.ConnectionState.FindingServices);
             }
-
-            setConnectionState(SyncUtils.ConnectionState.FindingServices);
+            return cont;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i(TAG, e.getMessage());
+            return false;
         }
-        return cont;
     }
 
     @Override

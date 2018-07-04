@@ -140,23 +140,22 @@ public class P2PServiceFinder {
         };
 
         wifiP2pManager.setDnsSdResponseListeners(channel, serviceListener, null);
+        startPeerDiscovery();
     }
 
     private void initTimers() {
 
-        this.discoverServiceTimeOutTimer = new CountDownTimer(30000, 1000) {
+        this.discoverServiceTimeOutTimer = new CountDownTimer(60000, 1000) {
             public void onTick(long millisUntilFinished) {
                 // not using
             }
 
             public void onFinish() {
                 stopDiscovery();
-//                startPeerDiscovery();
                 startServiceDiscovery();
             }
         };
-
-        long millisInFuture = 3000 + (new Random(System.currentTimeMillis()).nextInt(1000));
+        long millisInFuture = 5000 + (new Random(System.currentTimeMillis()).nextInt(5000));
         Log.i(TAG, "peerDiscoveryTimer timeout value:" + millisInFuture);
         this.peerDiscoveryTimer = new CountDownTimer(millisInFuture, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -168,7 +167,6 @@ public class P2PServiceFinder {
                 if (that.callBack != null) {
                     stopDiscovery();
                     that.callBack.processServiceList(serviceList);
-//                    that.callBack.gotServicesList(serviceList);
                     that.callBack.foundNeighboursList(serviceList);
                 } else {
                     startPeerDiscovery();
@@ -340,5 +338,4 @@ public class P2PServiceFinder {
     public void setHighPriorityServiceList(List<P2PSyncService> highPriorityServiceList) {
         this.highPriorityServiceList = highPriorityServiceList;
     }
-
 }

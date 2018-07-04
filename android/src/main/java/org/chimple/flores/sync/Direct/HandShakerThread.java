@@ -26,27 +26,27 @@ public class HandShakerThread extends Thread {
     }
 
     public void run() {
-        try {
-            Log.i(TAG, "Starting to connect in HandShakerThread");
-            if (mSocket != null && callBack != null) {
+        if (mSocket != null && callBack != null) {
+            try {
                 mSocket.bind(null);
                 mSocket.connect(new InetSocketAddress(mAddress, mPort), 5000);
                 Log.i(TAG, "called connect on HandShakerThread socket");
                 //return success
                 callBack.Connected(mSocket.getInetAddress(), mSocket.getLocalAddress());
                 Log.i(TAG, "called connected on HandShakerThread callback");
-            }
-        } catch (IOException e) {
-            Log.i(TAG, "socket connect failed: " + e.toString());
-            try {
-                if (mSocket != null) {
-                    mSocket.close();
+
+            } catch (IOException e) {
+                Log.i(TAG, "socket connect failed: " + e.toString());
+                try {
+                    if (mSocket != null) {
+                        mSocket.close();
+                    }
+                } catch (IOException ee) {
+                    Log.i(TAG, "closing socket 2 failed: " + ee.toString());
                 }
-            } catch (IOException ee) {
-                Log.i(TAG, "closing socket 2 failed: " + ee.toString());
-            }
-            if (!mStopped) {
-                callBack.ConnectionFailed(e.toString(), triedSoFarTimes);
+                if (!mStopped) {
+                    callBack.ConnectionFailed(e.toString(), triedSoFarTimes);
+                }
             }
         }
     }
