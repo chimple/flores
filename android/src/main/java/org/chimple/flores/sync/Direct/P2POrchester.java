@@ -74,7 +74,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
 
     private void initialize() {
-        cleanUp();
+//        cleanUp();
         //initialize the system, and
         // make sure Wifi is enabled before we start running
         mWifiBase = new P2PBase(this.context, this);

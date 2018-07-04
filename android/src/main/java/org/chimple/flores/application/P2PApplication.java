@@ -13,9 +13,9 @@ public class P2PApplication extends Application {
     public static AppDatabase db;
     // public static boolean addOnceMessages = false;
 
-    public static int REGULAR_JOB_TIMINGS_FOR_MIN_LATENCY = 60 * 1000; // 60 seconds
-    public static int REGULAR_JOB_TIMINGS_FOR_PERIOD = 60 * 1000;
-    public static int IMMEDIATE_JOB_TIMINGS = 60 * 1000;
+    public static int REGULAR_JOB_TIMINGS_FOR_MIN_LATENCY = 30 * 1000; // 60 seconds
+    public static int REGULAR_JOB_TIMINGS_FOR_PERIOD = 30 * 1000;
+    public static int IMMEDIATE_JOB_TIMINGS = 5 * 1000;
 
     @Override
     public void onCreate() {
