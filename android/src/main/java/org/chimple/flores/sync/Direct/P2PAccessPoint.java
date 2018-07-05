@@ -351,6 +351,10 @@ public class P2PAccessPoint implements HandShakeListenerCallBack, WifiP2pManager
                     wifiP2pManager.requestConnectionInfo(channel, that);
                 } else {
                     Log.i(TAG, "We are DIS-connected");
+                    if (mHandShakeListenerThread != null) {
+                        mHandShakeListenerThread.cleanUp();
+                        mHandShakeListenerThread = null;
+                    }
                 }
             }
         }
