@@ -44,6 +44,7 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
 
 
     private void initialize() {
+        // this cleanUp function can be removed if socket null error occurs.
         cleanUp();
         if (SyncUtils.isWifiConnected(this.context)) {
             setConnectionState(SyncUtils.ConnectionState.WaitingStateChange);
