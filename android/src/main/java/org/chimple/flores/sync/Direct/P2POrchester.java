@@ -8,6 +8,7 @@ import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -58,7 +59,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
         this.connectionState = SyncUtils.ConnectionState.NotInitialized;
         this.reportingState = SyncUtils.ReportingState.NotInitialized;
 
-        this.serviceFoundTimeOutTimer = new CountDownTimer(600000, 1000) {
+        this.serviceFoundTimeOutTimer = new CountDownTimer(240000, 1000) {
             public void onTick(long millisUntilFinished) {
                 // not using
             }
@@ -98,7 +99,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
     public void cleanUp() {
         Log.i(TAG, "Stopping all");
-        if(mWifiAccessPoint != null && mWifiAccessPoint.getmHandShakeListenerThread() != null) {
+        if (mWifiAccessPoint != null && mWifiAccessPoint.getmHandShakeListenerThread() != null) {
             mWifiAccessPoint.getmHandShakeListenerThread().cleanUp();
         }
         stopHandShakerThread();
@@ -154,7 +155,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     }
 
     private void startHandShakerThread(String Address, int trialNum) {
-        if (handShakeThread != null){
+        if (handShakeThread != null) {
             stopHandShakerThread();
         }
         Log.i(TAG, "startHandShakerThread addreess: " + Address + ", port : " + HandShakeportToUse);
@@ -379,7 +380,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                     Log.i(TAG, "Selecting from deviceIds: " + deviceIds);
                     P2PSyncDeviceStatus status = api.getLatestDeviceToSyncFromDevices(deviceIds);
                     P2PSyncService selItem = null;
-                    if(status != null) {
+                    if (status != null) {
                         Log.i(TAG, "Selected device: " + status.print());
                         selItem = serviceList.get(status.deviceId);
                         if (selItem != null) {
@@ -397,7 +398,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                             final String networkSSID = separated[2];
                             final String networkPass = separated[3];
                             final String ipAddress = separated[4];
-                            P2PSyncManager.CURRENT_CONNECTED_DEVICE = deviceUUID;                            
+                            P2PSyncManager.CURRENT_CONNECTED_DEVICE = deviceUUID;
 
                             Log.i(TAG, "Starting to connect now.");
                             mWifiConnection = new P2PWifiConnector(that.context, that);
@@ -423,15 +424,25 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                 Log.i(TAG, "gotPeersList, while connecting!!");
                 cont = false;
             } else {
-                this.serviceFoundTimeOutTimer.cancel();
-                this.serviceFoundTimeOutTimer.start();
+                if (that.serviceFoundTimeOutTimer != null) {
+                    that.serviceFoundTimeOutTimer.cancel();
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        boolean shouldStart = false;
+
+                        @Override
+                        public void run() {
+                            that.serviceFoundTimeOutTimer.start();
+                        }
+                    });
+                }
+
                 Log.i(TAG + " SS:", "Found " + list.size() + " peers.");
                 int numm = 0;
                 for (WifiP2pDevice peer : list) {
                     numm++;
                     Log.i(TAG + " SS:", "Peer(" + numm + "): " + peer.deviceName + " " + peer.deviceAddress);
                 }
-    
+
                 setConnectionState(SyncUtils.ConnectionState.FindingServices);
             }
             return cont;

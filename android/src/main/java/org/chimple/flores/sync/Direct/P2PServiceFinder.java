@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -83,25 +84,31 @@ public class P2PServiceFinder {
                 synchronized (wifiP2pDeviceLock) {
                     wifiP2pDeviceList = peers;
                 }
-
-                if (wifiP2pDeviceList.getDeviceList().size() > 0) {
-                    if (discoveryState != SyncUtils.DiscoveryState.DiscoverService) {
-                        boolean doContinue = true;
-                        if (callBack != null) {
-                            doContinue = callBack.gotPeersList(wifiP2pDeviceList.getDeviceList());
-                        }
-                        if (doContinue) {
-                            if (that.discoverServiceTimeOutTimer != null) {
-                                that.discoverServiceTimeOutTimer.start();
-                            }
-                            startServiceDiscovery();
-                        } else {
-                            if (discoverServiceTimeOutTimer != null) {
-                                that.discoverServiceTimeOutTimer.cancel();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    boolean shouldStart = false;
+                    @Override
+                    public void run() {
+                        if (wifiP2pDeviceList.getDeviceList().size() > 0) {
+                            if (discoveryState != SyncUtils.DiscoveryState.DiscoverService) {
+                                boolean doContinue = true;
+                                if (callBack != null) {
+                                    doContinue = callBack.gotPeersList(wifiP2pDeviceList.getDeviceList());
+                                }
+                                if (doContinue) {
+                                    if (that.discoverServiceTimeOutTimer != null) {
+                                        that.discoverServiceTimeOutTimer.start();
+                                    }
+                                    startServiceDiscovery();
+                                } else {
+                                    if (discoverServiceTimeOutTimer != null) {
+                                        that.discoverServiceTimeOutTimer.cancel();
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                });
+
             }
         };
     }
@@ -215,15 +222,27 @@ public class P2PServiceFinder {
             }
 
             public void onFailure(int reason) {
-                discoveryState = SyncUtils.DiscoveryState.NONE;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    boolean shouldStart = false;
+                    @Override
+                    public void run() {
+                        discoveryState = SyncUtils.DiscoveryState.NONE;
+                    }
+                });
                 Log.i(TAG, "Starting peer discovery failed, error code " + reason);
                 if (reason == 2){
                     stopPeerDiscovery();
                 }
                 //lets try again after 1 minute time-out !
-                if (that.discoverServiceTimeOutTimer != null) {
-                    that.discoverServiceTimeOutTimer.start();
-                }
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    boolean shouldStart = false;
+                    @Override
+                    public void run() {
+                        if (that.discoverServiceTimeOutTimer != null) {
+                            that.discoverServiceTimeOutTimer.start();
+                        }
+                    }
+                });
             }
         });
     }
