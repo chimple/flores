@@ -16,6 +16,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.chimple.flores.sync.SyncUtils;
 
@@ -48,8 +50,14 @@ public class P2PServiceFinder {
     private final WifiConnectionUpdateCallBack callBack;
 
     // Timers
-    private CountDownTimer peerDiscoveryTimer = null;
-    private CountDownTimer discoverServiceTimeOutTimer = null;
+//    private CountDownTimer peerDiscoveryTimer = null;
+//    private CountDownTimer discoverServiceTimeOutTimer = null;
+
+    private TimerTask peerDiscoveryTimerTask;
+    private Timer peerDiscoverTimer;
+
+    private TimerTask discoverServiceTimeOutTimerTask;
+    private Timer discoverServiceTimeOutTimer;
 
     private SyncUtils.DiscoveryState discoveryState = SyncUtils.DiscoveryState.NONE;
 
@@ -84,31 +92,28 @@ public class P2PServiceFinder {
                 synchronized (wifiP2pDeviceLock) {
                     wifiP2pDeviceList = peers;
                 }
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    boolean shouldStart = false;
-                    @Override
-                    public void run() {
-                        if (wifiP2pDeviceList.getDeviceList().size() > 0) {
-                            if (discoveryState != SyncUtils.DiscoveryState.DiscoverService) {
-                                boolean doContinue = true;
-                                if (callBack != null) {
-                                    doContinue = callBack.gotPeersList(wifiP2pDeviceList.getDeviceList());
-                                }
-                                if (doContinue) {
-                                    if (that.discoverServiceTimeOutTimer != null) {
-                                        that.discoverServiceTimeOutTimer.start();
-                                    }
-                                    startServiceDiscovery();
-                                } else {
-                                    if (discoverServiceTimeOutTimer != null) {
-                                        that.discoverServiceTimeOutTimer.cancel();
-                                    }
-                                }
+
+                if (wifiP2pDeviceList.getDeviceList().size() > 0) {
+                    if (discoveryState != SyncUtils.DiscoveryState.DiscoverService) {
+                        boolean doContinue = true;
+                        if (callBack != null) {
+                            doContinue = callBack.gotPeersList(wifiP2pDeviceList.getDeviceList());
+                        }
+                        if (doContinue) {
+                            if (that.discoverServiceTimeOutTimer != null) {
+                                that.discoverServiceTimeOutTimer.cancel();
+                            }
+                            that.discoverServiceTimeOutTimer = new Timer();
+                            that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
+                            that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
+                            startServiceDiscovery();
+                        } else {
+                            if (discoverServiceTimeOutTimer != null) {
+                                that.discoverServiceTimeOutTimer.cancel();
                             }
                         }
                     }
-                });
-
+                }
             }
         };
     }
@@ -135,14 +140,23 @@ public class P2PServiceFinder {
                     Log.i(TAG, "Not our Service, :" + SERVICE_TYPE + "!=" + serviceType + ":");
                 }
 
-                if (that.discoverServiceTimeOutTimer!=null){
+                if (that.discoverServiceTimeOutTimer != null) {
                     that.discoverServiceTimeOutTimer.cancel();
                 }
-                if (peerDiscoveryTimer!=null){
-                    peerDiscoveryTimer.cancel();
-                    peerDiscoveryTimer.start();
+//                if (peerDiscoveryTimer!=null){
+//                    peerDiscoveryTimer.cancel();
+//                    peerDiscoveryTimer.start();
+//                }
+
+
+                if (peerDiscoverTimer != null) {
+                    peerDiscoverTimer.cancel();
                 }
 
+                that.peerDiscoverTimer = new Timer();
+                that.peerDiscoveryTimerTask = that.createPeerDiscoveryTimerTask();
+                long millisInFuture = 5000 + (new Random(System.currentTimeMillis()).nextInt(5000));
+                peerDiscoverTimer.schedule(that.peerDiscoveryTimerTask, millisInFuture);
             }
         };
 
@@ -150,26 +164,21 @@ public class P2PServiceFinder {
         startPeerDiscovery();
     }
 
-    private void initTimers() {
-
-        this.discoverServiceTimeOutTimer = new CountDownTimer(60000, 1000) {
-            public void onTick(long millisUntilFinished) {
-                // not using
-            }
-
-            public void onFinish() {
-                stopDiscovery();
-                startServiceDiscovery();
+    private TimerTask createDiscoverServiceTask() {
+        return  new TimerTask() {
+            @Override
+            public void run() {
+                that.stopDiscovery();
+                that.startServiceDiscovery();
             }
         };
-        long millisInFuture = 5000 + (new Random(System.currentTimeMillis()).nextInt(5000));
-        Log.i(TAG, "peerDiscoveryTimer timeout value:" + millisInFuture);
-        this.peerDiscoveryTimer = new CountDownTimer(millisInFuture, 1000) {
-            public void onTick(long millisUntilFinished) {
-                // not using
-            }
+    }
 
-            public void onFinish() {
+    private TimerTask createPeerDiscoveryTimerTask() {
+        return  new TimerTask() {
+            @Override
+            public void run() {
+                Log.i(TAG, "serviceFoundTimeOutTimerTask starting....");
                 discoveryState = SyncUtils.DiscoveryState.NONE;
                 if (that.callBack != null) {
                     stopDiscovery();
@@ -180,6 +189,37 @@ public class P2PServiceFinder {
                 }
             }
         };
+    }
+
+    private void initTimers() {
+
+//        this.discoverServiceTimeOutTimer = new CountDownTimer(60000, 1000) {
+//            public void onTick(long millisUntilFinished) {
+//                // not using
+//            }
+//
+//            public void onFinish() {
+//                stopDiscovery();
+//                startServiceDiscovery();
+//            }
+//        };
+
+//        this.peerDiscoveryTimer = new CountDownTimer(millisInFuture, 1000) {
+//            public void onTick(long millisUntilFinished) {
+//                // not using
+//            }
+//
+//            public void onFinish() {
+//                discoveryState = SyncUtils.DiscoveryState.NONE;
+//                if (that.callBack != null) {
+//                    stopDiscovery();
+//                    that.callBack.processServiceList(serviceList);
+//                    that.callBack.foundNeighboursList(serviceList);
+//                } else {
+//                    startPeerDiscovery();
+//                }
+//            }
+//        };
 
     }
 
@@ -206,10 +246,16 @@ public class P2PServiceFinder {
 
     public void cleanUp() {
         this.unregisterP2PServiceFinderReceiver();
-        this.discoverServiceTimeOutTimer.cancel();
+        if(this.discoverServiceTimeOutTimer != null) {
+            this.discoverServiceTimeOutTimer.cancel();
+        }
         this.discoverServiceTimeOutTimer = null;
-        this.peerDiscoveryTimer.cancel();
-        this.peerDiscoveryTimer = null;
+        //this.peerDiscoveryTimer.cancel();
+        //this.peerDiscoveryTimer = null;
+        if(this.peerDiscoverTimer != null) {
+            this.peerDiscoverTimer.cancel();
+        }
+        this.peerDiscoverTimer = null;
         this.stopDiscovery();
         this.stopPeerDiscovery();
     }
@@ -222,27 +268,19 @@ public class P2PServiceFinder {
             }
 
             public void onFailure(int reason) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    boolean shouldStart = false;
-                    @Override
-                    public void run() {
-                        discoveryState = SyncUtils.DiscoveryState.NONE;
-                    }
-                });
+                discoveryState = SyncUtils.DiscoveryState.NONE;
                 Log.i(TAG, "Starting peer discovery failed, error code " + reason);
-                if (reason == 2){
+                if (reason == 2) {
                     stopPeerDiscovery();
                 }
                 //lets try again after 1 minute time-out !
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    boolean shouldStart = false;
-                    @Override
-                    public void run() {
-                        if (that.discoverServiceTimeOutTimer != null) {
-                            that.discoverServiceTimeOutTimer.start();
-                        }
-                    }
-                });
+
+                if (that.discoverServiceTimeOutTimer != null) {
+                    that.discoverServiceTimeOutTimer.cancel();
+                }
+                that.discoverServiceTimeOutTimer = new Timer();
+                that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
+                that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
             }
         });
     }
@@ -264,7 +302,7 @@ public class P2PServiceFinder {
         discoveryState = SyncUtils.DiscoveryState.DiscoverService;
 
         WifiP2pDnsSdServiceRequest request = WifiP2pDnsSdServiceRequest.newInstance(SERVICE_TYPE);
-        final Handler handler = new Handler();
+        final Handler handler = new Handler(Looper.getMainLooper());
         wifiP2pManager.addServiceRequest(channel, request, new WifiP2pManager.ActionListener() {
 
             public void onSuccess() {
@@ -286,9 +324,13 @@ public class P2PServiceFinder {
                                     discoveryState = SyncUtils.DiscoveryState.NONE;
                                     Log.i(TAG, "Starting service discovery failed, error code " + reason);
                                     //lets try again after 1 minute time-out !
+
                                     if (that.discoverServiceTimeOutTimer != null) {
-                                        that.discoverServiceTimeOutTimer.start();
+                                        that.discoverServiceTimeOutTimer.cancel();
                                     }
+                                    that.discoverServiceTimeOutTimer = new Timer();
+                                    that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
+                                    that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
                                 } catch (Exception e) {
                                     Log.e(TAG, e.getMessage());
                                 }
@@ -302,7 +344,12 @@ public class P2PServiceFinder {
                 discoveryState = SyncUtils.DiscoveryState.NONE;
                 Log.i(TAG, "Adding service request failed, error code " + reason);
                 //lets try again after 1 minute time-out !
-                that.discoverServiceTimeOutTimer.start();
+                if (that.discoverServiceTimeOutTimer != null) {
+                    that.discoverServiceTimeOutTimer.cancel();
+                }
+                that.discoverServiceTimeOutTimer = new Timer();
+                that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
+                that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
             }
         });
 

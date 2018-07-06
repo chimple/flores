@@ -10,6 +10,9 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.os.Handler;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.chimple.flores.sync.SyncUtils;
 
@@ -31,7 +34,9 @@ public class P2PWifiConnector {
     int netId = 0;
     private WifiConnectionUpdateCallBack callBack;
     P2PWifiConnectorReceiver receiver;
-    private CountDownTimer connectionTimeOutTimer;
+    //private CountDownTimer connectionTimeOutTimer;
+    private Timer connectionTimeOutTimer;
+    private TimerTask connectionTimeOutTimerTask;
 
     String inetAddress = "";
 
@@ -50,7 +55,10 @@ public class P2PWifiConnector {
     private void init() {
         this.wifiManager = (WifiManager) this.context.getSystemService(Context.WIFI_SERVICE);
         this.registerP2PWifiConnectorReceiver();
-        this.connectionTimeOutTimer = this.setConnectionTimeOutTimer();
+
+        //that.connectionTimeOutTimer = that.setConnectionTimeOutTimer();
+
+
     }
 
     private void registerP2PWifiConnectorReceiver() {
@@ -95,14 +103,24 @@ public class P2PWifiConnector {
         this.wifiManager.disconnect();
         this.wifiManager.enableNetwork(this.netId, true);
         this.wifiManager.reconnect();
-        if (this.connectionTimeOutTimer!=null){
-            this.connectionTimeOutTimer.start();
-        }
+        this.connectionTimeOutTimer = new Timer();
+        that.connectionTimeOutTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                Log.i(TAG, "Cancelling the connection with timeout");
+                mConectionState = SyncUtils.SyncHandShakeState.Disconnected;
+                that.setCurrentlyTryingToConnectService(null);
+                that.callBack.connectionStatusChanged(mConectionState, null, 0, null);
 
+            }
+        };
+        connectionTimeOutTimer.schedule(that.connectionTimeOutTimerTask, 60 * 1000);
     }
 
     public void cleanUp(boolean disconnect) {
-        this.connectionTimeOutTimer.cancel();
+        if (this.connectionTimeOutTimer != null) {
+            this.connectionTimeOutTimer.cancel();
+        }
         this.connectionTimeOutTimer = null;
         this.unregisterP2PWifiConnectorReceiver();
         if (disconnect) {
@@ -139,7 +157,7 @@ public class P2PWifiConnector {
             NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             if (info != null) {
                 if (info.isConnected()) {
-                    if(this.connectionTimeOutTimer!=null){
+                    if (this.connectionTimeOutTimer != null) {
                         this.connectionTimeOutTimer.cancel();
                     }
                     this.hadConnected = true;
@@ -153,7 +171,7 @@ public class P2PWifiConnector {
                         mConectionState = SyncUtils.SyncHandShakeState.PreConnecting;
                     }
                 }
-                this.callBack.connectionStatusChanged(mConectionState, info.getDetailedState(), 0, this.getCurrentlyTryingToConnectService() );
+                this.callBack.connectionStatusChanged(mConectionState, info.getDetailedState(), 0, this.getCurrentlyTryingToConnectService());
 
             }
 

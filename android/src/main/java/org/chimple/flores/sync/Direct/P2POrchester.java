@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.chimple.flores.db.P2PDBApi;
 import org.chimple.flores.db.P2PDBApiImpl;
@@ -46,7 +48,9 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     private P2POrchesterCallBack callBack = null;
     private Context context = null;
     private Handler mHandler = null;
-    private CountDownTimer serviceFoundTimeOutTimer;
+    // private CountDownTimer serviceFoundTimeOutTimer;
+    private TimerTask serviceFoundTimeOutTimerTask;
+    private Timer serviceFoundTimer;
 
     public static final String neighboursUpdateEvent = "neighbours-update-event";
     public static final String allMessageExchangedForP2P = "p2p-all-messages-exchanged";
@@ -59,23 +63,24 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
         this.connectionState = SyncUtils.ConnectionState.NotInitialized;
         this.reportingState = SyncUtils.ReportingState.NotInitialized;
 
-        this.serviceFoundTimeOutTimer = new CountDownTimer(240000, 1000) {
-            public void onTick(long millisUntilFinished) {
-                // not using
-            }
+//        this.serviceFoundTimeOutTimer = new CountDownTimer(4 * 60 * 1000, 1000) {
+//            public void onTick(long millisUntilFinished) {
+//                // not using
+//            }
+//
+//            public void onFinish() {
+//                Log.i(TAG, "serviceFoundTimeOutTimer timeout");
+//                reStartTheSearch();
+//            }
+//        };
 
-            public void onFinish() {
-                Log.i(TAG, "serviceFoundTimeOutTimer timeout");
-                reStartTheSearch();
-            }
-        };
 
         this.initialize();
     }
 
 
     private void initialize() {
-//        cleanUp();
+        cleanUp();
         //initialize the system, and
         // make sure Wifi is enabled before we start running
         mWifiBase = new P2PBase(this.context, this);
@@ -118,7 +123,13 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     }
 
     private void reStartTheSearch() {
-        this.serviceFoundTimeOutTimer.cancel();
+//        if (this.serviceFoundTimeOutTimer != null) {
+//            this.serviceFoundTimeOutTimer.cancel();
+//        }
+
+        if (this.serviceFoundTimer != null) {
+            this.serviceFoundTimer.cancel();
+        }
         //to get fresh situation, lets close all stuff before continuing
         this.stopServiceSearcher();
         this.reInitializeServiceFinder();
@@ -155,16 +166,15 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     }
 
     private void startHandShakerThread(String Address, int trialNum) {
-        if (handShakeThread != null) {
-            stopHandShakerThread();
-        }
         Log.i(TAG, "startHandShakerThread addreess: " + Address + ", port : " + HandShakeportToUse);
+
         handShakeThread = new HandShakerThread(that, Address, HandShakeportToUse, trialNum);
         handShakeThread.start();
     }
 
     private void stopHandShakerThread() {
         Log.i(TAG, "stopHandShakerThread");
+
         if (handShakeThread != null) {
             handShakeThread.cleanUp();
             handShakeThread = null;
@@ -192,9 +202,10 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
     private void stopServiceSearcher() {
         Log.i(TAG, "stopServiceSearcher");
-        if (this.serviceFoundTimeOutTimer != null) {
-            this.serviceFoundTimeOutTimer.cancel();
-        }
+
+//        if (this.serviceFoundTimeOutTimer != null) {
+//            this.serviceFoundTimeOutTimer.cancel();
+//        }
 
         if (mWifiServiceSearcher != null) {
             mWifiServiceSearcher.cleanUp();
@@ -398,6 +409,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                             final String networkSSID = separated[2];
                             final String networkPass = separated[3];
                             final String ipAddress = separated[4];
+
                             P2PSyncManager.CURRENT_CONNECTED_DEVICE = deviceUUID;
 
                             Log.i(TAG, "Starting to connect now.");
@@ -418,39 +430,34 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
     }
 
     public boolean gotPeersList(Collection<WifiP2pDevice> list) {
+
         boolean cont = true;
-        try {
-            if (mWifiConnection != null) {
-                Log.i(TAG, "gotPeersList, while connecting!!");
-                cont = false;
-            } else {
-                if (that.serviceFoundTimeOutTimer != null) {
-                    that.serviceFoundTimeOutTimer.cancel();
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        boolean shouldStart = false;
-
-                        @Override
-                        public void run() {
-                            that.serviceFoundTimeOutTimer.start();
-                        }
-                    });
-                }
-
-                Log.i(TAG + " SS:", "Found " + list.size() + " peers.");
-                int numm = 0;
-                for (WifiP2pDevice peer : list) {
-                    numm++;
-                    Log.i(TAG + " SS:", "Peer(" + numm + "): " + peer.deviceName + " " + peer.deviceAddress);
-                }
-
-                setConnectionState(SyncUtils.ConnectionState.FindingServices);
+        if (mWifiConnection != null) {
+            Log.i(TAG, "gotPeersList, while connecting!!");
+            cont = false;
+        } else {
+            if (that.serviceFoundTimer != null) {
+                that.serviceFoundTimer.cancel();
             }
-            return cont;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.i(TAG, e.getMessage());
-            return false;
+            that.serviceFoundTimer = new Timer();
+            this.serviceFoundTimeOutTimerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    Log.i(TAG, "serviceFoundTimeOutTimerTask starting....");
+                    reStartTheSearch();
+                }
+            };
+            that.serviceFoundTimer.schedule(that.serviceFoundTimeOutTimerTask, 4 * 60 * 1000);
+            Log.i(TAG + " SS:", "Found " + list.size() + " peers.");
+            int numm = 0;
+            for (WifiP2pDevice peer : list) {
+                numm++;
+                Log.i(TAG + " SS:", "Peer(" + numm + "): " + peer.deviceName + " " + peer.deviceAddress);
+            }
+
+            setConnectionState(SyncUtils.ConnectionState.FindingServices);
         }
+        return cont;
     }
 
     @Override
