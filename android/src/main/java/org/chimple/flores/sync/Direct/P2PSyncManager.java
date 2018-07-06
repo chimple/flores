@@ -58,8 +58,8 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     private ConnectToThread mTestConnectToThread = null;
     private ConnectedThread mTestConnectedThread = null;
     final private int TestChatPortNumber = 8768;
-    private Handler mHandler;
-    private HandlerThread handlerThread;
+    private static Handler mHandler;
+    private static HandlerThread handlerThread;
     private P2PStateFlow p2PStateFlow;
     private DBSyncManager dbSyncManager;
     private boolean shouldInitiate;
@@ -352,7 +352,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         stopConnectedThread();
         stopConnectToThread();
         stopListenerThread();
-
+        instance.mHandler.removeCallbacks(mStatusChecker);
         if (mWDConnector != null) {
             mWDConnector.cleanUp();
             mWDConnector = null;
