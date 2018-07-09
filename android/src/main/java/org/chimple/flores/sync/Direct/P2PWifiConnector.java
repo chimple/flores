@@ -71,7 +71,6 @@ public class P2PWifiConnector {
     private void unregisterP2PWifiConnectorReceiver() {
         if (receiver != null) {
             this.context.unregisterReceiver(receiver);
-            receiver = null;
         }
 
     }

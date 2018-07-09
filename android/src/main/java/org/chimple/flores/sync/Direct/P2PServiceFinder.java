@@ -66,6 +66,7 @@ public class P2PServiceFinder {
     private Object wifiP2pDeviceLock = new Object();
 
     public P2PServiceFinder(Context context, WifiP2pManager wifiP2pManager, WifiP2pManager.Channel Channel, WifiConnectionUpdateCallBack callBack, String serviceType) {
+        Log.i(TAG,"P2PServiceFinder constructor");
         this.that = this;
         this.context = context;
         this.wifiP2pManager = wifiP2pManager;
@@ -242,7 +243,6 @@ public class P2PServiceFinder {
     private void unregisterP2PServiceFinderReceiver() {
         if (receiver != null) {
             this.context.unregisterReceiver(receiver);
-            receiver = null;
         }
 
     }

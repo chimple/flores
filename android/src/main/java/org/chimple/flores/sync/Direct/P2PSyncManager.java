@@ -323,7 +323,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                                     result.putExtra(JOB_PARAMS, currentJobParams);
                                     LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
                                 }
-                            }, 1000);
+                            }, 5000);
                         }
                     };
 
