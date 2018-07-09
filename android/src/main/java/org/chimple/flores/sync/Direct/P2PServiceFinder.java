@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import org.chimple.flores.sync.SyncUtils;
 
@@ -103,7 +104,8 @@ public class P2PServiceFinder {
                             if (that.discoverServiceTimeOutTimer != null) {
                                 that.discoverServiceTimeOutTimer.cancel();
                             }
-                            that.discoverServiceTimeOutTimer = new Timer();
+                            that.discoverServiceTimeOutTimer = null;
+                            that.discoverServiceTimeOutTimer = new Timer("discover Service Timer" + UUID.randomUUID());
                             that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
                             that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
                             startServiceDiscovery();
@@ -111,6 +113,7 @@ public class P2PServiceFinder {
                             if (discoverServiceTimeOutTimer != null) {
                                 that.discoverServiceTimeOutTimer.cancel();
                             }
+                            that.discoverServiceTimeOutTimer = null;
                         }
                     }
                 }
@@ -143,17 +146,21 @@ public class P2PServiceFinder {
                 if (that.discoverServiceTimeOutTimer != null) {
                     that.discoverServiceTimeOutTimer.cancel();
                 }
+
+                that.discoverServiceTimeOutTimer = null;
 //                if (peerDiscoveryTimer!=null){
 //                    peerDiscoveryTimer.cancel();
 //                    peerDiscoveryTimer.start();
 //                }
 
 
-                if (peerDiscoverTimer != null) {
-                    peerDiscoverTimer.cancel();
+                if (that.peerDiscoverTimer != null) {
+                    that.peerDiscoverTimer.cancel();
                 }
+                that.peerDiscoverTimer = null;
 
-                that.peerDiscoverTimer = new Timer();
+                that.peerDiscoverTimer = new Timer("Peer discover Timer" + UUID.randomUUID());
+
                 that.peerDiscoveryTimerTask = that.createPeerDiscoveryTimerTask();
                 long millisInFuture = 5000 + (new Random(System.currentTimeMillis()).nextInt(5000));
                 peerDiscoverTimer.schedule(that.peerDiscoveryTimerTask, millisInFuture);
@@ -165,7 +172,7 @@ public class P2PServiceFinder {
     }
 
     private TimerTask createDiscoverServiceTask() {
-        return  new TimerTask() {
+        return new TimerTask() {
             @Override
             public void run() {
                 that.stopDiscovery();
@@ -175,7 +182,7 @@ public class P2PServiceFinder {
     }
 
     private TimerTask createPeerDiscoveryTimerTask() {
-        return  new TimerTask() {
+        return new TimerTask() {
             @Override
             public void run() {
                 Log.i(TAG, "serviceFoundTimeOutTimerTask starting....");
@@ -246,13 +253,22 @@ public class P2PServiceFinder {
 
     public void cleanUp() {
         this.unregisterP2PServiceFinderReceiver();
-        if(this.discoverServiceTimeOutTimer != null) {
+
+        if (this.discoverServiceTimeOutTimerTask != null) {
+            this.discoverServiceTimeOutTimerTask.cancel();
+        }
+        this.discoverServiceTimeOutTimerTask = null;
+
+        if (this.discoverServiceTimeOutTimer != null) {
             this.discoverServiceTimeOutTimer.cancel();
         }
         this.discoverServiceTimeOutTimer = null;
-        //this.peerDiscoveryTimer.cancel();
-        //this.peerDiscoveryTimer = null;
-        if(this.peerDiscoverTimer != null) {
+
+        if (this.peerDiscoveryTimerTask != null) {
+            this.peerDiscoveryTimerTask.cancel();
+        }
+        this.peerDiscoveryTimerTask = null;
+        if (this.peerDiscoverTimer != null) {
             this.peerDiscoverTimer.cancel();
         }
         this.peerDiscoverTimer = null;
@@ -404,4 +420,5 @@ public class P2PServiceFinder {
     public void setHighPriorityServiceList(List<P2PSyncService> highPriorityServiceList) {
         this.highPriorityServiceList = highPriorityServiceList;
     }
+
 }
