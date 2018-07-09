@@ -387,7 +387,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                 if (mWifiConnection != null) {
                     Log.i(TAG, "Already connecting !!");
                     return;
-                } else {
+                } else if (deviceIds != null){
                     Log.i(TAG, "Selecting from deviceIds: " + deviceIds);
                     P2PSyncDeviceStatus status = api.getLatestDeviceToSyncFromDevices(deviceIds);
                     P2PSyncService selItem = null;
