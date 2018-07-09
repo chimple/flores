@@ -548,8 +548,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
             stopWifiAccessPoint();
 
             // we have no connections, so lets make sure we do advertise us, as well as do active discovery
-            reInitializeP2PAccessPoint();
-            reStartTheSearch();
+            reStartAll();
         }
 
         Log.i(TAG + " COM:", "State change-out with status : " + conStatus);
