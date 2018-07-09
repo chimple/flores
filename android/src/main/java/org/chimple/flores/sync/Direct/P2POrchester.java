@@ -82,7 +82,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
 
     private void initialize() {
-        cleanUp();
+//        cleanUp();
         //initialize the system, and
         // make sure Wifi is enabled before we start running
         mWifiBase = new P2PBase(this.context, this);
@@ -140,8 +140,8 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
         }
 
         //to get fresh situation, lets close all stuff before continuing
-        this.stopServiceSearcher();
-        this.reInitializeServiceFinder();
+        stopServiceSearcher();
+        reInitializeServiceFinder();
     }
 
     private void reInitializeServiceFinder() {
@@ -150,13 +150,15 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
         if (mWifiBase != null) {
             channel = mWifiBase.getP2PChannel();
             p2p = mWifiBase.getWifiP2pManager();
+
         }
 
-        if (channel != null && p2p != null) {
+        if (channel != null && p2p != null && mWifiServiceSearcher == null) {
             Log.i(TAG, "Starting WifiServiceSearcher");
             setConnectionState(SyncUtils.ConnectionState.FindingPeers);
             mWifiServiceSearcher = new P2PServiceFinder(this.context, p2p, channel, this, SERVICE_TYPE);
         }
+
     }
 
     private void reInitializeP2PAccessPoint() {
@@ -196,7 +198,6 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
         if (mWifiAccessPoint != null) {
             mWifiAccessPoint.cleanUp();
-            mWifiAccessPoint = null;
         }
     }
 
@@ -227,7 +228,6 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
         if (mWifiBase != null) {
             mWifiBase.cleanUp();
-            mWifiBase = null;
         }
     }
 
@@ -305,9 +305,9 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
             Log.i(TAG + " WB:", "Wifi is now enabled !");
 
             // to avoid getting this event on starting, we we already know the state
-            if (!wifiIsEnabled) {
-                reStartAll();
-            }
+//            if (!wifiIsEnabled) {
+//                reStartAll();
+//            }
             wifiIsEnabled = true;
         } else {
             //no wifi availavble, thus we need to stop doing anything;

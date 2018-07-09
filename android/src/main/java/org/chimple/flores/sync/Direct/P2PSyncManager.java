@@ -349,6 +349,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     }
 
     public void StopConnector() {
+        Log.i(TAG,"StopConnector");
         stopConnectedThread();
         stopConnectToThread();
         stopListenerThread();
@@ -505,6 +506,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
     private void broadcastCustomStatusUpdateEvent(String who, String line) {
         Log.d(TAG, "Broadcasting message customStatusUpdateEvent");
+        Log.d(TAG, "Who : "+who+" ; Reason : "+line);
         this.timeCounter = 0;
         Intent intent = new Intent(customStatusUpdateEvent);
         // You can also include some extra data.
@@ -519,8 +521,9 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
         LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageReceiver);
         LocalBroadcastManager.getInstance(this.context).unregisterReceiver(p2pAllMessageExchangedReceiver);
         LocalBroadcastManager.getInstance(this.context).unregisterReceiver(networkConnectionChangedReceiver);
-        if (this.reStartJobTimer != null) {
-            this.reStartJobTimer.cancel();
+
+        if (this.shutDownSyncJobTimer != null) {
+            this.shutDownSyncJobTimer.cancel();
         }
         this.StopConnector();
         this.mStatusChecker = null;
