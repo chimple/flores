@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import org.chimple.flores.db.P2PDBApi;
 import org.chimple.flores.db.P2PDBApiImpl;
@@ -129,7 +131,14 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
         if (this.serviceFoundTimer != null) {
             this.serviceFoundTimer.cancel();
+            this.serviceFoundTimer = null;            
         }
+
+        if (this.serviceFoundTimeOutTimerTask != null) {
+            this.serviceFoundTimeOutTimerTask.cancel();
+            this.serviceFoundTimeOutTimerTask = null;            
+        }
+
         //to get fresh situation, lets close all stuff before continuing
         stopServiceSearcher();
         reInitializeServiceFinder();
@@ -438,8 +447,15 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
         } else {
             if (that.serviceFoundTimer != null) {
                 that.serviceFoundTimer.cancel();
+                that.serviceFoundTimer = null;
             }
-            that.serviceFoundTimer = new Timer();
+
+            if (that.serviceFoundTimeOutTimerTask != null) {
+                that.serviceFoundTimeOutTimerTask.cancel();
+                that.serviceFoundTimeOutTimerTask = null;
+            }
+
+            that.serviceFoundTimer = new Timer("Service Found Timer" + UUID.randomUUID());
             this.serviceFoundTimeOutTimerTask = new TimerTask() {
                 @Override
                 public void run() {
