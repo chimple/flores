@@ -108,6 +108,7 @@ public class P2PServiceFinder {
                             that.discoverServiceTimeOutTimer = new Timer("discover Service Timer" + UUID.randomUUID());
                             that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
                             that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
+                            stopDiscovery();
                             startServiceDiscovery();
                         } else {
                             if (discoverServiceTimeOutTimer != null) {
