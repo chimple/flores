@@ -306,24 +306,25 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    shutDownSyncJobTimer = new CountDownTimer(10000, 2000) {
+                    shutDownSyncJobTimer = new CountDownTimer(2000, 1000) {
                         public void onTick(long millisUntilFinished) {
                             Log.i(TAG, "start shut down timer ticking.....");
                         }
 
                         public void onFinish() {
                             Log.i(TAG, "shuting down Sync Job");
+                            StopConnector();
 
                             final Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 //Lets give others chance on creating new group before we come back online
                                 public void run() {
-                                    StopConnector();
+
                                     Intent result = new Intent(P2P_SYNC_RESULT_RECEIVED);
                                     result.putExtra(JOB_PARAMS, currentJobParams);
                                     LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
                                 }
-                            }, 5000);
+                            }, 10000);
                         }
                     };
 
