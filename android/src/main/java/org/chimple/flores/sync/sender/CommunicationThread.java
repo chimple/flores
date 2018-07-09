@@ -16,6 +16,7 @@ public class CommunicationThread extends Thread {
     private int listenerErrorSoFarTimes = 0;
 
     public CommunicationThread(CommunicationCallBack callback, int port, int number) {
+        Log.i(TAG,"CommunicationThread constructor");
         setName("CommunicationThread");
         this.callBack = callback;
         ServerSocket tmp = null;

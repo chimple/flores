@@ -230,6 +230,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     }
 
     public void execute(final JobParameters currentJobParams) {
+        Log.i(TAG,"starting execute method");
         this.currentJobParams = currentJobParams;
         mStatusChecker.run();
 
@@ -306,7 +307,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    shutDownSyncJobTimer = new CountDownTimer(2000, 1000) {
+                    shutDownSyncJobTimer = new CountDownTimer(10000, 2000) {
                         public void onTick(long millisUntilFinished) {
                             Log.i(TAG, "start shut down timer ticking.....");
                         }
@@ -324,7 +325,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
                                     result.putExtra(JOB_PARAMS, currentJobParams);
                                     LocalBroadcastManager.getInstance(instance.context).sendBroadcast(result);
                                 }
-                            }, 10000);
+                            }, 1000);
                         }
                     };
 
@@ -399,8 +400,8 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     public void connectToClient() {
         stopConnectedThread();
         stopConnectToThread();
-        if (instance.reStartJobTimer != null) {
-            instance.reStartJobTimer.cancel();
+        if (shutDownSyncJobTimer != null) {
+            shutDownSyncJobTimer.cancel();
         }
 
         if (clientIPAddressToConnect != null) {

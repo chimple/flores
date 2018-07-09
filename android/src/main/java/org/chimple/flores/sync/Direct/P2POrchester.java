@@ -82,7 +82,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
 
     private void initialize() {
-//        cleanUp();
+        cleanUp();
         //initialize the system, and
         // make sure Wifi is enabled before we start running
         mWifiBase = new P2PBase(this.context, this);
@@ -198,6 +198,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
         if (mWifiAccessPoint != null) {
             mWifiAccessPoint.cleanUp();
+            mWifiAccessPoint = null;
         }
     }
 
@@ -228,6 +229,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
         if (mWifiBase != null) {
             mWifiBase.cleanUp();
+            mWifiBase = null;
         }
     }
 

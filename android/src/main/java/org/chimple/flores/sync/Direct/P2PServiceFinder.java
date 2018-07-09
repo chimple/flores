@@ -108,8 +108,7 @@ public class P2PServiceFinder {
                             that.discoverServiceTimeOutTimer = null;
                             that.discoverServiceTimeOutTimer = new Timer("discover Service Timer" + UUID.randomUUID());
                             that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
-                            that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
-                            stopDiscovery();
+                            that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 30 * 1000);
                             startServiceDiscovery();
                         } else {
                             if (discoverServiceTimeOutTimer != null) {
@@ -177,8 +176,9 @@ public class P2PServiceFinder {
         return new TimerTask() {
             @Override
             public void run() {
+                Log.i(TAG,"TimerTask createDiscoverServiceTask ");
                 that.stopDiscovery();
-                that.startServiceDiscovery();
+                that.startPeerDiscovery();
             }
         };
     }
@@ -243,6 +243,7 @@ public class P2PServiceFinder {
     private void unregisterP2PServiceFinderReceiver() {
         if (receiver != null) {
             this.context.unregisterReceiver(receiver);
+            receiver = null;
         }
 
     }
@@ -297,7 +298,7 @@ public class P2PServiceFinder {
                 }
                 that.discoverServiceTimeOutTimer = new Timer();
                 that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
-                that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
+                that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 30 * 1000);
             }
         });
     }
@@ -347,7 +348,7 @@ public class P2PServiceFinder {
                                     }
                                     that.discoverServiceTimeOutTimer = new Timer();
                                     that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
-                                    that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
+                                    that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 30 * 1000);
                                 } catch (Exception e) {
                                     Log.e(TAG, e.getMessage());
                                 }
@@ -366,7 +367,7 @@ public class P2PServiceFinder {
                 }
                 that.discoverServiceTimeOutTimer = new Timer();
                 that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
-                that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 60 * 1000);
+                that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 30 * 1000);
             }
         });
 

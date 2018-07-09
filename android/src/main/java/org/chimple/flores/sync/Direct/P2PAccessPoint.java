@@ -13,6 +13,7 @@ import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.os.Handler;
 import android.util.Log;
 
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.Collection;
@@ -48,6 +49,7 @@ public class P2PAccessPoint implements HandShakeListenerCallBack, WifiP2pManager
     private HandShakeListenerThread mHandShakeListenerThread = null;
 
     public P2PAccessPoint(Context Context, WifiP2pManager Manager, WifiP2pManager.Channel Channel, Handler handler, WifiConnectionUpdateCallBack callBack) {
+        Log.i(TAG, "P2PAccessPoint constructor");
         this.context = Context;
         this.wifiP2pManager = Manager;
         this.channel = Channel;
@@ -353,7 +355,6 @@ public class P2PAccessPoint implements HandShakeListenerCallBack, WifiP2pManager
                     Log.i(TAG, "We are DIS-connected");
                     if (mHandShakeListenerThread != null) {
                         mHandShakeListenerThread.cleanUp();
-                        mHandShakeListenerThread = null;
                     }
                 }
             }
