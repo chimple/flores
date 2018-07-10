@@ -290,6 +290,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                                 Log.i(TAG + "shake:", "re shaking.");
                                 String address = mWifiConnection.retrieveInetAddress();
                                 setConnectionState(SyncUtils.ConnectionState.HandShaking);
+                                stopHandShakerThread();
                                 startHandShakerThread(address, (trialCountTmp + 1));
                             }
                         }
