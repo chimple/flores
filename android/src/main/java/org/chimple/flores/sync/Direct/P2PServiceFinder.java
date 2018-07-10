@@ -104,8 +104,8 @@ public class P2PServiceFinder {
                         if (doContinue) {
                             if (that.discoverServiceTimeOutTimer != null) {
                                 that.discoverServiceTimeOutTimer.cancel();
+                                that.discoverServiceTimeOutTimer = null;
                             }
-                            that.discoverServiceTimeOutTimer = null;
                             that.discoverServiceTimeOutTimer = new Timer("discover Service Timer" + UUID.randomUUID());
                             that.discoverServiceTimeOutTimerTask = that.createDiscoverServiceTask();
                             that.discoverServiceTimeOutTimer.schedule(that.discoverServiceTimeOutTimerTask, 30 * 1000);
@@ -113,8 +113,8 @@ public class P2PServiceFinder {
                         } else {
                             if (discoverServiceTimeOutTimer != null) {
                                 that.discoverServiceTimeOutTimer.cancel();
+                                that.discoverServiceTimeOutTimer = null;
                             }
-                            that.discoverServiceTimeOutTimer = null;
                         }
                     }
                 }
@@ -129,47 +129,47 @@ public class P2PServiceFinder {
             public void onDnsSdServiceAvailable(String instanceName, String serviceType, WifiP2pDevice device) {
 
                 if (serviceType.startsWith(SERVICE_TYPE)) {
+
+                    if (that.discoverServiceTimeOutTimer != null) {
+                        that.discoverServiceTimeOutTimer.cancel();
+                        that.discoverServiceTimeOutTimer = null;
+                    }
+
                     boolean addService = true;
-                    Log.i(TAG, "Found Service, :" + instanceName + ", type" + serviceType + ":");
+                    Log.i(TAG, "Found Service, : " + instanceName + ", type : " + serviceType + ":");
                     for (int i = 0; i < serviceList.size(); i++) {
                         if (serviceList.get(i).getDeviceAddress().equals(device.deviceAddress)) {
                             addService = false;
                         }
                     }
                     if (addService) {
+                        Log.i(TAG,"Added Found Service to the servicelist");
                         serviceList.add(SyncUtils.createP2PSyncService(instanceName, serviceType, device.deviceAddress, device.deviceName));
                     }
 
+                    that.peerDiscoverTimer = new Timer("Peer discover Timer" + UUID.randomUUID());
+
+                    that.peerDiscoveryTimerTask = that.createPeerDiscoveryTimerTask();
+                    long millisInFuture = 5000 + (new Random(System.currentTimeMillis()).nextInt(5000));
+                    that.peerDiscoverTimer.schedule(that.peerDiscoveryTimerTask, millisInFuture);
+
                 } else {
                     Log.i(TAG, "Not our Service, :" + SERVICE_TYPE + "!=" + serviceType + ":");
+
+
+                    if (that.peerDiscoverTimer != null) {
+                        that.peerDiscoverTimer.cancel();
+                        that.peerDiscoverTimer = null;
+                    }
                 }
 
-                if (that.discoverServiceTimeOutTimer != null) {
-                    that.discoverServiceTimeOutTimer.cancel();
-                }
-
-                that.discoverServiceTimeOutTimer = null;
-//                if (peerDiscoveryTimer!=null){
-//                    peerDiscoveryTimer.cancel();
-//                    peerDiscoveryTimer.start();
-//                }
 
 
-                if (that.peerDiscoverTimer != null) {
-                    that.peerDiscoverTimer.cancel();
-                }
-                that.peerDiscoverTimer = null;
-
-                that.peerDiscoverTimer = new Timer("Peer discover Timer" + UUID.randomUUID());
-
-                that.peerDiscoveryTimerTask = that.createPeerDiscoveryTimerTask();
-                long millisInFuture = 5000 + (new Random(System.currentTimeMillis()).nextInt(5000));
-                peerDiscoverTimer.schedule(that.peerDiscoveryTimerTask, millisInFuture);
             }
         };
 
         wifiP2pManager.setDnsSdResponseListeners(channel, serviceListener, null);
-        startPeerDiscovery();
+//        startPeerDiscovery();
     }
 
     private TimerTask createDiscoverServiceTask() {

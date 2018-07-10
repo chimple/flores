@@ -414,7 +414,8 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                             Log.i(TAG + " SS:", "found Device UUID:" + deviceUUID);
                             Log.i(TAG + " SS:", "found SSID:" + separated[2] + ", pwd:" + separated[3] + "IP: " + separated[4]);
 
-                            stopServiceSearcher();
+//                            stopServiceSearcher();
+
                             setConnectionState(SyncUtils.ConnectionState.Connecting);
 
                             final String networkSSID = separated[2];
