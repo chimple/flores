@@ -99,6 +99,7 @@ public class P2PServiceFinder {
                     if (discoveryState != SyncUtils.DiscoveryState.DiscoverService) {
                         boolean doContinue = true;
                         if (callBack != null) {
+                            Log.i(TAG,"onPeersAvailable => callBack != null");
                             doContinue = callBack.gotPeersList(wifiP2pDeviceList.getDeviceList());
                         }
                         if (doContinue) {

@@ -462,11 +462,19 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
             this.serviceFoundTimeOutTimerTask = new TimerTask() {
                 @Override
                 public void run() {
-                    Log.i(TAG, "serviceFoundTimeOutTimerTask starting....");
-                    reStartTheSearch();
+                    Log.i(TAG, "gotPeersList => serviceFoundTimeOutTimerTask starting....");
+                    // need to clear the connection here.
+                    stopHandShakerThread();
+                    stopWifiConnection();
+
+                    // to make sure advertising is ok, lets clear the old out at this point
+                    stopWifiAccessPoint();
+
+                    // we have no connections, so lets make sure we do advertise us, as well as do active discovery
+                    reStartAll();
                 }
             };
-            that.serviceFoundTimer.schedule(that.serviceFoundTimeOutTimerTask, 4 * 60 * 1000);
+            that.serviceFoundTimer.schedule(that.serviceFoundTimeOutTimerTask, 2 * 60 * 1000);
             Log.i(TAG + " SS:", "Found " + list.size() + " peers.");
             int numm = 0;
             for (WifiP2pDevice peer : list) {
