@@ -496,11 +496,12 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
         if (group.getClientList().size() > 0) {
             // we are ok, we just got new connections coming aiin
+
         } else {
             // note that we get this when we create a new group, so we also do need to check what the state is we are in
 
             // if we got zero clients then we are  not conncted anymore, so we can start doing stuff
-            if (reportingState == SyncUtils.ReportingState.ConnectedAndListening) {
+//            if (reportingState == SyncUtils.ReportingState.ConnectedAndListening) {
 
 //                reInitializeP2PAccessPoint();
 //
@@ -508,7 +509,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 //                if (connectionState == SyncUtils.ConnectionState.Idle) {
 //                    reStartTheSearch();
 //                }
-
+//            }
                 // need to clear the connection here.
                 stopHandShakerThread();
                 stopWifiConnection();
@@ -518,7 +519,6 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
 
                 // we have no connections, so lets make sure we do advertise us, as well as do active discovery
                 reStartAll();
-            }
 
         }
     }
