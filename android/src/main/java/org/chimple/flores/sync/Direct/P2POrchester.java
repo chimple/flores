@@ -290,7 +290,6 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
                                 Log.i(TAG + "shake:", "re shaking.");
                                 String address = mWifiConnection.retrieveInetAddress();
                                 setConnectionState(SyncUtils.ConnectionState.HandShaking);
-                                stopHandShakerThread();
                                 startHandShakerThread(address, (trialCountTmp + 1));
                             }
                         }
@@ -503,12 +502,22 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
             // if we got zero clients then we are  not conncted anymore, so we can start doing stuff
             if (reportingState == SyncUtils.ReportingState.ConnectedAndListening) {
 
-                reInitializeP2PAccessPoint();
+//                reInitializeP2PAccessPoint();
+//
+//                //also if we did stop all searching, lets start it again
+//                if (connectionState == SyncUtils.ConnectionState.Idle) {
+//                    reStartTheSearch();
+//                }
 
-                //also if we did stop all searching, lets start it again
-                if (connectionState == SyncUtils.ConnectionState.Idle) {
-                    reStartTheSearch();
-                }
+                // need to clear the connection here.
+                stopHandShakerThread();
+                stopWifiConnection();
+
+                // to make sure advertising is ok, lets clear the old out at this point
+                stopWifiAccessPoint();
+
+                // we have no connections, so lets make sure we do advertise us, as well as do active discovery
+                reStartAll();
             }
 
         }
@@ -579,7 +588,7 @@ public class P2POrchester implements HandShakeInitiatorCallBack, WifiConnectionU
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                stopHandShakerThread();
+//                stopHandShakerThread();
 
                 that.callBack.Connected(remoteTmp.getHostAddress(), ListeningStillTmp);
 
