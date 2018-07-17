@@ -110,6 +110,7 @@ public class NSDServiceFinder {
             // thus to avoid it, we are delaying the service discovery start here
             public void run() {
                 if(mDiscoveryListener != null) {
+                    serviceList.clear();
                     mNsdManager.discoverServices(
                             SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
                 }

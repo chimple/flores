@@ -238,7 +238,6 @@ public class NSDOrchester implements NSDHandShakeInitiatorCallBack, NSDWifiConne
 
                         setConnectionState(SyncUtils.ConnectionState.HandShaking);
                         startNSDHandShakerThread(host, port, 0);
-                        deviceIds.remove(deviceIds);
 
                     } else {
                         Log.i(TAG, "No Device found to Connect");
