@@ -127,8 +127,8 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
 
                 Log.i(TAG, "Will start shutdown job in: " + (EXIT_CURRENT_JOB_TIME - totalTimeTillJobStarted));
 
-                if (totalTimeTillJobStarted > EXIT_CURRENT_JOB_TIME  && !isShutDownJobStarted  && instance != null) {
-                    instance.startShutDownTimer();
+                if (totalTimeTillJobStarted > EXIT_CURRENT_JOB_TIME) {
+                    startShutDownTimer();
                 }
             }
 
