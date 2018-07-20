@@ -81,7 +81,7 @@ public class P2PSyncManager implements P2POrchesterCallBack, CommunicationCallBa
     public static final String customTimerStatusUpdateEvent = "custom-timer-status-update-event";
     public static final String p2pConnectionChangedEvent = "p2p-connection-changed-event";
     public static final String P2P_SHARED_PREF = "p2pShardPref";
-    public static final int EXIT_CURRENT_JOB_TIME = 4 * 60; // 5 mins
+    public static final int EXIT_CURRENT_JOB_TIME = 15 * 60; // 15 mins
 
     private boolean isShutDownJobStarted = false;
     private CountDownTimer shutDownSyncJobTimer;
