@@ -20,12 +20,12 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 
+import org.chimple.flores.application.P2PContext;
 import org.chimple.flores.db.DBSyncManager;
+import org.chimple.flores.multicast.MulticastManager;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
 import org.chimple.flores.db.entity.P2PUserIdMessage;
-import org.chimple.flores.scheduler.JobUtils;
-
 /**
  * FloresPlugin
  */
@@ -84,7 +84,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                   result.error("UNAVAILABLE", "Users are not available.", null);
               }
               break;
-          }
+          }          
           case "addUser":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;
@@ -92,21 +92,33 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String deviceId = arg.get("deviceId");
               String message = arg.get("message");
               boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
-            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r3" + userId, "Chat", "Good Day 🎮" + userId, true, "session 3" + userId);
-            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r4" + userId, "Chat", "🍤🍉" + userId, true, "session 4" + userId);
-
-            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "Hi" + userId, true, "session1" + userId);
-            //   DBSyncManager.getInstance(registrar.context()).addMessage(userId, "r1" + userId, "Chat", "😸" + userId, true, "session2" + userId);
-
-            //   DBSyncManager.getInstance(registrar.context()).loggedInUser(userId, deviceId);
               result.success(status);
               break;
           }
           case "start":
           {
-              JobUtils.scheduledJob(registrar.context().getApplicationContext(), true);
-              break;
+            Map<String, String> arg = (Map<String, String>)call.arguments;
+            String userId = arg.get("userId");
+            String deviceId = arg.get("deviceId");
+            String message = arg.get("message");
+            boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
+            P2PContext.getInstance().createShardProfilePreferences(userId);
+            MulticastManager.getInstance(registrar.context()).sendFindBuddyMessage();
+            result.success(status);
+            break;
           }
+          case "addTextMessage":{
+            Map<String, String> arg = (Map<String, String>)call.arguments;            
+            String userId = P2PContext.getInstance().getLoggedInUser();
+            String recipientId = null;
+            String messageType = "Chat";
+            String message = arg.get("message");
+            boolean retStatus =
+            DBSyncManager.getInstance(registrar.context())
+                            .addMessage(userId, recipientId, messageType, message);
+            result.success(retStatus);
+            break;              
+          }          
           case "addMessage":
           {
               Map<String, String> arg = (Map<String, String>)call.arguments;

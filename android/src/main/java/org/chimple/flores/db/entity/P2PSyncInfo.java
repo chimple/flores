@@ -8,6 +8,7 @@ import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity(indices = {
@@ -17,7 +18,7 @@ import java.util.Date;
         @Index("session_id"),
         @Index("status")
 })
-public class P2PSyncInfo {
+public class P2PSyncInfo implements Serializable {
 
     public P2PSyncInfo() {
 
@@ -31,6 +32,7 @@ public class P2PSyncInfo {
         this.recipientUserId = recipientUserId;
         this.message = message;
         this.messageType = messageType;
+        this.sender = deviceId;
         this.loggedAt = new Date();
     }
 
@@ -160,6 +162,16 @@ public class P2PSyncInfo {
     public Long getStep() {
         return step;
     }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    private String sender;
 }
 
 

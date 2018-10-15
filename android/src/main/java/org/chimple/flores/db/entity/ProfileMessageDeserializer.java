@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public class ProfileMessageDeserializer implements JsonDeserializer<ProfileMessage> {
-    @Override
+
     public ProfileMessage deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
 

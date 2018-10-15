@@ -9,7 +9,7 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 
 public class HandShakingInfoDeserializer implements JsonDeserializer<HandShakingInfo> {
-    @Override
+
     public HandShakingInfo deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
 

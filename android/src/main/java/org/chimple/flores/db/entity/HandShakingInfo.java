@@ -34,6 +34,10 @@ public class HandShakingInfo {
     @Expose(serialize = false, deserialize = false)
     private Long startingSequence;
 
+    @Expose(serialize = false, deserialize = false)
+    private String from;
+
+
     public HandShakingInfo() {
     }
 
@@ -64,11 +68,19 @@ public class HandShakingInfo {
         this.startingSequence = startingSequence;
     }
 
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String sFrom) {
+        this.from = sFrom;
+    }
+
     public void setSequence(Long sequence) {
         this.sequence = sequence;
     }
 
-    @Override
+
     public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
@@ -81,7 +93,7 @@ public class HandShakingInfo {
         }
     }
 
-    @Override
+
     public int hashCode() {
         int hashno = 7;
         hashno = 13 * hashno + (userId == null ? 0 : userId.hashCode()) + (deviceId == null ? 0 : deviceId.hashCode()) + (sequence == null ? 0 : sequence.hashCode());

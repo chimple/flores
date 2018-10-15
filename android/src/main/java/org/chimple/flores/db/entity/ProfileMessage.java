@@ -29,7 +29,7 @@ public class ProfileMessage {
         this.deviceId = deviceId;
     }
 
-    @Override
+
     public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
@@ -42,7 +42,7 @@ public class ProfileMessage {
         }
     }
 
-    @Override
+
     public int hashCode() {
         int hashno = 7;
         hashno = 13 * hashno + (messageType == null ? 0 : messageType.hashCode()) + (data == null ? 0 : data.hashCode() + (userId == null ? 0 : userId.hashCode()) + (deviceId == null ? 0 : deviceId.hashCode()));

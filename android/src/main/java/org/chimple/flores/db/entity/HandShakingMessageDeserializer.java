@@ -12,18 +12,33 @@ import java.util.ArrayList;
 
 
 public class HandShakingMessageDeserializer implements JsonDeserializer<HandShakingMessage> {
-    @Override
+
     public HandShakingMessage deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
 
         final JsonObject jsonObject = json.getAsJsonObject();
+
         final JsonElement jsonMessageType = jsonObject.get("message_type");
         String messageType = "";
-        if(jsonMessageType != null) {
+        if (jsonMessageType != null) {
             messageType = jsonMessageType.getAsString();
         }
+
+        final JsonElement jsonFrom = jsonObject.get("from");
+        String from = "";
+        if (jsonFrom != null) {
+            from = jsonFrom.getAsString();
+        }
+
+        final JsonElement jsonReply = jsonObject.get("reply");
+        String reply = "";
+        if (jsonReply != null) {
+            reply = jsonReply.getAsString();
+        }
+
+
         HandShakingInfo[] infos = context.deserialize(jsonObject.get("infos"), HandShakingInfo[].class);
-        final HandShakingMessage handShakingMessage = new HandShakingMessage(messageType, new ArrayList(Arrays.asList(infos)));
+        final HandShakingMessage handShakingMessage = new HandShakingMessage(from, messageType, reply, new ArrayList(Arrays.asList(infos)));
         return handShakingMessage;
     }
 }
