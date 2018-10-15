@@ -9,16 +9,31 @@ import android.content.Context;
 import android.util.Log;
 
 import org.chimple.flores.db.AppDatabase;
+import org.chimple.flores.multicast.MulticastManager;
 import org.chimple.flores.application.P2PContext;
 
 public class MainActivity extends FlutterActivity {
+    
     private static final String TAG = MainActivity.class.getName();
     private static Context context;
     public static AppDatabase db;
+    public static MulticastManager multicastManager;
 
-    public static int REGULAR_JOB_TIMINGS_FOR_MIN_LATENCY = 4 * 60 * 1000; // every 4 mins mininum
-    public static int REGULAR_JOB_TIMINGS_FOR_PERIOD = 8 * 60 * 1000; // every 8 mins
-    public static int IMMEDIATE_JOB_TIMINGS = 5 * 1000; // in next 5 seconds
+    public static final String SHARED_PREF = "shardPref";
+    public static final String USER_ID = "USER_ID";
+    public static final String DEVICE_ID = "DEVICE_ID";
+    public static final String NEW_MESSAGE_ADDED = "NEW_MESSAGE_ADDED";
+    public static final String REFRESH_DEVICE = "REFRESH_DEVICE";
+    public static final String messageEvent = "message-event";
+    public static final String uiMessageEvent = "ui-message-event";
+    public static final String newMessageAddedOnDevice = "new-message-added-event";
+    public static final String refreshDevice = "refresh-device-event";
+    public static final String MULTICAST_IP_ADDRESS = "235.1.1.0";
+    public static final String MULTICAST_IP_PORT = "4450";
+
+    public static final String CONSOLE_TYPE = "console";
+    public static final String LOG_TYPE = "log";
+    public static final String CLEAR_CONSOLE_TYPE = "clear-console";
 
 
     @Override
@@ -36,13 +51,11 @@ public class MainActivity extends FlutterActivity {
             @Override
             public void run() {
                 // Initialize all of the important frameworks and objects
-                P2PContext.getInstance().initialize(MainActivity.this);
-                //TODO: for now force the creation here
-                db = AppDatabase.getInstance(MainActivity.this);
-
+                P2PContext.getInstance().initialize(P2PApplication.this);
+                db = AppDatabase.getInstance(P2PApplication.this);
+                multicastManager = MulticastManager.getInstance(P2PApplication.this);
                 Log.i(TAG, "app database instance" + String.valueOf(db));
-
-                initializationComplete();
+                initializationComplete();                
             }
         };
 
@@ -57,6 +70,20 @@ public class MainActivity extends FlutterActivity {
     public static Context getContext() {
         return context;
     }
+
+    public static String getLoggedInUser() {
+        SharedPreferences pref = getContext().getSharedPreferences(SHARED_PREF, 0);
+        String userId = pref.getString("USER_ID", null); // getting String
+        return userId;
+    }
+
+
+    public static String getCurrentDevice() {
+        SharedPreferences pref = getContext().getSharedPreferences(SHARED_PREF, 0);
+        String deviceId = pref.getString("DEVICE_ID", null); // getting String
+        return deviceId;
+    }
+
 
     @Override
     protected void attachBaseContext(Context base) {
