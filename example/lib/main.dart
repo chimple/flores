@@ -64,8 +64,13 @@ class UserScreen extends StatelessWidget {
                     .toList(growable: false)),
           ),
           TextField(
-              onSubmitted: (text) {
-                AppStateContainer.of(context).addUser(text);
+              onSubmitted: (text) async {
+                String userId =
+                    await AppStateContainer.of(context).addUser(text);
+                await AppStateContainer.of(context)
+                    .setLoggedInUser(userId, text);
+                Navigator.of(context).push(MaterialPageRoute<Null>(
+                    builder: (BuildContext context) => FriendScreen()));
               },
               decoration: new InputDecoration.collapsed(hintText: 'Add User'))
         ],

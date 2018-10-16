@@ -45,7 +45,7 @@ class AppStateContainerState extends State<AppStateContainer> {
     }
   }
 
-  void addUser(String name) async {
+  Future<String> addUser(String name) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final deviceId = prefs.getString('deviceId');
     String userId = Uuid().v4();
@@ -61,6 +61,7 @@ class AppStateContainerState extends State<AppStateContainer> {
     userList.add('$userId,$deviceId,$name');
     prefs.setStringList('users', userList);
     getUsers();
+    return userId;
   }
 
   Future<void> setLoggedInUser(String userId, String userName) async {
