@@ -15,8 +15,8 @@ public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
-    public static final String MULTICAST_IP_ADDRESS = "236.1.1.0";
-    public static final String MULTICAST_IP_PORT = "4450";
+    public static final String MULTICAST_IP_ADDRESS = "234.0.0.0";
+    public static final String MULTICAST_IP_PORT = "4451";
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
@@ -95,6 +95,7 @@ public class P2PContext {
     public static String getLoggedInUser() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String
+        Log.d(TAG, "GOT User ID -------------->" +  userId);
         return userId;
     }
 
@@ -102,6 +103,7 @@ public class P2PContext {
     public static String getCurrentDevice() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String deviceId = pref.getString("DEVICE_ID", null); // getting String
+        Log.d(TAG, "GOT Device ID -------------->" +  deviceId);
         return deviceId;
     }    
 
