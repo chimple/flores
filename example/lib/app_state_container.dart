@@ -23,7 +23,7 @@ class AppStateContainer extends StatefulWidget {
 
 class AppStateContainerState extends State<AppStateContainer> {
   List<dynamic> messages = [];
-  List<Map<String, String>> users = [];
+  List<dynamic> users = [];
   String loggedInUserId;
   String loggedInUserName;
   String friendId;
@@ -82,12 +82,17 @@ class AppStateContainerState extends State<AppStateContainer> {
   }
 
   Future<void> getUsers() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userList = prefs.getStringList('users');
-    setState(() => users = userList
-        .map((u) =>
-            Map.fromIterables(['userId', 'deviceId', 'name'], u.split(',')))
-        .toList());
+    List<dynamic> users;
+    try {
+      users = await Flores().users;
+    } on PlatformException {
+      print('Flores: Failed users');
+    } catch (e, s) {
+      print('Exception details:\n $e');
+      print('Stack trace:\n $s');
+    }
+
+    setState(() => this.users = users);
     print('getUsers: $users');
   }
 

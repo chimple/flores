@@ -52,13 +52,14 @@ class UserScreen extends StatelessWidget {
                           child: RaisedButton(
                             onPressed: () async {
                               await AppStateContainer.of(context)
-                                  .setLoggedInUser(u['userId'], u['name']);
+                                  .setLoggedInUser(u['userId'], u['message']);
+                              await AppStateContainer.of(context).getUsers();
                               Navigator.of(context).push(
                                   MaterialPageRoute<Null>(
                                       builder: (BuildContext context) =>
                                           FriendScreen()));
                             },
-                            child: Text(u['name']),
+                            child: Text(u['message']),
                           ),
                         ))
                     .toList(growable: false)),
@@ -69,6 +70,7 @@ class UserScreen extends StatelessWidget {
                     await AppStateContainer.of(context).addUser(text);
                 await AppStateContainer.of(context)
                     .setLoggedInUser(userId, text);
+                await AppStateContainer.of(context).getUsers();
                 Navigator.of(context).push(MaterialPageRoute<Null>(
                     builder: (BuildContext context) => FriendScreen()));
               },
@@ -102,10 +104,10 @@ class FriendScreen extends StatelessWidget {
                         Navigator.of(context).push(MaterialPageRoute<Null>(
                             builder: (BuildContext context) => ChatScreen(
                                   friendId: u['userId'],
-                                  friendName: u['name'],
+                                  friendName: u['message'],
                                 )));
                       },
-                      child: Text(u['name']),
+                      child: Text(u['message']),
                     ),
                   ))
               .toList(growable: false)),
