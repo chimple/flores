@@ -75,14 +75,6 @@ class AppStateContainerState extends State<AppStateContainer> {
       print('Exception details:\n $e');
       print('Stack trace:\n $s');
     }
-    try {
-      await Flores().start();
-    } on PlatformException {
-      print('Flores: Failed start');
-    } catch (e, s) {
-      print('Exception details:\n $e');
-      print('Stack trace:\n $s');
-    }
     setState(() {
       loggedInUserId = userId;
       loggedInUserName = userName;
