@@ -91,8 +91,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String userId = arg.get("userId");
               String deviceId = arg.get("deviceId");
               String message = arg.get("message");
-              boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
-              MulticastManager.getInstance(registrar.context()).sendFindBuddyMessage();
+              boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);              
               result.success(status);
               break;
           }
@@ -199,6 +198,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String deviceId = arg.get("deviceId");
               boolean status = DBSyncManager.getInstance(registrar.context())
                               .loggedInUser(userId, deviceId);
+              MulticastManager.getInstance(registrar.context()).sendFindBuddyMessage();
 
               result.success(status);
               break;
