@@ -264,6 +264,8 @@ public class P2PDBApiImpl {
         while (keys.hasNext()) {
             String mDeviceId = keys.next();
             List<SyncInfoItem> syncItems = items.get(mDeviceId);
+            Log.d(TAG, "build SyncInfoRequestMessage ----->" + P2PContext.getCurrentDevice());
+            Log.d(TAG, "build SyncInfoRequestMessage mDeviceId ----->" + mDeviceId);
             SyncInfoRequestMessage m = new SyncInfoRequestMessage(P2PContext.getCurrentDevice(), mDeviceId, syncItems);
             syncInfoRequestMessages.add(m);
         }
@@ -675,8 +677,7 @@ public class P2PDBApiImpl {
             P2PSyncInfo info = new P2PSyncInfo(userId, deviceId, maxSequence, recipientId, message, messageType);
             db.p2pSyncDao().insertP2PSyncInfo(info);
             Log.i(TAG, "inserted data" + info);
-            broadcastNewMessageAdded(info);
-            this.addDeviceToSyncAndStartJobIfNotRunning(recipientId);
+            broadcastNewMessageAdded(info);            
             return true;
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -710,6 +711,7 @@ public class P2PDBApiImpl {
     }
 
     private void broadcastNewMessageAdded(P2PSyncInfo info) {
+        Log.d(TAG, "broadcastNewMessageAdded ----> " + info.getMessage());
         Intent intent = new Intent(newMessageAddedOnDevice);
         intent.putExtra(NEW_MESSAGE_ADDED, info);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -740,7 +742,7 @@ public class P2PDBApiImpl {
             info.setStep(step);
             db.p2pSyncDao().insertP2PSyncInfo(info);
             Log.i(TAG, "inserted data" + info);
-            this.addDeviceToSyncAndStartJobIfNotRunning(recipientId);
+            broadcastNewMessageAdded(info);        
             return true;
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -781,12 +783,14 @@ public class P2PDBApiImpl {
             if (userInfo != null) {
                 userInfo.setUserId(userId);
                 userInfo.setDeviceId(deviceId);
+                userInfo.setSender(deviceId);
                 userInfo.setMessage(message);
                 userInfo.setMessageType(DBSyncManager.MessageTypes.PHOTO.type());
             } else {
                 userInfo = new P2PSyncInfo();
                 userInfo.setUserId(userId);
                 userInfo.setDeviceId(deviceId);
+                userInfo.setSender(deviceId);
 
                 Long maxSequence = db.p2pSyncDao().getLatestSequenceAvailableByUserIdAndDeviceId(userId, deviceId);
                 if (maxSequence == null) {

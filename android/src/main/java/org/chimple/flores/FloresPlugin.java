@@ -92,19 +92,12 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               String deviceId = arg.get("deviceId");
               String message = arg.get("message");
               boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
+              MulticastManager.getInstance(registrar.context()).sendFindBuddyMessage();
               result.success(status);
               break;
           }
           case "start":
-          {
-            Map<String, String> arg = (Map<String, String>)call.arguments;
-            String userId = arg.get("userId");
-            String deviceId = arg.get("deviceId");
-            String message = arg.get("message");
-            boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
-            P2PContext.getInstance().createShardProfilePreferences(userId);
-            MulticastManager.getInstance(registrar.context()).sendFindBuddyMessage();
-            result.success(status);
+          {           
             break;
           }
           case "addTextMessage":{

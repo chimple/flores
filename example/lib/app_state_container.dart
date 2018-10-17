@@ -23,7 +23,7 @@ class AppStateContainer extends StatefulWidget {
 
 class AppStateContainerState extends State<AppStateContainer> {
   List<dynamic> messages = [];
-  List<Map<String, String>> users = [];
+  List<dynamic> users = [];
   String loggedInUserId;
   String loggedInUserName;
   String friendId;
@@ -45,7 +45,7 @@ class AppStateContainerState extends State<AppStateContainer> {
     }
   }
 
-  void addUser(String name) async {
+  Future<String> addUser(String name) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final deviceId = prefs.getString('deviceId');
     String userId = Uuid().v4();
@@ -61,6 +61,7 @@ class AppStateContainerState extends State<AppStateContainer> {
     userList.add('$userId,$deviceId,$name');
     prefs.setStringList('users', userList);
     getUsers();
+    return userId;
   }
 
   Future<void> setLoggedInUser(String userId, String userName) async {
@@ -74,14 +75,6 @@ class AppStateContainerState extends State<AppStateContainer> {
       print('Exception details:\n $e');
       print('Stack trace:\n $s');
     }
-    try {
-      await Flores().start();
-    } on PlatformException {
-      print('Flores: Failed start');
-    } catch (e, s) {
-      print('Exception details:\n $e');
-      print('Stack trace:\n $s');
-    }
     setState(() {
       loggedInUserId = userId;
       loggedInUserName = userName;
@@ -89,12 +82,17 @@ class AppStateContainerState extends State<AppStateContainer> {
   }
 
   Future<void> getUsers() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userList = prefs.getStringList('users');
-    setState(() => users = userList
-        .map((u) =>
-            Map.fromIterables(['userId', 'deviceId', 'name'], u.split(',')))
-        .toList());
+    List<dynamic> users;
+    try {
+      users = await Flores().users;
+    } on PlatformException {
+      print('Flores: Failed users');
+    } catch (e, s) {
+      print('Exception details:\n $e');
+      print('Stack trace:\n $s');
+    }
+
+    setState(() => this.users = users);
     print('getUsers: $users');
   }
 
