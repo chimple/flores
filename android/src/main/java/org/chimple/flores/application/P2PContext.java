@@ -15,8 +15,8 @@ public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
-    public static final String MULTICAST_IP_ADDRESS = "234.0.0.0";
-    public static final String MULTICAST_IP_PORT = "4451";
+    public static final String MULTICAST_IP_ADDRESS = "237.0.0.0";
+    public static final String MULTICAST_IP_PORT = "4452";
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
@@ -111,12 +111,5 @@ public class P2PContext {
         return context;
     }
 
-    public void createShardProfilePreferences(String userId) {
-        SharedPreferences pref = this.getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("USER_ID", userId);
-        editor.putString("DEVICE_ID", userId+"-device");
-        editor.commit(); // commit changes
-    }
-
+   
 }

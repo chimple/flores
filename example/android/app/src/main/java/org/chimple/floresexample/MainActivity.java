@@ -32,8 +32,8 @@ public class MainActivity extends FlutterActivity {
     public static final String uiMessageEvent = "ui-message-event";
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
-    public static final String MULTICAST_IP_ADDRESS = "234.0.0.0";
-    public static final String MULTICAST_IP_PORT = "4451";
+    public static final String MULTICAST_IP_ADDRESS = "237.0.0.0";
+    public static final String MULTICAST_IP_PORT = "4452";
 
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
