@@ -8,8 +8,9 @@ import 'package:uuid/uuid.dart';
 
 class AppStateContainer extends StatefulWidget {
   final Widget child;
+  final String deviceId;
 
-  AppStateContainer({this.child});
+  AppStateContainer({this.child, this.deviceId});
 
   static AppStateContainerState of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_InheritedAppStateContainer)
@@ -27,6 +28,8 @@ class AppStateContainerState extends State<AppStateContainer> {
   String loggedInUserId;
   String loggedInUserName;
   String friendId;
+
+  String get deviceId => widget.deviceId;
 
   @override
   void initState() {
@@ -46,8 +49,6 @@ class AppStateContainerState extends State<AppStateContainer> {
   }
 
   Future<String> addUser(String name) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final deviceId = prefs.getString('deviceId');
     String userId = Uuid().v4();
     try {
       Flores().addUser(userId, deviceId, name);
@@ -57,16 +58,12 @@ class AppStateContainerState extends State<AppStateContainer> {
       print('Exception details:\n $e');
       print('Stack trace:\n $s');
     }
-    final userList = prefs.getStringList('users') ?? [];
-    userList.add('$userId,$deviceId,$name');
-    prefs.setStringList('users', userList);
-    getUsers();
+
+    await getUsers();
     return userId;
   }
 
   Future<void> setLoggedInUser(String userId, String userName) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final deviceId = prefs.getString('deviceId');
     try {
       await Flores().loggedInUser(userId, deviceId);
     } on PlatformException {
@@ -123,11 +120,6 @@ class AppStateContainerState extends State<AppStateContainer> {
 
   void onReceiveMessage(Map<dynamic, dynamic> message) async {
     if (message['messageType'] == 'Photo') {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final userList = prefs.getStringList('users');
-      userList.add(
-          "${message['userId']},${message['deviceId']},${message['message']}");
-      prefs.setStringList('users', userList);
       getUsers();
     } else if (message['messageType'] == 'chat' &&
         message['recipientUserId'] == loggedInUserId &&

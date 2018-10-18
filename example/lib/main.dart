@@ -8,10 +8,13 @@ import 'package:uuid/uuid.dart';
 
 void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (prefs.getString('deviceId') == null) {
-    prefs.setString('deviceId', Uuid().v4());
+  String deviceId = prefs.getString('deviceId');
+  if (deviceId == null) {
+    deviceId = Uuid().v4();
+    prefs.setString('deviceId', deviceId);
   }
-  runApp(AppStateContainer(child: MyApp()));
+
+  runApp(AppStateContainer(deviceId: deviceId, child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -47,6 +50,8 @@ class UserScreen extends StatelessWidget {
             child: ListView(
                 children: AppStateContainer.of(context)
                     .users
+                    .where((u) =>
+                        u['deviceId'] == AppStateContainer.of(context).deviceId)
                     .map((u) => Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: RaisedButton(
@@ -89,7 +94,8 @@ class FriendScreen extends StatelessWidget {
     print('FriendScreen userId: $userId users: $users');
     return Scaffold(
       appBar: new AppBar(
-        title: new Text(AppStateContainer.of(context).loggedInUserName),
+        title: new Text(
+            'User: ${AppStateContainer.of(context).loggedInUserName} chat with...'),
       ),
       body: ListView(
           children: AppStateContainer.of(context)
@@ -126,7 +132,7 @@ class ChatScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            '${AppStateContainer.of(context).loggedInUserName} $friendName'),
+            'User: ${AppStateContainer.of(context).loggedInUserName} chat with $friendName'),
       ),
       body: Column(
         children: <Widget>[
