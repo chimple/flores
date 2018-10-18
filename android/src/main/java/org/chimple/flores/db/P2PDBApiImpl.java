@@ -264,6 +264,10 @@ public class P2PDBApiImpl {
         while (keys.hasNext()) {
             String mDeviceId = keys.next();
             List<SyncInfoItem> syncItems = items.get(mDeviceId);
+            Log.d(TAG, "buildSyncInfoRequestMessages mDeviceId --->" + mDeviceId);
+            if(mDeviceId == null || mDeviceId.isEmpty()) {
+                Log.d(TAG, "build SyncInfoRequestMessage setting mDeviceID as it was Not Set ----->" + P2PContext.getCurrentDevice());                
+            }
             Log.d(TAG, "build SyncInfoRequestMessage ----->" + P2PContext.getCurrentDevice());
             Log.d(TAG, "build SyncInfoRequestMessage mDeviceId ----->" + mDeviceId);
             SyncInfoRequestMessage m = new SyncInfoRequestMessage(P2PContext.getCurrentDevice(), mDeviceId, syncItems);
