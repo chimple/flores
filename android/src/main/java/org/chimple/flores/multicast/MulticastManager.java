@@ -209,10 +209,13 @@ public class MulticastManager {
         instance.stopListening();
     }
 
-    private void startMultiCastOperations() {
+    public void startMultiCastOperations() {
         instance.startListening();
         if(P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null)
         {
+            Log.d(TAG,"in sendFindBuddyMessage");
+            Log.d(TAG, "startMultiCastOperations getCurrentDevice ----> " + P2PContext.getCurrentDevice());
+            Log.d(TAG, "startMultiCastOperations getLoggedInUser ----> " + P2PContext.getLoggedInUser());
             instance.sendFindBuddyMessage();
         }        
     }
