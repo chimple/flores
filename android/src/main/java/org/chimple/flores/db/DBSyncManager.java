@@ -21,6 +21,7 @@ public class DBSyncManager {
     public enum MessageTypes {
         PHOTO("Photo"),
         CHAT("Chat"),
+        MISSING("missing"),
         GAME("Game");
 
         private String type;

@@ -1,5 +1,6 @@
 package org.chimple.flores.multicast;
 
+import android.arch.persistence.room.util.StringUtil;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +10,11 @@ import android.os.CountDownTimer;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.chimple.flores.application.P2PContext;
 import org.chimple.flores.db.DBSyncManager;
 import org.chimple.flores.db.P2PDBApiImpl;
@@ -211,13 +216,12 @@ public class MulticastManager {
 
     public void startMultiCastOperations() {
         instance.startListening();
-        if(P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null)
-        {
-            Log.d(TAG,"in sendFindBuddyMessage");
+        if (P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null) {
+            Log.d(TAG, "in sendFindBuddyMessage");
             Log.d(TAG, "startMultiCastOperations getCurrentDevice ----> " + P2PContext.getCurrentDevice());
             Log.d(TAG, "startMultiCastOperations getLoggedInUser ----> " + P2PContext.getLoggedInUser());
             instance.sendFindBuddyMessage();
-        }        
+        }
     }
 
 
@@ -414,31 +418,33 @@ public class MulticastManager {
         return jsons;
     }
 
-    private boolean validIncomingSyncMessage(P2PSyncInfo info) {
-        // reject out of order message, send handshaking request
+    private MessageStatus validIncomingSyncMessage(P2PSyncInfo info, MessageStatus status) {
+        // DON'T reject out of order message, send handshaking request for only missing data
         // reject duplicate messages if any
-
         boolean isValid = true;
         String iKey = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
         String iPreviousKey = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue() - 1);
-
+        Log.d(TAG, "validIncomingSyncMessage previousKey" + iPreviousKey);
         // remove duplicates
         if (allSyncInfosReceived.contains(iKey)) {
-            Log.d(TAG, "Rejecting sync data message as key already found" + iKey);
+            Log.d(TAG, "sync data message as key already found" + iKey);
+            status.setDuplicateMessage(true);
+            status.setOutOfSyncMessage(false);
             isValid = false;
         } else if (info.getSequence().longValue() != 1
                 && !allSyncInfosReceived.contains(iPreviousKey)) {
-            Log.d(TAG, "Rejecting sync data message as out of sequence => previous key not found " + iPreviousKey + " for key:" + iKey);
+            Log.d(TAG, "found sync data message as out of sequence => previous key not found " + iPreviousKey + " for key:" + iKey);
             isValid = false;
-            // generate handshaking request
-            Log.d(TAG, "validIncomingSyncMessage -> out of order -> sendInitialHandShakingMessage");
-            sendInitialHandShakingMessage(true);
+            status.setDuplicateMessage(false);
+            status.setOutOfSyncMessage(true);
         }
 
         if (isValid) {
+            Log.d(TAG, "validIncomingSyncMessage adding to allSyncInfosReceived for key:" + iKey);
             allSyncInfosReceived.add(iKey);
         }
-        return isValid;
+
+        return status;
     }
 
     public void processInComingSyncInfoMessage(String message, String fromIP) {
@@ -446,21 +452,28 @@ public class MulticastManager {
         Iterator<P2PSyncInfo> infos = p2PDBApiImpl.deSerializeP2PSyncInfoFromJson(message).iterator();
         while (infos.hasNext()) {
             P2PSyncInfo info = infos.next();
-            boolean isValidMessage = instance.validIncomingSyncMessage(info);
-            if (!isValidMessage) {
-                notifyUI(info.message + " ---------> out of order or duplicate - rejected ", info.getSender(), LOG_TYPE);
+            MessageStatus status = new MessageStatus(false, false);
+            status = instance.validIncomingSyncMessage(info, status);
+            if (status.isDuplicateMessage()) {
+                notifyUI(info.message + " ---------> duplicate - rejected ", info.getSender(), LOG_TYPE);
                 infos.remove();
-                return;
-            }
-            if (isValidMessage) {
+            } else if (status.isOutOfSyncMessage()) {
+                notifyUI(info.message + " with sequence " + info.getSequence() + " ---------> out of sync processed with filling Missing type message ", info.getSender(), LOG_TYPE);
+                String key = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
+                Log.d(TAG, "processing out of sync data message for key:" + key + " and message:" + info.message);
+                String rMessage = p2PDBApiImpl.persistOutOfSyncP2PSyncMessage(info);
+                // generate handshaking request
+                if (status.isOutOfSyncMessage()) {
+                    Log.d(TAG, "validIncomingSyncMessage -> out of order -> sendInitialHandShakingMessage");
+                    sendInitialHandShakingMessage(true);
+                }
+            } else if (!status.isOutOfSyncMessage() && !status.isDuplicateMessage()) {
                 String key = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
                 Log.d(TAG, "processing sync data message for key:" + key + " and message:" + info.message);
                 String rMessage = p2PDBApiImpl.persistP2PSyncInfo(info);
             } else {
                 infos.remove();
-                return;
             }
-
         }
     }
 
@@ -512,6 +525,7 @@ public class MulticastManager {
         return allHandShakingInfos;
     }
 
+
     private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, HandShakingMessage> messages) {
         // sort by device id and sequence desc order
         synchronized (MulticastManager.class) {
@@ -520,7 +534,29 @@ public class MulticastManager {
             final Map<String, HandShakingInfo> uniqueHandShakeInfosReceived = new ConcurrentHashMap<String, HandShakingInfo>();
             while (itReceived.hasNext()) {
                 HandShakingInfo info = itReceived.next();
-                uniqueHandShakeInfosReceived.put(info.getUserId(), info);
+                HandShakingInfo existingInfo = uniqueHandShakeInfosReceived.get(info.getUserId());
+                if (existingInfo == null) {
+                    uniqueHandShakeInfosReceived.put(info.getUserId(), info);
+                } else {
+                    if (existingInfo.getSequence().longValue() < info.getSequence().longValue()) {
+                        uniqueHandShakeInfosReceived.put(info.getUserId(), info);
+                    } else if (existingInfo.getSequence().longValue() == info.getSequence().longValue()) {
+
+                        String myMissingMessageSequences = existingInfo.getMissingMessages();
+                        String otherDeviceMissingMessageSequences = info.getMissingMessages();
+                        List<String> list1 = new ArrayList<String>();
+                        List<String> list2 = new ArrayList<String>();
+                        if (myMissingMessageSequences != null) {
+                            list1 = Lists.newArrayList(Splitter.on(",").split(myMissingMessageSequences));
+                        }
+                        if (otherDeviceMissingMessageSequences != null) {
+                            list2 = Lists.newArrayList(Splitter.on(",").split(otherDeviceMissingMessageSequences));
+                        }
+                        if (list1.size() > list2.size()) {
+                            uniqueHandShakeInfosReceived.put(info.getUserId(), info);
+                        }
+                    }
+                }
             }
 
             final Map<String, HandShakingInfo> myHandShakingMessages = p2PDBApiImpl.handShakingInformationFromCurrentDevice();
@@ -532,11 +568,50 @@ public class MulticastManager {
                 if (myHandShakingMessages.keySet().contains(userKey)) {
                     HandShakingInfo infoFromOtherDevice = uniqueHandShakeInfosReceived.get(userKey);
                     HandShakingInfo infoFromMyDevice = myHandShakingMessages.get(userKey);
-                    if (infoFromMyDevice.getSequence() >= infoFromOtherDevice.getSequence()) {
+                    if (infoFromMyDevice.getSequence().longValue() > infoFromOtherDevice.getSequence().longValue()) {
                         Log.d(TAG, "removing from uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromMyDevice.getSequence()" + infoFromMyDevice.getSequence() + " infoFromOtherDevice.getSequence()" + infoFromOtherDevice.getSequence());
                         uniqueHandShakeInfosReceived.remove(userKey);
+                    } else if (infoFromMyDevice.getSequence().longValue() == infoFromOtherDevice.getSequence().longValue()) {
+                        //check for missing keys, if the same then remove otherwise only add missing key for infoFromMyDevice
+                        String myMissingMessageSequences = infoFromMyDevice.getMissingMessages();
+                        String otherDeviceMissingMessageSequences = infoFromOtherDevice.getMissingMessages();
+                        List<String> list1 = new ArrayList<String>();
+                        List<String> list2 = new ArrayList<String>();
+                        if (myMissingMessageSequences != null) {
+                            list1 = Lists.newArrayList(Splitter.on(",").split(myMissingMessageSequences));
+                        }
+                        if (otherDeviceMissingMessageSequences != null) {
+                            list2 = Lists.newArrayList(Splitter.on(",").split(otherDeviceMissingMessageSequences));
+                        }
+                        List<String> missingSequencesToAsk = new ArrayList<>(CollectionUtils.subtract(list1, list2));
+                        if (missingSequencesToAsk != null && missingSequencesToAsk.size() > 0) {
+                            infoFromOtherDevice.setMissingMessages(StringUtils.join(missingSequencesToAsk, ","));
+                            infoFromOtherDevice.setStartingSequence(infoFromOtherDevice.getSequence() + 1);
+                        } else {
+                            Log.d(TAG, "removing from uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromMyDevice.getSequence()" + infoFromMyDevice.getSequence() + " infoFromOtherDevice.getSequence()" + infoFromOtherDevice.getSequence());
+                            uniqueHandShakeInfosReceived.remove(userKey);
+                        }
                     } else {
                         Log.d(TAG, "uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromOtherDevice.setStartingSequence" + infoFromMyDevice.getSequence().longValue());
+                        // take other device's missing keys remove
+                        // take my missing keys and remove if the same as other device's missing keys
+                        // ask for all messages my sequence + 1
+                        // ask for all my missing keys messages also
+
+                        String myMissingMessageSequences = infoFromMyDevice.getMissingMessages();
+                        String otherDeviceMissingMessageSequences = infoFromOtherDevice.getMissingMessages();
+                        List<String> list1 = new ArrayList<String>();
+                        List<String> list2 = new ArrayList<String>();
+                        if (myMissingMessageSequences != null) {
+                            list1 = Lists.newArrayList(Splitter.on(",").split(myMissingMessageSequences));
+                        }
+                        if (otherDeviceMissingMessageSequences != null) {
+                            list2 = Lists.newArrayList(Splitter.on(",").split(otherDeviceMissingMessageSequences));
+                        }
+                        List<String> missingSequencesToAsk = new ArrayList<>(CollectionUtils.subtract(list1, list2));
+                        if (missingSequencesToAsk != null && missingSequencesToAsk.size() > 0) {
+                            infoFromOtherDevice.setMissingMessages(StringUtils.join(missingSequencesToAsk, ","));
+                        }
                         infoFromOtherDevice.setStartingSequence(infoFromMyDevice.getSequence().longValue() + 1);
                     }
                 }
@@ -547,13 +622,28 @@ public class MulticastManager {
 
             Collection<HandShakingInfo> values = uniqueHandShakeInfosReceived.values();
             Iterator itValues = values.iterator();
-            if (itValues.hasNext()) {
+            while (itValues.hasNext()) {
                 HandShakingInfo t = (HandShakingInfo) itValues.next();
                 Log.d(TAG, "validating : " + t.getUserId() + " " + t.getDeviceId() + " " + t.getStartingSequence() + " " + t.getSequence());
-                if (t.getStartingSequence() == null) {
-                    valuesToSend.add(t);
+
+                if (t.getMissingMessages() != null && t.getMissingMessages().length() > 0) {
+
+                    List<String> missingMessages = Lists.newArrayList(Splitter.on(",").split(t.getMissingMessages()));
+                    for (String m : missingMessages) {
+                        HandShakingInfo n = new HandShakingInfo(t.getUserId(), t.getDeviceId(), t.getSequence(), null);
+                        n.setFrom(t.getFrom());
+                        n.setStartingSequence(Long.valueOf(m));
+                        n.setSequence(Long.valueOf(m));
+                        valuesToSend.add(n);
+                    }
                 }
-                if (t.getStartingSequence() != null && t.getStartingSequence().longValue() <= t.getSequence().longValue()) {
+
+
+                if (t.getStartingSequence() == null) {
+                    t.setMissingMessages(null);
+                    valuesToSend.add(t);
+                } else if (t.getStartingSequence() != null && t.getStartingSequence().longValue() <= t.getSequence().longValue()) {
+                    t.setMissingMessages(null);
                     valuesToSend.add(t);
                 }
             }
@@ -561,6 +651,9 @@ public class MulticastManager {
         }
     }
 
+    /*
+        only for testing
+     */
     public List<String> computeSyncInformation() {
         List<String> computedMessages = new CopyOnWriteArrayList<String>();
 
