@@ -119,7 +119,7 @@ public class P2PDBApiImpl {
         try {
             if ((userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) || message.messageType.equals("Photo")) {
                 Log.i(TAG, "messageReceived intent constructing for user" + userId);
-                //FloresPlugin.onMessageReceived(message);
+                FloresPlugin.onMessageReceived(message);
                 //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
                 Log.i(TAG, "messageReceived intent sent successfully");
             }
