@@ -144,9 +144,19 @@ public class P2PDBApiImpl {
         Log.i(TAG, "got Sync sequence:" + message.sequence);
         Log.i(TAG, "got Sync message:" + message.message);
         Long lastValidSequence = db.p2pSyncDao().fetchMinValidSequenceByUserAndDevice(message.getUserId(), message.getDeviceId(), message.sequence);
-        //Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> got last valid sequence:" + lastValidSequence.longValue());
+        Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> got last valid sequence:" + lastValidSequence.longValue());
         if(lastValidSequence != null) {
             for (int i = lastValidSequence.intValue() + 1; i < message.sequence; i++) {
+                P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
+                Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
+                Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> inserted out of sync message userId:" + message.userId + " deviceId:" + message.deviceId + "sequence:" + i + "messageType:" + DBSyncManager.MessageTypes.MISSING.type());
+                Long existingId = db.p2pSyncDao().findId(message.userId, message.deviceId, message.sequence);
+                missingP2P.id = existingId;
+                db.p2pSyncDao().insertP2PSyncInfo(missingP2P);
+                manager.notifyUI(message.message + "inserted ----> missing message with sequence:" + i, message.getSender(), LOG_TYPE);
+            }
+        } else {
+            for (int i = 1; i < message.sequence; i++) {
                 P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
                 Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
                 Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> inserted out of sync message userId:" + message.userId + " deviceId:" + message.deviceId + "sequence:" + i + "messageType:" + DBSyncManager.MessageTypes.MISSING.type());
