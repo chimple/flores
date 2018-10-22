@@ -1001,10 +1001,11 @@ class P2PSyncInfoDeserializer implements JsonDeserializer<P2PSyncInfo> {
                 String dateString = jsonCreatedAt.getAsString();
                 DateFormat readFormat = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
                 createdAt = readFormat.parse(dateString);
+                Log.d(TAG, "created at from json:" + createdAt);
             } catch (Exception e) {
-                e.printStackTrace();
-            }
-            createdAt = new Date();
+                createdAt = new Date();
+                e.printStackTrace();            
+            }            
         }
 
         final P2PSyncInfo p2PSyncInfo = new P2PSyncInfo(userId, deviceId, sequence, recipientUserId, receivedMessage, messageType, createdAt);
