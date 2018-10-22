@@ -945,7 +945,7 @@ public class P2PDBApiImpl {
 
 
 class P2PSyncInfoDeserializer implements JsonDeserializer<P2PSyncInfo> {
-
+    private static final String TAG = P2PSyncInfoDeserializer.class.getName();
     public P2PSyncInfo deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
 
