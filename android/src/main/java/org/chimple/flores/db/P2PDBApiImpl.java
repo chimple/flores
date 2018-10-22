@@ -144,9 +144,9 @@ public class P2PDBApiImpl {
             Log.i(TAG, "got Sync deviceId:" + message.deviceId);
             Log.i(TAG, "got Sync sequence:" + message.sequence);
             Log.i(TAG, "got Sync message:" + message.message);
-            Long lastValidSequence = db.p2pSyncDao().fetchMinValidSequenceByUserAndDevice(message.getUserId(), message.getDeviceId(), message.sequence);
-            Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> got last valid sequence:" + lastValidSequence.longValue());
+            Long lastValidSequence = db.p2pSyncDao().fetchMinValidSequenceByUserAndDevice(message.getUserId(), message.getDeviceId(), message.sequence);            
             if(lastValidSequence != null) {
+                Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> got last valid sequence:" + lastValidSequence.longValue());
                 for (int i = lastValidSequence.intValue() + 1; i < message.sequence; i++) {
                     P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
                     Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
