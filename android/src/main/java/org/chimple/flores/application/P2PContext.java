@@ -8,6 +8,8 @@ import android.net.ConnectivityManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.content.SharedPreferences;
+import org.chimple.flores.db.AppDatabase;
+import org.chimple.flores.multicast.MulticastManager;
 
 import static org.chimple.flores.multicast.MulticastManager.multiCastConnectionChangedEvent;
 
@@ -16,7 +18,7 @@ public class P2PContext {
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
     public static final String MULTICAST_IP_ADDRESS = "232.1.1.0";
-    public static final String MULTICAST_IP_PORT = "4456";
+    public static final String MULTICAST_IP_PORT = "4457";
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
@@ -58,6 +60,8 @@ public class P2PContext {
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(networkChangeReceiver, intentFilter);
         instance.context = context;
+        AppDatabase.getInstance(context);
+        MulticastManager.getInstance(context);
         initialized = true;
 
     }
