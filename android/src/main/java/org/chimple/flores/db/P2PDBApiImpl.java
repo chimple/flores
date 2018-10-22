@@ -129,6 +129,7 @@ public class P2PDBApiImpl {
                 || userId.equals(message.getRecipientUserId()))) 
                 || message.messageType.equals("Photo")) {
                 Log.i(TAG, "messageReceived intent constructing for user" + userId);
+                this.appendLog("messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
                 FloresPlugin.onMessageReceived(message);
                 //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
                 Log.i(TAG, "messageReceived intent sent successfully");
@@ -188,6 +189,7 @@ public class P2PDBApiImpl {
                     || message.messageType.equals("Photo")) {
                         Log.i(TAG, "messageReceived intent constructing for user" + userId);
                        FloresPlugin.onMessageReceived(message);
+                       this.appendLog("messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
                         //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
                         Log.i(TAG, "messageReceived intent sent successfully");
                     }
@@ -207,34 +209,38 @@ public class P2PDBApiImpl {
 
     public void appendLog(String text)
     {
-        String path = Environment.getExternalStorageDirectory().getPath() + "/" + "log.file";
-        File logFile = new File(path);
-        
-        if (!logFile.exists())
-        {
+        try {
+            String path = Environment.getExternalStorageDirectory().getPath() + "/" + "log.file";
+            File logFile = new File(path);
+            
+            if (!logFile.exists())
+            {
+                try
+                {
+                    logFile.createNewFile();
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
             try
             {
-                logFile.createNewFile();
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(text);
+                buf.newLine();
+                buf.close();
             }
             catch (IOException e)
             {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
-        try
-        {
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append(text);
-            buf.newLine();
-            buf.close();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
+        } catch (Exception e) {
             e.printStackTrace();
-        }
+        }    
     }
 
     public P2PSyncInfo fetchByUserAndDeviceAndSequence(String userId, String deviceId, Long sequence) {
