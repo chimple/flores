@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import android.os.Environment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -207,7 +207,9 @@ public class P2PDBApiImpl {
 
     public void appendLog(String text)
     {
-        File logFile = new File("sdcard/log.file");
+        String path = Environment.getExternalStorageDirectory().getPath() + "/" + "log.file";
+        File logFile = new File(path);
+        
         if (!logFile.exists())
         {
             try
