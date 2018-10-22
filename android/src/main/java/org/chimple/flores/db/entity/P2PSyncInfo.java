@@ -92,6 +92,7 @@ public class P2PSyncInfo implements Serializable {
         this.createdAt = createdAt;
     }
 
+    @Expose(serialize = false, deserialize = false)
     @ColumnInfo(name = "logged_at")
     public Date loggedAt;
 
