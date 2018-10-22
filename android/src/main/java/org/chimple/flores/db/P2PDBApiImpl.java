@@ -926,6 +926,8 @@ public class P2PDBApiImpl {
                 userInfo.setMessage(message);
                 userInfo.setMessageType(DBSyncManager.MessageTypes.PHOTO.type());
             }
+            userInfo.setLoggedAt(new Date());
+            userInfo.setCreatedAt(new Date());
             db.p2pSyncDao().insertP2PSyncInfo(userInfo);
             return true;
 
