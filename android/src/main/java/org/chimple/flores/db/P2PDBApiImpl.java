@@ -143,68 +143,71 @@ public class P2PDBApiImpl {
     }
 
     public String persistOutOfSyncP2PSyncMessage(P2PSyncInfo message) {
-        try {
-            Log.i(TAG, "got Sync userId:" + message.userId);
-            Log.i(TAG, "got Sync deviceId:" + message.deviceId);
-            Log.i(TAG, "got Sync sequence:" + message.sequence);
-            Log.i(TAG, "got Sync message:" + message.message);
-            Long lastValidSequence = db.p2pSyncDao().fetchMinValidSequenceByUserAndDevice(message.getUserId(), message.getDeviceId(), message.sequence);            
-            if(lastValidSequence != null) {
-                Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> got last valid sequence:" + lastValidSequence.longValue());
-                for (int i = lastValidSequence.intValue() + 1; i < message.sequence; i++) {
-                    P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
-                    Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
-                    Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> inserted out of sync message userId:" + message.userId + " deviceId:" + message.deviceId + "sequence:" + i + "messageType:" + DBSyncManager.MessageTypes.MISSING.type());
-                    Long existingId = db.p2pSyncDao().findId(message.userId, message.deviceId, message.sequence);
-                    missingP2P.id = existingId;
-                    db.p2pSyncDao().insertP2PSyncInfo(missingP2P);
-                    manager.notifyUI(message.message + "inserted ----> missing message with sequence:" + i, message.getSender(), LOG_TYPE);
-                }
-            } else {
-                for (int i = 1; i < message.sequence; i++) {
-                    P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
-                    Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
-                    Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> inserted out of sync message userId:" + message.userId + " deviceId:" + message.deviceId + "sequence:" + i + "messageType:" + DBSyncManager.MessageTypes.MISSING.type());
-                    Long existingId = db.p2pSyncDao().findId(message.userId, message.deviceId, message.sequence);
-                    missingP2P.id = existingId;
-                    db.p2pSyncDao().insertP2PSyncInfo(missingP2P);
-                    manager.notifyUI(message.message + "inserted ----> missing message with sequence:" + i, message.getSender(), LOG_TYPE);
-                }
-            }
-            
-    
-            P2PSyncInfo found = db.p2pSyncDao().fetchByUserAndDeviceAndSequence(message.getUserId(), message.getDeviceId(), message.sequence);
-            if (found == null) {
-                db.p2pSyncDao().insertP2PSyncInfo(message);
-                Log.i(TAG, "inserted data" + message);
-                manager.getAllSyncInfosReceived().add(message.getDeviceId() + "_" + message.getUserId() + "_" + Long.valueOf(message.getSequence().longValue()));
-                manager.notifyUI(message.message + "inserted ----> out of sync with sequence:" + message.getSequence(), message.getSender(), CONSOLE_TYPE);
-                SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
-                String userId = pref.getString("USER_ID", null); // getting String
-                try {
-                    if ((userId != null 
-                    && message.recipientUserId != null 
-                    && (message.getRecipientUserId().equals("0") 
-                    || userId.equals(message.getRecipientUserId()))) 
-                    || message.messageType.equals("Photo")) {
-                        Log.i(TAG, "messageReceived intent constructing for user" + userId);
-                       FloresPlugin.onMessageReceived(message);
-                       this.appendLog("messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
-                        //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
-                        Log.i(TAG, "messageReceived intent sent successfully");
+        if(message == null) {
+         return null;
+        } else {
+            try {            
+                Log.i(TAG, "got Sync userId:" + message.userId);
+                Log.i(TAG, "got Sync deviceId:" + message.deviceId);
+                Log.i(TAG, "got Sync sequence:" + message.sequence);
+                Log.i(TAG, "got Sync message:" + message.message);
+                Long lastValidSequence = db.p2pSyncDao().fetchMinValidSequenceByUserAndDevice(message.getUserId(), message.getDeviceId(), message.sequence);            
+                if(lastValidSequence != null) {
+                    Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> got last valid sequence:" + lastValidSequence.longValue());
+                    for (int i = lastValidSequence.intValue() + 1; i < message.sequence; i++) {
+                        P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
+                        Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
+                        Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> inserted out of sync message userId:" + message.userId + " deviceId:" + message.deviceId + "sequence:" + i + "messageType:" + DBSyncManager.MessageTypes.MISSING.type());
+                        Long existingId = db.p2pSyncDao().findId(message.userId, message.deviceId, message.sequence);
+                        missingP2P.id = existingId;
+                        db.p2pSyncDao().insertP2PSyncInfo(missingP2P);
+                        manager.notifyUI(message.message + "inserted ----> missing message with sequence:" + i, message.getSender(), LOG_TYPE);
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    Log.i(TAG, "messageReceived intent failed");
+                } else {
+                    for (int i = 1; i < message.sequence; i++) {
+                        P2PSyncInfo missingP2P = new P2PSyncInfo(message.userId, message.deviceId, new Long(i), message.recipientUserId, null, DBSyncManager.MessageTypes.MISSING.type(), message.getCreatedAt());
+                        Log.i(TAG, "inserted out of sync message" + missingP2P.toString());
+                        Log.i(TAG, "in persistOutOfSyncP2PSyncMessage --> inserted out of sync message userId:" + message.userId + " deviceId:" + message.deviceId + "sequence:" + i + "messageType:" + DBSyncManager.MessageTypes.MISSING.type());
+                        Long existingId = db.p2pSyncDao().findId(message.userId, message.deviceId, message.sequence);
+                        missingP2P.id = existingId;
+                        db.p2pSyncDao().insertP2PSyncInfo(missingP2P);
+                        manager.notifyUI(message.message + "inserted ----> missing message with sequence:" + i, message.getSender(), LOG_TYPE);
+                    }
                 }
-            } else {
-                Log.i(TAG, "existing data" + message);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                
         
-        return message.message;
+                P2PSyncInfo found = db.p2pSyncDao().fetchByUserAndDeviceAndSequence(message.getUserId(), message.getDeviceId(), message.sequence);
+                if (found == null) {
+                    db.p2pSyncDao().insertP2PSyncInfo(message);
+                    Log.i(TAG, "inserted data" + message);
+                    manager.getAllSyncInfosReceived().add(message.getDeviceId() + "_" + message.getUserId() + "_" + Long.valueOf(message.getSequence().longValue()));
+                    manager.notifyUI(message.message + "inserted ----> out of sync with sequence:" + message.getSequence(), message.getSender(), CONSOLE_TYPE);
+                    SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
+                    String userId = pref.getString("USER_ID", null); // getting String
+                    try {
+                        if ((userId != null 
+                        && message.recipientUserId != null 
+                        && (message.getRecipientUserId().equals("0") 
+                        || userId.equals(message.getRecipientUserId()))) 
+                        || message.messageType.equals("Photo")) {
+                            Log.i(TAG, "messageReceived intent constructing for user" + userId);
+                           FloresPlugin.onMessageReceived(message);
+                           this.appendLog("messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
+                            //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
+                            Log.i(TAG, "messageReceived intent sent successfully");
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Log.i(TAG, "messageReceived intent failed");
+                    }
+                } else {
+                    Log.i(TAG, "existing data" + message);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }           
+            return message.message;
+        }    
     }
 
     public void appendLog(String text)
