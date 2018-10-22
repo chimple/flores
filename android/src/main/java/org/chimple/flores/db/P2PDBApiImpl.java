@@ -119,7 +119,12 @@ public class P2PDBApiImpl {
         SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String
         try {
-            if ((userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) || message.messageType.equals("Photo")) {
+            // one more recipient id 0
+            if ((userId != null 
+                && message.recipientUserId != null 
+                && (message.getRecipientUserId().equals("0") 
+                || userId.equals(message.getRecipientUserId()))) 
+                || message.messageType.equals("Photo")) {
                 Log.i(TAG, "messageReceived intent constructing for user" + userId);
                 FloresPlugin.onMessageReceived(message);
                 //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
@@ -162,7 +167,11 @@ public class P2PDBApiImpl {
             SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
             String userId = pref.getString("USER_ID", null); // getting String
             try {
-                if ((userId != null && message.recipientUserId != null && userId.equals(message.getRecipientUserId())) || message.messageType.equals("Photo")) {
+                if ((userId != null 
+                && message.recipientUserId != null 
+                && (message.getRecipientUserId().equals("0") 
+                || userId.equals(message.getRecipientUserId()))) 
+                || message.messageType.equals("Photo")) {
                     Log.i(TAG, "messageReceived intent constructing for user" + userId);
                    FloresPlugin.onMessageReceived(message);
                     //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
