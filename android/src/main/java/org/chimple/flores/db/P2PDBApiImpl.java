@@ -447,11 +447,6 @@ public class P2PDBApiImpl {
 
     public String serializeHandShakingMessage(boolean needAcknowlegement) {
         try {
-            P2PSyncInfo[] all = db.p2pSyncDao().refreshAllMessages();
-            for (P2PSyncInfo a : all) {
-                Log.d(TAG, "Print message for user id:" + a.userId + " deviceId:" + a.deviceId + " message:" + a.message + " messageType:" + a.messageType + " sequence:" + a.sequence);
-            }
-
             List<HandShakingInfo> handShakingInfos = new ArrayList<HandShakingInfo>();
             P2PLatestInfoByUserAndDevice[] infos = db.p2pSyncDao().getLatestInfoAvailableByUserIdAndDeviceId();
             for (P2PLatestInfoByUserAndDevice info : infos) {

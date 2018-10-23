@@ -34,8 +34,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static synchronized AppDatabase getInstance(Context context) {
         if (sInstance == null) {
             sInstance = Room
-                    .databaseBuilder(context.getApplicationContext(), AppDatabase.class, DATABASE_NAME)
-                    .allowMainThreadQueries()
+                    .databaseBuilder(context.getApplicationContext(), AppDatabase.class, DATABASE_NAME)                    
                     .build();
 //            DatabaseInitializer.populateAsync(sInstance, context, P2PDBApiImpl.getInstance(context));
         }
