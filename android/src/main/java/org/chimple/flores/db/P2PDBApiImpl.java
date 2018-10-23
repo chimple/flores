@@ -106,6 +106,9 @@ public class P2PDBApiImpl {
     }
 
     public String persistP2PSyncMessage(P2PSyncInfo message) {
+        if(message == null) {
+            return null;
+        }
         Log.i(TAG, "got Sync userId:" + message.userId);
         Log.i(TAG, "got Sync deviceId:" + message.deviceId);
         Log.i(TAG, "got Sync sequence:" + message.sequence);
