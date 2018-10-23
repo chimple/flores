@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import android.os.AsyncTask;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -61,7 +61,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
   }
 
   @Override
-  public void onMethodCall(MethodCall call, Result result) {
+  public void onMethodCall(final MethodCall call, final Result result) {
       switch (call.method) {
           case "getUsers":
           {
@@ -87,13 +87,18 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           }          
           case "addUser":
           {
-              Map<String, String> arg = (Map<String, String>)call.arguments;
-              String userId = arg.get("userId");
-              String deviceId = arg.get("deviceId");
-              String message = arg.get("message");
-              boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);              
-              result.success(status);
-              break;
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Map<String, String> arg = (Map<String, String>)call.arguments;
+                    String userId = arg.get("userId");
+                    String deviceId = arg.get("deviceId");
+                    String message = arg.get("message");
+                    boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);              
+                    result.success(status);                    
+                }
+            });
+            break;
           }
           case "start":
           {           
