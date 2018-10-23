@@ -57,51 +57,99 @@ public class DBSyncManager {
 
 
     public boolean addMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);        
+            }
+        });    
     }
 
 
     public boolean addMessage(String userId, String recipientId, String messageType, String message) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.addMessage(userId, recipientId, messageType, message);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.addMessage(userId, recipientId, messageType, message);        
+            }
+        });
+
     }
 
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         Log.i(TAG, "Called getUsers");
-
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.getUsers();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.getUsers();        
+            }
+        });
     }
 
     public List<P2PUserIdMessage> fetchLatestMessagesByMessageType(String messageType, List<String> userIds) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.fetchLatestMessagesByMessageType(messageType, userIds);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.fetchLatestMessagesByMessageType(messageType, userIds);        
+            }
+        });
     }
 
     public List<P2PSyncInfo> getConversations(String firstUserId, String secondUserId, String messageType) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.getConversations(firstUserId, secondUserId, messageType);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.getConversations(firstUserId, secondUserId, messageType);        
+            }
+        });
+
     }
 
     public List<P2PSyncInfo> getLatestConversations(String firstUserId, String secondUserId, String messageType) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.getLatestConversations(firstUserId, secondUserId, messageType);
+                    }
+            });
     }
 
     public List<P2PSyncInfo> getLatestConversations(String firstUserId, String messageType) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.getLatestConversations(firstUserId, messageType);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.getLatestConversations(firstUserId, messageType);        
+            }
+        });
+
     }
 
     public boolean upsertUser(String userId, String deviceId, String fileName) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.upsertProfileForUserIdAndDevice(userId, deviceId, fileName);        
+            }
+        });
     }
 
     public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
-        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
-        return p2pdbapi.getLatestConversationsByUser(firstUserId);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+                return p2pdbapi.getLatestConversationsByUser(firstUserId);        
+            }
+        });
+
     }
 
     public boolean loggedInUser(String userId, String deviceId) {
