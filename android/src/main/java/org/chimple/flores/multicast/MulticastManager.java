@@ -427,12 +427,17 @@ public class MulticastManager {
 
                             public void onFinish() {
                                 Log.d(TAG, "waitForHandShakingMessagesTimer finished ... processing sync information ...");
-                                instance.generateSyncInfoPullRequest(instance.getAllHandShakeMessagesInCurrentLoop());
-                                if (waitForHandShakingMessagesTimer != null) {
-                                    waitForHandShakingMessagesTimer.cancel();
-                                    Log.d(TAG, "waitForHandShakingMessagesTimer => reset to cancelled");
-                                    waitForHandShakingMessagesTimer = null;
-                                }
+                                AsyncTask.execute(new Runnable() {
+                                  @Override
+                                      public void run() {
+                                        instance.generateSyncInfoPullRequest(instance.getAllHandShakeMessagesInCurrentLoop());
+                                        if (waitForHandShakingMessagesTimer != null) {
+                                            waitForHandShakingMessagesTimer.cancel();
+                                            Log.d(TAG, "waitForHandShakingMessagesTimer => reset to cancelled");
+                                            waitForHandShakingMessagesTimer = null;
+                                        }
+                                      }
+                                  });
                             }
                         }.start();
                     }
@@ -814,7 +819,14 @@ public class MulticastManager {
     }
 
     public void sendFindBuddyMessage() {
-        instance.sendInitialHandShakingMessage(true);
+            AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        instance.sendInitialHandShakingMessage(true);                
+                    }
+            });
+
+        
     }
 
     public Map<String, HandShakingMessage> getAllHandShakeMessagesInCurrentLoop() {

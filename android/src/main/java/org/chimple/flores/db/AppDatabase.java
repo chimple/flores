@@ -21,7 +21,7 @@ import org.chimple.flores.db.entity.P2PSyncInfo;
         DateConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
     public static final String DATABASE_NAME = "p2p_db";
-    public static final int SYNC_NUMBER_OF_LAST_MESSAGES = 5;
+    public static final int SYNC_NUMBER_OF_LAST_MESSAGES = 15;
 
     /**
      * The only instance
@@ -35,7 +35,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public static synchronized AppDatabase getInstance(Context context) {
         if (sInstance == null) {
             sInstance = Room
-                    .databaseBuilder(context.getApplicationContext(), AppDatabase.class, DATABASE_NAME)                    
+                    .databaseBuilder(context.getApplicationContext(), AppDatabase.class, DATABASE_NAME)                                    
+                    //.allowMainThreadQueries()
                     .build();
 //            DatabaseInitializer.populateAsync(sInstance, context, P2PDBApiImpl.getInstance(context));
         }
