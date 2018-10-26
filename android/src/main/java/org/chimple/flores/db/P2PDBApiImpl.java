@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.chimple.flores.db.entity.P2PUserIdDeviceId;
 import org.chimple.flores.application.P2PContext;
 import org.chimple.flores.db.entity.HandShakingInfo;
 import org.chimple.flores.db.entity.HandShakingInfoDeserializer;
@@ -899,28 +900,22 @@ public class P2PDBApiImpl {
         intent.putExtra(NEW_MESSAGE_ADDED, info);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
-        long totalMessages = db.p2pSyncDao().totalMessages();
-        Log.d(TAG, "totalMessages" + totalMessages);
-        if (totalMessages >= 1.1 * PURGE_MESSAGE_LIMIT + SYNC_NUMBER_OF_LAST_MESSAGES) {
-            String userId = P2PContext.getLoggedInUser();
-            String deviceId = P2PContext.getCurrentDevice();
-            Long latestUserProfileId = db.p2pSyncDao().findLatestProfilePhotoId(userId, deviceId);
-            List<Long> otherProfileIds = Arrays.asList(db.p2pSyncDao().findLatestProfilePhotoIdForOtherUsers(userId, deviceId));
-            List<Long> topIdsToRetain = Arrays.asList(db.p2pSyncDao().findTopMessagesToRetain((long) 1.1 * SYNC_NUMBER_OF_LAST_MESSAGES));
-
+        long purgeLimit = PURGE_MESSAGE_LIMIT + SYNC_NUMBER_OF_LAST_MESSAGES;
+        List<P2PUserIdDeviceId> purgeSenders = db.p2pSyncDao().findSenderToPurge(purgeLimit);
+        for (P2PUserIdDeviceId s : purgeSenders) {
+            Long latestUserProfileId = db.p2pSyncDao().findLatestProfilePhotoId(s.userId, s.deviceId);
+            List<Long> topIdsToRetain = Arrays.asList(db.p2pSyncDao().findTopMessagesToRetain(SYNC_NUMBER_OF_LAST_MESSAGES));
             List<Long> ids = new ArrayList<Long>();
-            if(latestUserProfileId != null) {
+            if (latestUserProfileId != null) {
                 ids.add(latestUserProfileId);
             }
-            ids.addAll(otherProfileIds);
             ids.addAll(topIdsToRetain);
 
             String strIds = StringUtils.join(ids, ',');
             Log.d(TAG, "ids to retain:" + strIds);
             db.p2pSyncDao().purgeMessages(ids);
-            // Intent intentR = new Intent(refreshDevice);
-            // LocalBroadcastManager.getInstance(context).sendBroadcast(intentR);
-        }
+
+        }        
 
     }
 
