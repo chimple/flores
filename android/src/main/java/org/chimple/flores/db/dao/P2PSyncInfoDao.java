@@ -104,4 +104,19 @@ public interface P2PSyncInfoDao {
 
     @Query("SELECT p2p.* from (SELECT session_id, max(step) as step from P2PSyncInfo where status = 1 group by session_id) tmp, P2PSyncInfo p2p where p2p.session_id = tmp.session_id and p2p.step = tmp.step and p2p.user_id = :userId")
     public List<P2PSyncInfo> fetchLatestConversationsByUser(String userId);
+
+    @Query("SELECT count(*) FROM P2PSyncInfo where message_type != 'missing'")
+    public Long totalMessages();    
+
+    @Query("SELECT max(id) FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId and message_type='Photo'")
+    public Long findLatestProfilePhotoId(String userId, String deviceId);
+
+    @Query("SELECT id FROM P2PSyncInfo WHERE user_id != :userId AND device_id != :deviceId and message_type='Photo'")
+    public Long[] findLatestProfilePhotoIdForOtherUsers(String userId, String deviceId);
+
+    @Query("SELECT id FROM P2PSyncInfo order by id desc limit :limit")
+    public Long[] findTopMessagesToRetain(long limit);
+
+    @Query("DELETE FROM P2PSyncInfo WHERE id not in (:ids)")
+    public void purgeMessages(List<Long> ids);
 }

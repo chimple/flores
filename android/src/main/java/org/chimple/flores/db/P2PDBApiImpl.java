@@ -68,6 +68,7 @@ import static org.chimple.flores.application.P2PContext.NEW_MESSAGE_ADDED;
 import static org.chimple.flores.application.P2PContext.SHARED_PREF;
 import static org.chimple.flores.application.P2PContext.newMessageAddedOnDevice;
 import static org.chimple.flores.db.AppDatabase.SYNC_NUMBER_OF_LAST_MESSAGES;
+import static org.chimple.flores.db.AppDatabase.PURGE_MESSAGE_LIMIT;
 
 
 import org.chimple.flores.FloresPlugin;
@@ -897,6 +898,29 @@ public class P2PDBApiImpl {
         Intent intent = new Intent(newMessageAddedOnDevice);
         intent.putExtra(NEW_MESSAGE_ADDED, info);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+        long totalMessages = db.p2pSyncDao().totalMessages();
+        Log.d(TAG, "totalMessages" + totalMessages);
+        if (totalMessages >= 1.1 * PURGE_MESSAGE_LIMIT + SYNC_NUMBER_OF_LAST_MESSAGES) {
+            String userId = P2PContext.getLoggedInUser();
+            String deviceId = P2PContext.getCurrentDevice();
+            Long latestUserProfileId = db.p2pSyncDao().findLatestProfilePhotoId(userId, deviceId);
+            List<Long> otherProfileIds = Arrays.asList(db.p2pSyncDao().findLatestProfilePhotoIdForOtherUsers(userId, deviceId));
+            List<Long> topIdsToRetain = Arrays.asList(db.p2pSyncDao().findTopMessagesToRetain((long) 1.1 * SYNC_NUMBER_OF_LAST_MESSAGES));
+
+            List<Long> ids = new ArrayList<Long>();
+            if(latestUserProfileId != null) {
+                ids.add(latestUserProfileId);
+            }
+            ids.addAll(otherProfileIds);
+            ids.addAll(topIdsToRetain);
+
+            String strIds = StringUtils.join(ids, ',');
+            Log.d(TAG, "ids to retain:" + strIds);
+            db.p2pSyncDao().purgeMessages(ids);
+            // Intent intentR = new Intent(refreshDevice);
+            // LocalBroadcastManager.getInstance(context).sendBroadcast(intentR);
+        }
 
     }
 
