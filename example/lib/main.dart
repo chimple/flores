@@ -100,7 +100,7 @@ class FriendScreen extends StatelessWidget {
       body: ListView(
           children: AppStateContainer.of(context)
               .users
-              .where((u) => u['userId'] != userId)
+              .where((u) => (u['userId'] != null && u['userId'] != userId))
               .map((u) => Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RaisedButton(
@@ -113,7 +113,7 @@ class FriendScreen extends StatelessWidget {
                                   friendName: u['message'],
                                 )));
                       },
-                      child: Text(u['message']),
+                      child: Text(u['message'] ?? ''),
                     ),
                   ))
               .toList(growable: false)),
