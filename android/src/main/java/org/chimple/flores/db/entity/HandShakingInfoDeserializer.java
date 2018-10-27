@@ -46,18 +46,6 @@ public class HandShakingInfoDeserializer implements JsonDeserializer<HandShaking
             String missingMessages1 = jsonMissingMessages.getAsString();
             char[] bits = missingMessages1.toCharArray();
 
-//            for (int i = bits.length - 1; i > -1; i--) {
-//                char b = bits[i];
-//                if(b == '0') {
-//                    if(sequence.intValue() > SYNC_NUMBER_OF_LAST_MESSAGES) {
-//                        missingMessages.append(sequence.intValue() - SYNC_NUMBER_OF_LAST_MESSAGES + i);
-//                    } else {
-//                        missingMessages.append(sequence.intValue() -  i);
-//                    }
-//                    missingMessages.append(",");
-//                }
-//            }
-
             for (int i = 0; i < bits.length; i++) {
                 char b = bits[i];
                 if(b == '0' && i < sequence) {
@@ -75,7 +63,14 @@ public class HandShakingInfoDeserializer implements JsonDeserializer<HandShaking
             result = missingMessages.toString();
         }
 
-        final HandShakingInfo handShakingInfo = new HandShakingInfo(userId, deviceId, sequence, result);
+        Long profileSequence = 0L;
+        final JsonElement jsonProfileSequence = jsonObject.get("profileSequence");
+        if (jsonProfileSequence != null) {
+            profileSequence = jsonProfileSequence.getAsLong();
+        }
+
+
+        final HandShakingInfo handShakingInfo = new HandShakingInfo(userId, deviceId, sequence, result, profileSequence);
         return handShakingInfo;
     }
 }
