@@ -30,13 +30,13 @@ public class SyncRequestMessageDeserializer implements JsonDeserializer<SyncInfo
             md = jsonMd.getAsString();
         }
 
-        final JsonElement jsonSender = jsonObject.get("sender");
+        final JsonElement jsonSender = jsonObject.get("s");
         String sender = "";
         if (jsonSender != null) {
             sender = jsonSender.getAsString();
         }
 
-        SyncInfoItem[] infos = context.deserialize(jsonObject.get("items"), SyncInfoItem[].class);
+        SyncInfoItem[] infos = context.deserialize(jsonObject.get("l"), SyncInfoItem[].class);
         final SyncInfoRequestMessage message = new SyncInfoRequestMessage(sender, md, new ArrayList(Arrays.asList(infos)));
         return message;
     }

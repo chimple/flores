@@ -23,24 +23,31 @@ import java.util.List;
 public class HandShakingInfo {
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("u")
     private String userId;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("d")
     private String deviceId;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("s")
     private Long sequence;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("ss")
     private Long startingSequence;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("f")
     private String from;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("ms")
     private String missingMessages;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("ps")
     private Long profileSequence;
 
 
