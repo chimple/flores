@@ -109,7 +109,7 @@ public interface P2PSyncInfoDao {
     @Query("SELECT count(*) FROM P2PSyncInfo where message_type != 'missing'")
     public Long totalMessages();    
 
-    @Query("SELECT max(id) FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId and message_type='Photo'")
+    @Query("SELECT max(sequence) FROM P2PSyncInfo WHERE user_id=:userId AND device_id=:deviceId and message_type='Photo'")
     public Long findLatestProfilePhotoId(String userId, String deviceId);
 
     @Query("select user_id, device_id from P2PSyncInfo where message_type is not null and message_type != 'Photo' group by sender having count(*) > :purgeLimit")
