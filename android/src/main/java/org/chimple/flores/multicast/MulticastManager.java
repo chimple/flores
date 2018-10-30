@@ -114,7 +114,7 @@ public class MulticastManager {
         instance = null;
     }
 
-    public void startListening() {
+    public synchronized void startListening() {
         if (!isListening) {
             setWifiLockAcquired(true);
             this.multicastListenerThread = new MulticastListenerThread(this.context, getMulticastIP(), getMulticastPort());
@@ -127,7 +127,7 @@ public class MulticastManager {
         return isListening;
     }
 
-    public void stopListening() {
+    public synchronized void stopListening() {
         if (isListening) {
             Log.d(TAG, "stopListening called");
             isListening = false;
