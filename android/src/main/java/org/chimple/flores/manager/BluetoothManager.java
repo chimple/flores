@@ -279,6 +279,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
     }
 
     public void startSync() {
+        Log.d(TAG, "in startSync : should start sync:" + !instance.isSyncStarted.get());
         if (!instance.isSyncStarted.get()) {
             if (instance.immediateSyncActivityTimer != null) {
                 instance.immediateSyncActivityTimer.cancel();
@@ -1444,15 +1445,22 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
 
     public void startNextDeviceToSync() {
         synchronized (BluetoothManager.class) {
-            instance.startListener();
-            notifyUI("peerDevices has  ... " + instance.peerDevices.size(), "---------->", LOG_TYPE);
-            if (peerDevices != null && peerDevices.contains(instance.connectedAddress)) {
-                peerDevices.remove(instance.connectedAddress);
-                notifyUI("peerDevices removed ... " + instance.connectedAddress, "---------->", LOG_TYPE);
-                instance.connectedAddress = "";
+            if (instance.isBluetoothEnabled()) {
+                instance.startListener();
+                notifyUI("peerDevices has  ... " + instance.peerDevices.size(), "---------->", LOG_TYPE);
+                if (peerDevices != null && peerDevices.contains(instance.connectedAddress)) {
+                    peerDevices.remove(instance.connectedAddress);
+                    notifyUI("peerDevices removed ... " + instance.connectedAddress, "---------->", LOG_TYPE);
+                    instance.connectedAddress = "";
+                }
+                instance.startNextPolling();
+                notifyUI("startNextDeviceToSync ...", "---------->", LOG_TYPE);
+            } else {
+                if (instance.stopAllBlueToothActivityTimer != null) {
+                    instance.stopAllBlueToothActivityTimer.cancel();
+                    instance.stopAllBlueToothActivityTimer.start();
+                }
             }
-            instance.startNextPolling();
-            notifyUI("startNextDeviceToSync ...", "---------->", LOG_TYPE);
         }
     }
 }
