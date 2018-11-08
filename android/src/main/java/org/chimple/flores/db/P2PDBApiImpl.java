@@ -62,6 +62,7 @@ import org.chimple.flores.db.entity.SyncInfoRequestMessage;
 import org.chimple.flores.db.entity.SyncItemDeserializer;
 import org.chimple.flores.db.entity.SyncRequestMessageDeserializer;
 import org.chimple.flores.multicast.MulticastManager;
+import org.chimple.flores.db.entity.BtAddress;
 
 import static org.chimple.flores.application.P2PContext.CONSOLE_TYPE;
 import static org.chimple.flores.application.P2PContext.LOG_TYPE;
@@ -478,7 +479,8 @@ public class P2PDBApiImpl {
 
             Gson gson = this.registerHandShakingMessageBuilder();
             String reply = needAcknowlegement ? "true" : "false";
-            HandShakingMessage message = new HandShakingMessage(P2PContext.getCurrentDevice(), "handshaking", reply, handShakingInfos);
+            String bluetoothAddress = db.btInfoDao().getBluetoothAddress(P2PContext.getCurrentDevice());
+            HandShakingMessage message = new HandShakingMessage(P2PContext.getCurrentDevice(), "handshaking", reply, handShakingInfos, bluetoothAddress);
             Type handShakingType = new TypeToken<HandShakingMessage>() {
             }.getType();
             String json = gson.toJson(message, handShakingType);
@@ -1019,6 +1021,33 @@ public class P2PDBApiImpl {
 
     public List<P2PSyncInfo> getLatestConversationsByUser(String firstUserId) {
         return db.p2pSyncDao().fetchLatestConversationsByUser(firstUserId);
+    }
+
+    public List<String> fetchAllSyncedDevices() {
+        List<String> staticSupportedDevices = Arrays.asList(db.btInfoDao().fetchAllSyncedDevices());
+        return staticSupportedDevices;
+    }
+
+    public void saveBtAddress(String from, String btAddress) {
+        try {
+            db.beginTransaction();
+            String storedBlueToothAddress = db.btInfoDao().getBluetoothAddress(from);
+            if(storedBlueToothAddress != null && !storedBlueToothAddress.equalsIgnoreCase(btAddress))
+            {
+                BtAddress newAddress = new BtAddress(from, btAddress);
+                db.btInfoDao().insertBtInfo(newAddress);
+                db.setTransactionSuccessful();
+            } else {
+                BtAddress newAddress = new BtAddress(from, btAddress);
+                db.btInfoDao().insertBtInfo(newAddress);
+                db.setTransactionSuccessful();                
+            }
+            Log.d(TAG, "saving bt address: "  + storedBlueToothAddress + " for device id:" + from);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
     }
 }
 

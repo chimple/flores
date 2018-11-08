@@ -11,14 +11,12 @@ import android.content.SharedPreferences;
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
 
-import static org.chimple.flores.multicast.MulticastManager.multiCastConnectionChangedEvent;
-
 public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
     public static final String MULTICAST_IP_ADDRESS = "232.1.1.2";
-    public static final String MULTICAST_IP_PORT = "4456";
+    public static final String MULTICAST_IP_PORT = "4460";
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
@@ -28,6 +26,7 @@ public class P2PContext {
     public static final String REFRESH_DEVICE = "REFRESH_DEVICE";
     public static final String messageEvent = "message-event";
     public static final String SHARED_PREF = "shardPref";
+    public static final String multiCastConnectionChangedEvent = "multicast-connection-changed-event";
 
     private static final String TAG = P2PContext.class.getName();
     private static P2PContext instance;

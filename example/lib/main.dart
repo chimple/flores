@@ -6,6 +6,7 @@ import 'package:flores/flores.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+
 void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String deviceId = prefs.getString('deviceId');

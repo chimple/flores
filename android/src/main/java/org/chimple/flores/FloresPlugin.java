@@ -22,6 +22,7 @@ import io.flutter.plugin.common.PluginRegistry;
 
 import org.chimple.flores.application.P2PContext;
 import org.chimple.flores.db.DBSyncManager;
+import org.chimple.flores.manager.BluetoothManager;
 import org.chimple.flores.multicast.MulticastManager;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.P2PUserIdDeviceIdAndMessage;
@@ -100,8 +101,10 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     Map<String, String> arg = (Map<String, String>)call.arguments;
                     String userId = arg.get("userId");
                     String deviceId = arg.get("deviceId");
+                    Log.i(TAG, "addUser with user id: "+userId+ " and device id:" + deviceId);
                     String message = arg.get("message");
-                    boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);              
+                    boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
+                    String bluetoothAddress = BluetoothManager.getInstance(registrar.context()).getBluetoothMacAddress();                    DBSyncManager.getInstance(registrar.context()).saveBtAddress(deviceId, bluetoothAddress);
                     result.success(status);                    
                 }
             });

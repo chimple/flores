@@ -93,7 +93,6 @@ public class MulticastManager {
                 instance.registerMulticastBroadcasts();
                 instance.dbSyncManager = DBSyncManager.getInstance(context);
                 instance.p2PDBApiImpl = P2PDBApiImpl.getInstance(context);
-
                 instance.broadCastRefreshDevice();
             }
 
@@ -406,6 +405,9 @@ public class MulticastManager {
         notifyUI("handshaking message received", " ------> ", LOG_TYPE);
         //parse message and add to all messages
         HandShakingMessage handShakingMessage = instance.parseHandShakingMessage(message);
+        if (handShakingMessage.getBt() != null && handShakingMessage.getFrom() != null) {
+            instance.p2PDBApiImpl.saveBtAddress(handShakingMessage.getFrom(), handShakingMessage.getBt());
+        }        
         boolean shouldSendAck = shouldSendAckForHandShakingMessage(handShakingMessage);
 
         // send handshaking information if message received "from" first time

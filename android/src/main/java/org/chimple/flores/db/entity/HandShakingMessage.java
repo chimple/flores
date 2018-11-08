@@ -17,6 +17,12 @@ public class HandShakingMessage {
     @SerializedName("f")
     String from;
 
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName("bt")
+    String bt;
+
+    public String getBt() { return bt; }
+
     public String getFrom() { return from; }
 
     public String getReply() { return reply; }
@@ -33,11 +39,12 @@ public class HandShakingMessage {
     @SerializedName("i")
     List<HandShakingInfo> infos;
 
-    public HandShakingMessage(String from, String messageType, String reply, List<HandShakingInfo> infos) {
+    public HandShakingMessage(String from, String messageType, String reply, List<HandShakingInfo> infos, String bt) {
         this.messageType = messageType;
         this.infos = infos;
         this.from = from;
         this.reply = reply;
+        this.bt = bt;
     }
 
 

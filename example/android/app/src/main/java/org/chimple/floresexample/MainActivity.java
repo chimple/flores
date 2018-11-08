@@ -10,6 +10,7 @@ import android.util.Log;
 import android.content.SharedPreferences;
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
+import org.chimple.flores.manager.BluetoothManager;
 import org.chimple.flores.application.P2PContext;
 import static org.chimple.flores.application.P2PContext.CLEAR_CONSOLE_TYPE;
 import static org.chimple.flores.application.P2PContext.refreshDevice;
@@ -22,6 +23,7 @@ public class MainActivity extends FlutterActivity {
     private static Context context;
     public static AppDatabase db;
     public static MulticastManager manager;
+    public static BluetoothManager BluetoothManager;
 
     public static final String SHARED_PREF = "shardPref";
     public static final String USER_ID = "USER_ID";
@@ -33,7 +35,7 @@ public class MainActivity extends FlutterActivity {
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
     public static final String MULTICAST_IP_ADDRESS = "232.1.1.2";
-    public static final String MULTICAST_IP_PORT = "4456";
+    public static final String MULTICAST_IP_PORT = "4460";
 
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
@@ -58,6 +60,7 @@ public class MainActivity extends FlutterActivity {
     protected void onDestroy() {
         super.onDestroy();
         manager.onCleanUp();
+        BluetoothManager.onCleanUp();
     }
 
     private void initialize() {
@@ -70,6 +73,7 @@ public class MainActivity extends FlutterActivity {
                 P2PContext.getInstance().initialize(MainActivity.activity);
                 db = AppDatabase.getInstance(MainActivity.activity);
                 manager = MulticastManager.getInstance(MainActivity.activity);
+                BluetoothManager = BluetoothManager.getInstance(MainActivity.activity);
                 Log.i(TAG, "app database instance" + String.valueOf(db));
                 initializationComplete();                
             }
