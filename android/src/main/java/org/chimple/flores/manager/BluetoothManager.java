@@ -227,6 +227,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
                             @Override
                             public void onFinish() {
                                 if (instance.isBluetoothEnabled()) {
+                                    instance.stopAcceptListener();
                                     instance.Stop();
                                 }
                             }
@@ -247,6 +248,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
                             public void onFinish() {
                                 if (instance.isBluetoothEnabled()) {
                                     Log.d(TAG, "immediateSyncActivityTimer finished staring Sync ....");
+                                    instance.isSyncStarted.set(false);
                                     instance.startSync();
                                 }
                             }
@@ -267,30 +269,37 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
                             public void onFinish() {
                                 if (instance.isBluetoothEnabled()) {
                                     Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
+                                    instance.isSyncStarted.set(false);
                                     instance.startSync();
                                 }
                             }
                         };
                     }
                 });
+            }  
+            instance.p2PDBApiImpl.saveBtAddress(P2PContext.getCurrentDevice(), instance.getBluetoothMacAddress());
+            if(instance.isBluetoothEnabled() && !instance.isConnected.get()) {
+                instance.startAcceptListener();
             }            
         }
         return instance;
     }
 
     public void startSync() {
+        synchronized(BluetoothManager.class) {
         Log.d(TAG, "in startSync : should start sync:" + !instance.isSyncStarted.get());
-        if (!instance.isSyncStarted.get()) {
-            if (instance.immediateSyncActivityTimer != null) {
-                instance.immediateSyncActivityTimer.cancel();
-            }
-            instance.isSyncStarted.set(true);
-            if (instance.peerDevices != null) {
-                instance.peerDevices.clear();
-            }
-            instance.Start(0);
-        }
-
+            if (!instance.isSyncStarted.get()) {
+                instance.isSyncStarted.set(true);
+                if (instance.immediateSyncActivityTimer != null) {
+                    instance.immediateSyncActivityTimer.cancel();
+                }
+                
+                if (instance.peerDevices != null) {
+                    instance.peerDevices.clear();
+                }
+                instance.Start(0);
+            }            
+        }        
     }
 
 
@@ -353,12 +362,11 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
                 // When discovery is finished, change the Activity title
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
-                notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
                 if (instance.peerDevices.size() == 0) {
                     instance.peerDevices.add("48:88:CA:4C:6E:D3");
                     instance.peerDevices.add("C0:EE:FB:53:9F:C2");
-                }
-                instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: added static peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
+                }                
+                instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);                
                 instance.stopDiscovery();
                 instance.startNextPolling();
             }
@@ -420,24 +428,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
 
     public void Stop() {
         // Cancel the thread that completed the connection
-        if (mConnectThread != null) {
-            mConnectThread.Stop();
-            mConnectThread = null;
-        }
-
-        // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread.Stop();
-            mConnectedThread = null;
-        }
-
-        // Cancel the accept thread because we only want to connect to one device
-        if (mInsecureAcceptThread != null) {
-            mInsecureAcceptThread.Stop();
-            mInsecureAcceptThread = null;
-        }
-
-
+        instance.reset();
         instance.stopDiscovery();
 
         if (instance.handShakeFailedTimer != null) {
@@ -502,10 +493,10 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             this.context.registerReceiver(receiver, filter);
         }
 
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
+        LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));        
         LocalBroadcastManager.getInstance(this.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));
+        LocalBroadcastManager.getInstance(instance.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
 
     }
 
@@ -522,8 +513,8 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
     private void DoNextPollingRound() {
         String nextDevice = getNextToSync();
         if (nextDevice != null) {
-            instance.notifyUI("Start Polling:" + nextDevice, " ----->", LOG_TYPE);
-            Log.d(TAG, "Polling device : " + nextDevice);
+            instance.notifyUI("Starting Connection with: " + nextDevice, " ----->", LOG_TYPE);
+            Log.d(TAG, "Starting Connection with: " + nextDevice);
             instance.connectedAddress = nextDevice;
             BluetoothDevice device = instance.mAdapter.getRemoteDevice(nextDevice.trim());
             instance.connect(device);
@@ -535,6 +526,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             Log.d(TAG, "DoNextPollingRound -> isSyncStarted false");
             instance.notifyUI("Stop polling", " ----->", LOG_TYPE);
             instance.Stop();
+            instance.startAcceptListener();
             if (instance.repeatSyncActivityTimer != null) {
                 instance.repeatSyncActivityTimer.start();
             }
@@ -666,12 +658,6 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             mConnectedThread = null;
             notifyUI("mConnectedThread stopped", " ------>", LOG_TYPE);
         }
-
-        if (mInsecureAcceptThread != null) {
-            mInsecureAcceptThread.Stop();
-            mInsecureAcceptThread = null;
-            notifyUI("mInsecureAcceptThread stopped", " ------>", LOG_TYPE);
-        }
     }
 
     @Override
@@ -681,6 +667,9 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             notifyUI("Connected, Socket Type:" + socketType, " ----->", LOG_TYPE);
 
             instance.startHandShakeTimer();
+
+            // stop listening new connection
+            instance.stopAcceptListener();
             instance.reset();
 
             // Start the thread to manage the connection and perform transmissions
@@ -689,6 +678,23 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
         }
     }
 
+    private void stopAcceptListener() {
+        if (mInsecureAcceptThread != null) {
+            mInsecureAcceptThread.Stop();
+            mInsecureAcceptThread = null;
+            notifyUI("mInsecureAcceptThread stopped", " ------>", LOG_TYPE);
+        }
+    }
+
+    private void startAcceptListener() {        
+        if (mInsecureAcceptThread == null && this.mAdapter != null) {
+            mInsecureAcceptThread = new AcceptThread(this.context, instance);
+            mInsecureAcceptThread.start();
+            notifyUI("mInsecureAcceptThread start", " ------>", LOG_TYPE);
+        }
+    }
+
+
     @Override
     public void GotConnection(BluetoothSocket socket, BluetoothDevice device, String socketType) {
         synchronized (BluetoothManager.class) {
@@ -696,8 +702,11 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             notifyUI("GotConnection connected, Socket Type:" + socketType, " ----->", LOG_TYPE);
 
             instance.startHandShakeTimer();
-            instance.reset();
 
+            //stop accept listener
+            
+            instance.stopAcceptListener();
+            instance.reset();
             // Start the thread to manage the connection and perform transmissions
             mConnectedThread = new ConnectedThread(socket, socketType, instance, instance.context);
             mConnectedThread.start();
@@ -755,11 +764,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
     private void startListener() {
         synchronized (BluetoothManager.class) {
             instance.reset();
-            if (mInsecureAcceptThread == null && this.mAdapter != null) {
-                mInsecureAcceptThread = new AcceptThread(this.context, instance);
-                mInsecureAcceptThread.start();
-                notifyUI("mInsecureAcceptThread start", " ------>", LOG_TYPE);
-            }
+            instance.startAcceptListener();
         }
     }
 
@@ -900,7 +905,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
         public void onReceive(Context context, Intent intent) {
             synchronized (BluetoothManager.class) {
                 boolean isConnected = intent.getBooleanExtra("isConnected", false);
-                instance.isConnected.set(isConnected);
+                instance.isConnected.set(isConnected);            
             }
         }
     };
@@ -1435,9 +1440,15 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
                 instance.connectedAddress = "";
             }
             instance.stopHandShakeTimer();
+
+            //start incoming listener - accept new connections
+            instance.startAcceptListener();
+
             if(isDisconnectAfterSync) {
+                notifyUI("Start Next Device to Sync ....", " ----> ", LOG_TYPE);
                 instance.startNextDeviceToSync();
-            } else  {
+            } 
+            else  {
                 notifyUI("WAITING FOR NEXT SYNC ROUND ....", " ----> ", LOG_TYPE);
             }
         }

@@ -16,7 +16,7 @@ public class P2PContext {
     public static final String newMessageAddedOnDevice = "new-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
     public static final String MULTICAST_IP_ADDRESS = "232.1.1.2";
-    public static final String MULTICAST_IP_PORT = "4460";
+    public static final String MULTICAST_IP_PORT = "4461";
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";

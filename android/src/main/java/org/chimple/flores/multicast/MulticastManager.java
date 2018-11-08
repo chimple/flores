@@ -213,7 +213,7 @@ public class MulticastManager {
         LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));
+        LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));        
     }
 
 
@@ -237,7 +237,8 @@ public class MulticastManager {
 
         public void onReceive(Context context, Intent intent) {
             synchronized (MulticastManager.class) {
-                boolean isConnected = intent.getBooleanExtra("isConnected", false);
+                boolean isConnected = intent.getBooleanExtra("isConnected", false);       
+
                 if (!isConnected) {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
