@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.chimple.flores.AbstractManager;
 
 import static org.chimple.flores.application.P2PContext.messageEvent;
 import static org.chimple.flores.application.P2PContext.newMessageAddedOnDevice;
@@ -57,7 +58,7 @@ import static org.chimple.flores.application.P2PContext.NEW_MESSAGE_ADDED;
 import static org.chimple.flores.application.P2PContext.uiMessageEvent;
 import static org.chimple.flores.db.AppDatabase.SYNC_NUMBER_OF_LAST_MESSAGES;
 
-public class MulticastManager {
+public class MulticastManager extends AbstractManager {
 
     private static final String TAG = MulticastManager.class.getSimpleName();
     private Context context;
@@ -71,7 +72,7 @@ public class MulticastManager {
     private P2PDBApiImpl p2PDBApiImpl;
     private DBSyncManager dbSyncManager;
     private Map<String, HandShakingMessage> handShakingMessagesInCurrentLoop = new ConcurrentHashMap<>();
-    private Set<String> allSyncInfosReceived = new HashSet<String>();
+    private Set<String> allSyncInfosReceived = new HashSet<String>();    
 
     public static final String multiCastConnectionChangedEvent = "multicast-connection-changed-event";
 
@@ -90,6 +91,7 @@ public class MulticastManager {
                 instance = new MulticastManager(context);
                 instance.setMulticastIpAddress(MULTICAST_IP_ADDRESS);
                 instance.setMulticastPort(MULTICAST_IP_PORT);
+                instance.registerCommonBroadcasts();
                 instance.registerMulticastBroadcasts();
                 instance.dbSyncManager = DBSyncManager.getInstance(context);
                 instance.p2PDBApiImpl = P2PDBApiImpl.getInstance(context);
@@ -101,6 +103,7 @@ public class MulticastManager {
     }
 
     private MulticastManager(Context context) {
+        super(context);
         this.context = context;
     }
 
@@ -109,6 +112,7 @@ public class MulticastManager {
         stopThreads();
         if (instance != null) {
             instance.unregisterMulticastBroadcasts();
+            instance.unregisterCommonBroadcasts();
         }
         instance = null;
     }
@@ -192,11 +196,6 @@ public class MulticastManager {
             netWorkChangerReceiver = null;
         }
 
-        if (mMessageEventReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
-            mMessageEventReceiver = null;
-        }
-
         if (newMessageAddedReceiver != null) {
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);
             newMessageAddedReceiver = null;
@@ -211,7 +210,6 @@ public class MulticastManager {
 
     private void registerMulticastBroadcasts() {
         LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));        
     }
@@ -237,9 +235,10 @@ public class MulticastManager {
 
         public void onReceive(Context context, Intent intent) {
             synchronized (MulticastManager.class) {
-                boolean isConnected = intent.getBooleanExtra("isConnected", false);       
+                boolean connected = intent.getBooleanExtra("isConnected", false);       
+                instance.isConnected.set(connected);
 
-                if (!isConnected) {
+                if (!isConnected.get()) {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
@@ -321,17 +320,7 @@ public class MulticastManager {
             }
         }
     };
-
-    private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
-
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            String message = intent.getStringExtra("message");
-            String fromIP = intent.getStringExtra("fromIP");
-            processInComingMessage(message, fromIP);
-        }
-    };
-
+   
 
     public void notifyUI(String message, String fromIP, String type) {
 
@@ -341,33 +330,7 @@ public class MulticastManager {
         intent.putExtra("message", consoleMessage);
         intent.putExtra("type", type);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
-
-    private boolean isHandShakingMessage(String message) {
-        boolean isHandShakingMessage = false;
-        if (message != null) {
-            String handShakeMessage = "\"mt\":\"handshaking\"";
-            isHandShakingMessage = message.contains(handShakeMessage);
-        }
-        return isHandShakingMessage;
-    }
-
-    private boolean isSyncInfoMessage(String message) {
-        boolean isSyncInfoMessage = false;
-        if (message != null) {
-            String syncInfoMessage = "\"mt\":\"syncInfoMessage\"";
-            isSyncInfoMessage = message.contains(syncInfoMessage);
-        }
-        return isSyncInfoMessage;
-    }
-
-    private boolean isSyncRequestMessage(String message) {
-        String messageType = "\"mt\":\"syncInfoRequestMessage\"";
-        String messageType_1 = "\"mt\":\"syncInfoRequestMessage\"";
-        return message != null && (message.contains(messageType) || message.contains(messageType_1)) ? true : false;
-    }
-
+    }    
 
     private void sendInitialHandShakingMessage(boolean needAck) {
         // construct handshaking message(s)
@@ -379,20 +342,21 @@ public class MulticastManager {
     }
 
     public void processInComingMessage(final String message, final String fromIP) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (instance.isHandShakingMessage(message)) {
-                    instance.processInComingHandShakingMessage(message);
-                } else if (instance.isSyncRequestMessage(message)) {
-                    List<String> syncInfoMessages = instance.processInComingSyncRequestMessage(message);
-                    instance.sendMessages(syncInfoMessages);
-                } else if (instance.isSyncInfoMessage(message)) {
-                    instance.processInComingSyncInfoMessage(message, fromIP);
+        if(isConnected.get() && !instance.isBluetoothEnabled.get()) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (instance.isHandShakingMessage(message)) {
+                        instance.processInComingHandShakingMessage(message);
+                    } else if (instance.isSyncRequestMessage(message)) {
+                        List<String> syncInfoMessages = instance.processInComingSyncRequestMessage(message);
+                        instance.sendMessages(syncInfoMessages);
+                    } else if (instance.isSyncInfoMessage(message)) {
+                        instance.processInComingSyncInfoMessage(message, fromIP);
+                    }
                 }
-            }
-        });
-
+            });
+        }
     }
 
 

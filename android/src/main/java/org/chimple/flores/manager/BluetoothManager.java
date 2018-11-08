@@ -48,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.chimple.flores.AbstractManager;
 
 import static org.chimple.flores.application.P2PContext.CLEAR_CONSOLE_TYPE;
 import static org.chimple.flores.application.P2PContext.CONSOLE_TYPE;
@@ -60,7 +61,7 @@ import static org.chimple.flores.application.P2PContext.refreshDevice;
 import static org.chimple.flores.application.P2PContext.uiMessageEvent;
 import static org.chimple.flores.db.AppDatabase.SYNC_NUMBER_OF_LAST_MESSAGES;
 
-public class BluetoothManager implements BtListenCallback, BtCallback, BluetoothStatusChanged {
+public class BluetoothManager extends AbstractManager implements BtListenCallback, BtCallback, BluetoothStatusChanged {
     private static final String TAG = BluetoothManager.class.getSimpleName();
     private Context context;
     private static BluetoothManager instance;
@@ -69,8 +70,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
     private Map<String, HandShakingMessage> handShakingMessagesInCurrentLoop = new ConcurrentHashMap<>();
     private Set<String> allSyncInfosReceived = new HashSet<String>();
     private BluetoothAdapter mAdapter;
-    private final AtomicBoolean isDiscoverying = new AtomicBoolean(false);
-    private final AtomicBoolean isConnected = new AtomicBoolean(false);
+    private final AtomicBoolean isDiscoverying = new AtomicBoolean(false);    
     private final AtomicInteger mState = new AtomicInteger(STATE_NONE);
     private final AtomicInteger mNewState = new AtomicInteger(STATE_NONE);
     private BtBrowdCastReceiver receiver = null;
@@ -304,7 +304,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
 
 
     public boolean isBluetoothEnabled() {
-        return instance.mAdapter != null ? instance.mAdapter.isEnabled() : false;
+        return instance.isBluetoothEnabled.get() && !instance.isConnected.get() && instance.mAdapter != null && instance.mAdapter.isEnabled();
     }
 
     public void startBluetoothBased() {
@@ -313,11 +313,13 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             if (instance.isConnected.get())
             {
                 Log.d(TAG, "still connected with network - no blue tooth");
+                instance.isBluetoothEnabled.set(false);
             } 
             else 
             {
                 Log.d(TAG, "startBluetoothBased .....");    
-                if (BluetoothManager.getInstance(context).isBluetoothEnabled()) {
+                instance.isBluetoothEnabled.set(true);
+                if (BluetoothManager.getInstance(context).isBluetoothEnabled()) {                    
                     Log.d(TAG, "network is not connected and  bluetooth is enabled ...starting all bluetooth activity");
                     if (stopAllBlueToothActivityTimer != null) {
                         stopAllBlueToothActivityTimer.cancel();
@@ -328,6 +330,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
                 
                 } else {
                     Log.d(TAG, "network is connected or bluetooth is not enabled ...stopping all bluetooth activity");
+                    instance.isBluetoothEnabled.set(false);
                     if (startAllBlueToothActivityTimer != null) {
                         startAllBlueToothActivityTimer.cancel();
                     }
@@ -400,13 +403,9 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
     }
 
     public void onCleanUp() {
-        this.Stop();
-        this.context.unregisterReceiver(receiver);
-
-        if (mMessageEventReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
-            mMessageEventReceiver = null;
-        }
+        instance.Stop();
+        instance.context.unregisterReceiver(receiver);
+        instance.unregisterCommonBroadcasts();
 
         if (newMessageAddedReceiver != null) {
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);
@@ -493,11 +492,11 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
             this.context.registerReceiver(receiver, filter);
         }
 
+        instance.registerCommonBroadcasts();        
+
         LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));        
         LocalBroadcastManager.getInstance(this.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));
-        LocalBroadcastManager.getInstance(instance.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
-
+        LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));        
     }
 
     private void startNextPolling() {
@@ -589,6 +588,7 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
     }
 
     private BluetoothManager(Context context) {
+        super(context);
         this.context = context;
     }
 
@@ -905,54 +905,45 @@ public class BluetoothManager implements BtListenCallback, BtCallback, Bluetooth
         public void onReceive(Context context, Intent intent) {
             synchronized (BluetoothManager.class) {
                 boolean isConnected = intent.getBooleanExtra("isConnected", false);
-                instance.isConnected.set(isConnected);            
+                instance.isConnected.set(isConnected); 
             }
         }
     };
-
-    private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
-
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            String message = intent.getStringExtra("message");
-            String fromIP = intent.getStringExtra("fromIP");
-            processInComingMessage(message, fromIP);
-        }
-    };
-
+    
 
     public void processInComingMessage(final String message, final String fromIP) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (instance.isHandShakingMessage(message)) {
-                    instance.processInComingHandShakingMessage(message);
-                } else if (instance.isSyncRequestMessage(message)) {
-                    List<String> syncInfoMessages = instance.processInComingSyncRequestMessage(message);
-                    instance.sendMessages(syncInfoMessages);
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            instance.sendMulticastMessage("BLUETOOTH-SYNC-COMPLETED");
+        if(!instance.isConnected.get() && instance.isBluetoothEnabled.get()) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (instance.isHandShakingMessage(message)) {
+                        instance.processInComingHandShakingMessage(message);
+                    } else if (instance.isSyncRequestMessage(message)) {
+                        List<String> syncInfoMessages = instance.processInComingSyncRequestMessage(message);
+                        instance.sendMessages(syncInfoMessages);
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                instance.sendMulticastMessage("BLUETOOTH-SYNC-COMPLETED");
+                            }
+                        }, 1000);
+
+                    } else if (instance.isSyncInfoMessage(message)) {
+                        instance.processInComingSyncInfoMessage(message);
+                    } else if (instance.isBluetoothSyncCompleteMessage(message)) {
+                        instance.notifyUI("BLUETOOTH SYNC COMPLETED ....", " ------> ", LOG_TYPE);
+                        notifyUI("peerDevices has  ... " + instance.peerDevices.size(), "---------->", LOG_TYPE);
+                        if (peerDevices != null && peerDevices.contains(instance.connectedAddress)) {
+                            peerDevices.remove(instance.connectedAddress);
+                            notifyUI("peerDevices removed ... " + instance.connectedAddress, "---------->", LOG_TYPE);
+                            instance.connectedAddress = "";
                         }
-                    }, 1000);
 
-                } else if (instance.isSyncInfoMessage(message)) {
-                    instance.processInComingSyncInfoMessage(message);
-                } else if (instance.isBluetoothSyncCompleteMessage(message)) {
-                    instance.notifyUI("BLUETOOTH SYNC COMPLETED ....", " ------> ", LOG_TYPE);
-                    notifyUI("peerDevices has  ... " + instance.peerDevices.size(), "---------->", LOG_TYPE);
-                    if (peerDevices != null && peerDevices.contains(instance.connectedAddress)) {
-                        peerDevices.remove(instance.connectedAddress);
-                        notifyUI("peerDevices removed ... " + instance.connectedAddress, "---------->", LOG_TYPE);
-                        instance.connectedAddress = "";
+                        instance.startNextDeviceToSync();
                     }
-
-                    instance.startNextDeviceToSync();
                 }
-            }
-        });
-
+            });
+        }
     }
 
     private MessageStatus validIncomingSyncMessage(P2PSyncInfo info, MessageStatus status) {
@@ -1331,36 +1322,12 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
         return handShakingMessage;
     }
 
-    private boolean isHandShakingMessage(String message) {
-        boolean isHandShakingMessage = false;
-        if (message != null) {
-            String handShakeMessage = "\"mt\":\"handshaking\"";
-            isHandShakingMessage = message.contains(handShakeMessage);
-        }
-        return isHandShakingMessage;
-    }
-
     private boolean isBluetoothSyncCompleteMessage(String message) {
         boolean isSyncCompletedMessage = false;
         if (message != null && message.equalsIgnoreCase("BLUETOOTH-SYNC-COMPLETED")) {
             isSyncCompletedMessage = true;
         }
         return isSyncCompletedMessage;
-    }
-
-    private boolean isSyncInfoMessage(String message) {
-        boolean isSyncInfoMessage = false;
-        if (message != null) {
-            String syncInfoMessage = "\"mt\":\"syncInfoMessage\"";
-            isSyncInfoMessage = message.contains(syncInfoMessage);
-        }
-        return isSyncInfoMessage;
-    }
-
-    private boolean isSyncRequestMessage(String message) {
-        String messageType = "\"mt\":\"syncInfoRequestMessage\"";
-        String messageType_1 = "\"mt\":\"syncInfoRequestMessage\"";
-        return message != null && (message.contains(messageType) || message.contains(messageType_1)) ? true : false;
     }
 
     private void broadCastRefreshDevice() {
