@@ -241,7 +241,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         instance.immediateSyncActivityTimer = new CountDownTimer(IMMEDIATE_TIME_ALARM, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
-                                instance.isImmediateSyncTimerStartedForLoop = true;
+                                if(!instance.isImmediateSyncTimerStartedForLoop) {
+                                    instance.isImmediateSyncTimerStartedForLoop = true;    
+                                }
+                                
                             }
 
                             @Override
