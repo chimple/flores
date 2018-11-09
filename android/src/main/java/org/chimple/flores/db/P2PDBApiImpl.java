@@ -1060,7 +1060,11 @@ public class P2PDBApiImpl {
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            db.endTransaction();
+            try {
+                db.endTransaction();                
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
