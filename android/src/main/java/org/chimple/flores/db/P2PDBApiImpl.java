@@ -485,6 +485,12 @@ public class P2PDBApiImpl {
             Gson gson = this.registerHandShakingMessageBuilder();
             String reply = needAcknowlegement ? "true" : "false";
             String bluetoothAddress = db.btInfoDao().getBluetoothAddress(P2PContext.getCurrentDevice());
+            Log.d(TAG, "BT ADDRESS:" + bluetoothAddress);
+            if(bluetoothAddress == null) {
+                bluetoothAddress = bluetoothManager.getBluetoothMacAddress();
+                Log.d(TAG, "BT ADDRESS:" + bluetoothAddress);
+                this.saveBtAddress(P2PContext.getCurrentDevice(), bluetoothAddress);
+            }
             HandShakingMessage message = new HandShakingMessage(P2PContext.getCurrentDevice(), "handshaking", reply, handShakingInfos, bluetoothAddress);
             Type handShakingType = new TypeToken<HandShakingMessage>() {
             }.getType();

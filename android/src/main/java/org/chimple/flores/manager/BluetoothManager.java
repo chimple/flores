@@ -366,9 +366,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
                 instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
-                if(instance.peerDevices.size() == 0) {
-                    instance.peerDevices.addAll(instance.supportedDevices);
-                }             
+                instance.peerDevices.addAll(instance.supportedDevices);
                 instance.stopDiscovery();
                 instance.startNextPolling();
             }
@@ -821,11 +819,11 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     public String getBluetoothMacAddress() {
+        String bluetoothMacAddress = null;
         try 
         {
             BluetoothAdapter bluetoothAdapter = instance.getmAdapter();
-            if (bluetoothAdapter != null) {
-                String bluetoothMacAddress = "";
+            if (bluetoothAdapter != null) {                                
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                     try {
                         Field mServiceField = bluetoothAdapter.getClass().getDeclaredField("mService");
@@ -835,6 +833,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
                         if (btManagerService != null) {
                             bluetoothMacAddress = (String) btManagerService.getClass().getMethod("getAddress").invoke(btManagerService);
+                            Log.d(TAG, "inside getBluetoothMacAddress 222: " + bluetoothMacAddress);
                         }
                     } catch (NoSuchFieldException e) {
 
@@ -845,16 +844,17 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     } catch (InvocationTargetException e) {
 
                     }
-                } else {
+                } else {                    
                     bluetoothMacAddress = bluetoothAdapter.getAddress();
+                    Log.d(TAG, "inside getBluetoothMacAddress 222: " + bluetoothMacAddress);
                 }
                 return bluetoothMacAddress;
             } else {
-                return null;
+                return bluetoothMacAddress;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return bluetoothMacAddress;
         }        
 }
 
