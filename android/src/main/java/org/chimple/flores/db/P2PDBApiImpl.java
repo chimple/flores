@@ -1050,14 +1050,13 @@ public class P2PDBApiImpl {
             if(storedBlueToothAddress != null && !storedBlueToothAddress.equalsIgnoreCase(btAddress))
             {
                 BtAddress newAddress = new BtAddress(from, btAddress);
-                db.btInfoDao().insertBtInfo(newAddress);
-                db.setTransactionSuccessful();
+                db.btInfoDao().insertBtInfo(newAddress);                
             } else {
                 BtAddress newAddress = new BtAddress(from, btAddress);
-                db.btInfoDao().insertBtInfo(newAddress);
-                db.setTransactionSuccessful();                
+                db.btInfoDao().insertBtInfo(newAddress);                                
             }
             Log.d(TAG, "saving bt address: "  + storedBlueToothAddress + " for device id:" + from);
+            db.setTransactionSuccessful();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

@@ -519,6 +519,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             if (instance.nextRoundTimer != null) {
                 instance.nextRoundTimer.cancel();
             }
+            instance.isSyncStarted.set(false);
         } else {
             instance.isSyncStarted.set(false);
             Log.d(TAG, "DoNextPollingRound -> isSyncStarted false");
@@ -856,7 +857,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             e.printStackTrace();
             return bluetoothMacAddress;
         }        
-}
+    }
 
     public Set<String> getAllSyncInfosReceived() {
         return allSyncInfosReceived;
