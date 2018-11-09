@@ -10,6 +10,7 @@ import android.util.Log;
 import android.content.SharedPreferences;
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
+import org.chimple.flores.manager.BluetoothManager;
 
 public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
@@ -25,8 +26,9 @@ public class P2PContext {
     public static final String NEW_MESSAGE_ADDED = "NEW_MESSAGE_ADDED";
     public static final String REFRESH_DEVICE = "REFRESH_DEVICE";
     public static final String messageEvent = "message-event";
+    public static final String bluetoothMessageEvent = "bluetooth-message-event";
     public static final String SHARED_PREF = "shardPref";
-    public static final String multiCastConnectionChangedEvent = "multicast-connection-changed-event";
+    public static final String multiCastConnectionChangedEvent = "multicast-connection-changed-event";    
 
     private static final String TAG = P2PContext.class.getName();
     private static P2PContext instance;
@@ -60,7 +62,9 @@ public class P2PContext {
         context.registerReceiver(networkChangeReceiver, intentFilter);
         instance.context = context;
         AppDatabase.getInstance(context);
-        MulticastManager.getInstance(context);
+        MulticastManager mManager = MulticastManager.getInstance(context);
+        BluetoothManager bManager = BluetoothManager.getInstance(context);
+        mManager.setBluetoothMangager(bManager);
         initialized = true;
 
     }

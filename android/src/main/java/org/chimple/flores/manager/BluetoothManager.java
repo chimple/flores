@@ -54,8 +54,7 @@ import static org.chimple.flores.application.P2PContext.CLEAR_CONSOLE_TYPE;
 import static org.chimple.flores.application.P2PContext.CONSOLE_TYPE;
 import static org.chimple.flores.application.P2PContext.LOG_TYPE;
 import static org.chimple.flores.application.P2PContext.NEW_MESSAGE_ADDED;
-import static org.chimple.flores.application.P2PContext.messageEvent;
-import static org.chimple.flores.application.P2PContext.multiCastConnectionChangedEvent;
+import static org.chimple.flores.application.P2PContext.bluetoothMessageEvent;
 import static org.chimple.flores.application.P2PContext.newMessageAddedOnDevice;
 import static org.chimple.flores.application.P2PContext.refreshDevice;
 import static org.chimple.flores.application.P2PContext.uiMessageEvent;
@@ -77,6 +76,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     List<String> peerDevices = Collections.synchronizedList(new ArrayList<String>());
     List<String> supportedDevices = Collections.synchronizedList(new ArrayList<String>());
     private Handler mHandler = null;
+    private int bluetoothState = -1;
 
 
     private final AtomicBoolean isSyncStarted = new AtomicBoolean(false);
@@ -304,41 +304,36 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
 
     public boolean isBluetoothEnabled() {
-        return instance.isBluetoothEnabled.get() && !instance.isConnected.get() && instance.mAdapter != null && instance.mAdapter.isEnabled();
+        return instance.bluetoothState != BluetoothAdapter.SCAN_MODE_NONE && !instance.isConnected.get() && instance.mAdapter != null && instance.mAdapter.isEnabled();
     }
 
-    public void startBluetoothBased() {
+    private void startBluetoothBased() {
         synchronized(BluetoothManager.class) {
             Log.d(TAG, "is network connected:" + instance.isConnected.get());
             if (instance.isConnected.get())
             {
                 Log.d(TAG, "still connected with network - no blue tooth");
-                instance.isBluetoothEnabled.set(false);
+                instance.stopBlueToothConnections();             
             } 
             else 
             {
-                Log.d(TAG, "startBluetoothBased .....");    
-                instance.isBluetoothEnabled.set(true);
-                if (BluetoothManager.getInstance(context).isBluetoothEnabled()) {                    
-                    Log.d(TAG, "network is not connected and  bluetooth is enabled ...starting all bluetooth activity");
-                    if (stopAllBlueToothActivityTimer != null) {
-                        stopAllBlueToothActivityTimer.cancel();
-                    }
-                    if(instance.startAllBlueToothActivityTimer != null) {
-                        instance.startAllBlueToothActivityTimer.start();    
-                    }
-                
+                if (instance.isBluetoothEnabled()) {                    
+                    instance.startBluetoothConnections();
                 } else {
-                    Log.d(TAG, "network is connected or bluetooth is not enabled ...stopping all bluetooth activity");
-                    instance.isBluetoothEnabled.set(false);
-                    if (startAllBlueToothActivityTimer != null) {
-                        startAllBlueToothActivityTimer.cancel();
-                    }
-                    if(instance.stopAllBlueToothActivityTimer != null) {
-                        instance.stopAllBlueToothActivityTimer.start();    
-                    }            
+                    instance.stopBlueToothConnections();          
                 }                
             } 
+        }
+    }
+
+    private void startBluetoothConnections() {
+        Log.d(TAG, "network is not connected and  bluetooth is enabled ...starting all bluetooth activity");
+        if (stopAllBlueToothActivityTimer != null) {
+            stopAllBlueToothActivityTimer.cancel();
+        }
+        if(instance.startAllBlueToothActivityTimer != null) {
+            instance.startAllBlueToothActivityTimer.cancel();
+            instance.startAllBlueToothActivityTimer.start();    
         }
     }
 
@@ -395,17 +390,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     }
 
                 });            
-            
-            //instance.supportedDevices.add("48:88:CA:4C:6E:D3");
-            //instance.supportedDevices.add("C0:EE:FB:53:9F:C2");
-
         }
     }
 
     public void onCleanUp() {
         instance.Stop();
         instance.context.unregisterReceiver(receiver);
-        instance.unregisterCommonBroadcasts();
 
         if (newMessageAddedReceiver != null) {
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);
@@ -417,9 +407,9 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             refreshDeviceReceiver = null;
         }
 
-        if (netWorkChangerReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(netWorkChangerReceiver);
-            netWorkChangerReceiver = null;
+        if (mMessageEventReceiver != null) {
+            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
+            mMessageEventReceiver = null;
         }
 
         instance.receiver = null;
@@ -479,24 +469,22 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             receiver = new BtBrowdCastReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-            this.context.registerReceiver(receiver, filter);
+            instance.context.registerReceiver(receiver, filter);
 
             filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            this.context.registerReceiver(receiver, filter);
+            instance.context.registerReceiver(receiver, filter);
 
 
             filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            this.context.registerReceiver(receiver, filter);
+            instance.context.registerReceiver(receiver, filter);
 
             filter.addAction(BluetoothDevice.ACTION_FOUND);
-            this.context.registerReceiver(receiver, filter);
+            instance.context.registerReceiver(receiver, filter);
         }
-
-        instance.registerCommonBroadcasts();        
-
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));        
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));        
+            
+        LocalBroadcastManager.getInstance(instance.context).registerReceiver(mMessageEventReceiver, new IntentFilter(bluetoothMessageEvent));           
+        LocalBroadcastManager.getInstance(instance.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
+        LocalBroadcastManager.getInstance(instance.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));        
     }
 
     private void startNextPolling() {
@@ -763,18 +751,20 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     private void startListener() {
         synchronized (BluetoothManager.class) {
-            instance.reset();
-            instance.startAcceptListener();
+            if(instance.isBluetoothEnabled()) {
+                instance.reset();
+                instance.startAcceptListener();                
+            }
         }
     }
 
 
     @Override
     public void BluetoothStateChanged(int state) {
+        instance.bluetoothState = state;
         if (state == BluetoothAdapter.SCAN_MODE_NONE) {
             instance.stopAllBlueToothActivityTimer.start();
-            Log.d(TAG, "Bluetooth DISABLED, stopping");
-            instance.Stop();
+            Log.d(TAG, "Bluetooth DISABLED, stopping");            
             if (instance.immediateSyncActivityTimer != null) {
                 instance.immediateSyncActivityTimer.cancel();
             }
@@ -847,17 +837,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             e.printStackTrace();
             return null;
         }        
-    }
-
-    public void notifyUI(String message, String fromIP, String type) {
-
-        final String consoleMessage = "[" + fromIP + "]: " + message + "\n";
-        Log.d(TAG, "got message: " + consoleMessage);
-        Intent intent = new Intent(uiMessageEvent);
-        intent.putExtra("message", consoleMessage);
-        intent.putExtra("type", type);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
+}
 
     public Set<String> getAllSyncInfosReceived() {
         return allSyncInfosReceived;
@@ -900,19 +880,39 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         }
     }
 
-    private BroadcastReceiver netWorkChangerReceiver = new BroadcastReceiver() {
-
+    private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            synchronized (BluetoothManager.class) {
-                boolean isConnected = intent.getBooleanExtra("isConnected", false);
-                instance.isConnected.set(isConnected); 
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("message");
+            String fromIP = intent.getStringExtra("fromIP");
+            processInComingMessage(message, fromIP);
+        }
+    };  
+
+    public void updateNetworkConnected(boolean connected) {
+        synchronized(BluetoothManager.class) {
+            instance.isConnected.set(connected);    
+
+            if(instance.isBluetoothEnabled()) {
+                instance.startBluetoothBased();
             }
         }
-    };
-    
+        
+    }
+
+    public void stopBlueToothConnections() {
+        Log.d(TAG, "network is connected or bluetooth is not enabled ...stopping all bluetooth activity");        
+        if (startAllBlueToothActivityTimer != null) {
+            startAllBlueToothActivityTimer.cancel();
+        }
+        if(instance.stopAllBlueToothActivityTimer != null) {
+            instance.stopAllBlueToothActivityTimer.cancel();    
+            instance.stopAllBlueToothActivityTimer.start();    
+        }                
+    }
 
     public void processInComingMessage(final String message, final String fromIP) {
-        if(!instance.isConnected.get() && instance.isBluetoothEnabled.get()) {
+        if(instance.isBluetoothEnabled()) {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1400,24 +1400,26 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
     public void HandShakeFailed(String reason, boolean isDisconnectAfterSync) {
         synchronized (BluetoothManager.class) {
             notifyUI("HandShakeFailed: " + reason, " ----> ", LOG_TYPE);
-            notifyUI("peerDevices has  ... " + instance.peerDevices.size(), "---------->", LOG_TYPE);
-            if (peerDevices != null && peerDevices.contains(instance.connectedAddress)) {
-                peerDevices.remove(instance.connectedAddress);
-                notifyUI("peerDevices removed ... " + instance.connectedAddress, "---------->", LOG_TYPE);
-                instance.connectedAddress = "";
-            }
-            instance.stopHandShakeTimer();
+            if(instance.isBluetoothEnabled()) {
+                notifyUI("peerDevices has  ... " + instance.peerDevices.size(), "---------->", LOG_TYPE);
+                if (peerDevices != null && peerDevices.contains(instance.connectedAddress)) {
+                    peerDevices.remove(instance.connectedAddress);
+                    notifyUI("peerDevices removed ... " + instance.connectedAddress, "---------->", LOG_TYPE);
+                    instance.connectedAddress = "";
+                }
+                instance.stopHandShakeTimer();
 
-            //start incoming listener - accept new connections
-            instance.startAcceptListener();
+                //start incoming listener - accept new connections
+                instance.startAcceptListener();
 
-            if(isDisconnectAfterSync) {
-                notifyUI("Start Next Device to Sync ....", " ----> ", LOG_TYPE);
-                instance.startNextDeviceToSync();
-            } 
-            else  {
-                notifyUI("WAITING FOR NEXT SYNC ROUND ....", " ----> ", LOG_TYPE);
-            }
+                if(isDisconnectAfterSync) {
+                    notifyUI("Start Next Device to Sync ....", " ----> ", LOG_TYPE);
+                    instance.startNextDeviceToSync();
+                } 
+                else  {
+                    notifyUI("WAITING FOR NEXT SYNC ROUND ....", " ----> ", LOG_TYPE);
+                }
+            }            
         }
     }
 

@@ -62,6 +62,7 @@ import org.chimple.flores.db.entity.SyncInfoRequestMessage;
 import org.chimple.flores.db.entity.SyncItemDeserializer;
 import org.chimple.flores.db.entity.SyncRequestMessageDeserializer;
 import org.chimple.flores.multicast.MulticastManager;
+import org.chimple.flores.manager.BluetoothManager;
 import org.chimple.flores.db.entity.BtAddress;
 
 import static org.chimple.flores.application.P2PContext.CONSOLE_TYPE;
@@ -81,21 +82,23 @@ public class P2PDBApiImpl {
     private Context context;
     private static P2PDBApiImpl p2pDBApiInstance;
     private static MulticastManager manager;
+    private static BluetoothManager bluetoothManager;
 
     public static P2PDBApiImpl getInstance(Context context) {
         synchronized (P2PDBApiImpl.class) {
             if (p2pDBApiInstance == null) {
-                p2pDBApiInstance = new P2PDBApiImpl(AppDatabase.getInstance(context), MulticastManager.getInstance(context), context);
+                p2pDBApiInstance = new P2PDBApiImpl(AppDatabase.getInstance(context), MulticastManager.getInstance(context), BluetoothManager.getInstance(context), context);
             }
             return p2pDBApiInstance;
         }
     }
 
 
-    private P2PDBApiImpl(AppDatabase db, MulticastManager manager, Context context) {
+    private P2PDBApiImpl(AppDatabase db, MulticastManager manager, BluetoothManager bluetoothManager, Context context) {
         this.db = db;
         this.context = context;
         this.manager = manager;
+        this.bluetoothManager = bluetoothManager;
     }
 
     public void persistMessage(String userId, String deviceId, String recepientUserId, String message, String messageType, Date createDate) {
@@ -125,6 +128,7 @@ public class P2PDBApiImpl {
         db.p2pSyncDao().insertP2PSyncInfo(message);
         Log.i(TAG, "inserted data" + message);
         manager.getAllSyncInfosReceived().add(message.getDeviceId() + "_" + message.getUserId() + "_" + Long.valueOf(message.getSequence().longValue()));
+        bluetoothManager.getAllSyncInfosReceived().add(message.getDeviceId() + "_" + message.getUserId() + "_" + Long.valueOf(message.getSequence().longValue()));
         manager.notifyUI(message.message, message.getSender(), CONSOLE_TYPE);
 
         SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
@@ -191,6 +195,7 @@ public class P2PDBApiImpl {
                 db.p2pSyncDao().insertP2PSyncInfo(message);
                 Log.i(TAG, "inserted data" + message);
                 manager.getAllSyncInfosReceived().add(message.getDeviceId() + "_" + message.getUserId() + "_" + Long.valueOf(message.getSequence().longValue()));
+                bluetoothManager.getAllSyncInfosReceived().add(message.getDeviceId() + "_" + message.getUserId() + "_" + Long.valueOf(message.getSequence().longValue()));
                 manager.notifyUI(message.message + "inserted ----> out of sync with sequence:" + message.getSequence(), message.getSender(), CONSOLE_TYPE);
                 SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
                 String userId = pref.getString("USER_ID", null); // getting String

@@ -45,6 +45,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.chimple.flores.AbstractManager;
+import org.chimple.flores.manager.BluetoothManager;
 
 import static org.chimple.flores.application.P2PContext.messageEvent;
 import static org.chimple.flores.application.P2PContext.newMessageAddedOnDevice;
@@ -71,6 +72,7 @@ public class MulticastManager extends AbstractManager {
     private int multicastPort;
     private P2PDBApiImpl p2PDBApiImpl;
     private DBSyncManager dbSyncManager;
+    private BluetoothManager bluetoothManager;
     private Map<String, HandShakingMessage> handShakingMessagesInCurrentLoop = new ConcurrentHashMap<>();
     private Set<String> allSyncInfosReceived = new HashSet<String>();    
 
@@ -91,7 +93,6 @@ public class MulticastManager extends AbstractManager {
                 instance = new MulticastManager(context);
                 instance.setMulticastIpAddress(MULTICAST_IP_ADDRESS);
                 instance.setMulticastPort(MULTICAST_IP_PORT);
-                instance.registerCommonBroadcasts();
                 instance.registerMulticastBroadcasts();
                 instance.dbSyncManager = DBSyncManager.getInstance(context);
                 instance.p2PDBApiImpl = P2PDBApiImpl.getInstance(context);
@@ -107,12 +108,16 @@ public class MulticastManager extends AbstractManager {
         this.context = context;
     }
 
+    public void setBluetoothMangager(BluetoothManager m) {
+        instance.bluetoothManager = m;
+    }
+
+
     public void onCleanUp() {
         stopListening();
         stopThreads();
         if (instance != null) {
             instance.unregisterMulticastBroadcasts();
-            instance.unregisterCommonBroadcasts();
         }
         instance = null;
     }
@@ -206,21 +211,34 @@ public class MulticastManager extends AbstractManager {
             refreshDeviceReceiver = null;
         }
 
+        if (mMessageEventReceiver != null) {
+            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
+            mMessageEventReceiver = null;
+        }        
+
+
     }
 
     private void registerMulticastBroadcasts() {
         LocalBroadcastManager.getInstance(this.context).registerReceiver(netWorkChangerReceiver, new IntentFilter(multiCastConnectionChangedEvent));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
         LocalBroadcastManager.getInstance(this.context).registerReceiver(refreshDeviceReceiver, new IntentFilter(refreshDevice));        
+        LocalBroadcastManager.getInstance(this.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
     }
 
 
     private void stopMultiCastOperations() {
-
+        if(instance.bluetoothManager != null) {
+            instance.bluetoothManager.updateNetworkConnected(false);
+        }
         instance.stopListening();
     }
 
     public void startMultiCastOperations() {
+        if(instance.bluetoothManager != null) {
+            instance.bluetoothManager.updateNetworkConnected(true);
+            instance.bluetoothManager.stopBlueToothConnections();
+        }
         instance.startListening();
         if (P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null) {
             Log.d(TAG, "in sendFindBuddyMessage");
@@ -230,6 +248,14 @@ public class MulticastManager extends AbstractManager {
         }
     }
 
+    private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("message");
+            String fromIP = intent.getStringExtra("fromIP");
+            processInComingMessage(message, fromIP);
+        }
+    };  
 
     private BroadcastReceiver netWorkChangerReceiver = new BroadcastReceiver() {
 
@@ -270,6 +296,7 @@ public class MulticastManager extends AbstractManager {
                                 @Override
                                 public void onFinish() {
                                     notifyUI("starting multicast operations", " ------> ", LOG_TYPE);
+
                                     instance.startMultiCastOperations();
                                 }
                             }.start();
@@ -322,16 +349,6 @@ public class MulticastManager extends AbstractManager {
     };
    
 
-    public void notifyUI(String message, String fromIP, String type) {
-
-        final String consoleMessage = "[" + fromIP + "]: " + message + "\n";
-        Log.d(TAG, "got message: " + consoleMessage);
-        Intent intent = new Intent(uiMessageEvent);
-        intent.putExtra("message", consoleMessage);
-        intent.putExtra("type", type);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }    
-
     private void sendInitialHandShakingMessage(boolean needAck) {
         // construct handshaking message(s)
         // put in queue - TBD
@@ -342,7 +359,7 @@ public class MulticastManager extends AbstractManager {
     }
 
     public void processInComingMessage(final String message, final String fromIP) {
-        if(isConnected.get() && !instance.isBluetoothEnabled.get()) {
+        if(isConnected.get()) {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {

@@ -65,7 +65,6 @@ public abstract class AbstractManager {
 
 	protected Context context;
 	protected final AtomicBoolean isConnected = new AtomicBoolean(false);
-	protected final AtomicBoolean isBluetoothEnabled = new AtomicBoolean(false);
 
 	public AbstractManager(Context context) {
 		this.context = context;
@@ -93,28 +92,15 @@ public abstract class AbstractManager {
         String messageType = "\"mt\":\"syncInfoRequestMessage\"";       
         return message != null && message.contains(messageType);
     }
+	
 
-    protected void registerCommonBroadcasts() {
-        LocalBroadcastManager.getInstance(this.context).registerReceiver(mMessageEventReceiver, new IntentFilter(messageEvent));
-    }
-
-
-    protected void unregisterCommonBroadcasts() {        
-        if (mMessageEventReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
-            mMessageEventReceiver = null;
-        }        
-
-    }
-
-	protected BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            String message = intent.getStringExtra("message");
-            String fromIP = intent.getStringExtra("fromIP");
-            processInComingMessage(message, fromIP);
-        }
-    };   
+    public void notifyUI(String message, String fromIP, String type) {
+        final String consoleMessage = "[" + fromIP + "]: " + message + "\n";
+        Intent intent = new Intent(uiMessageEvent);
+        intent.putExtra("message", consoleMessage);
+        intent.putExtra("type", type);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    } 	
 
     public abstract void processInComingMessage(final String message, final String fromIP);
 }

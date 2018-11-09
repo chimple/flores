@@ -12,7 +12,7 @@ import java.io.OutputStream;
 
 import static org.chimple.flores.application.P2PContext.CONSOLE_TYPE;
 import static org.chimple.flores.application.P2PContext.LOG_TYPE;
-import static org.chimple.flores.application.P2PContext.messageEvent;
+import static org.chimple.flores.application.P2PContext.bluetoothMessageEvent;
 import static org.chimple.flores.manager.BluetoothManager.MESSAGE_READ;
 import static org.chimple.flores.manager.BluetoothManager.MESSAGE_WRITE;
 import static org.chimple.flores.manager.BluetoothManager.STATE_CONNECTED;
@@ -108,13 +108,13 @@ public class ConnectedThread extends Thread {
                 String[] subMessages = finalMessage.split("ENDSTART");
                 if(subMessages != null && subMessages.length > 0) {
                     for (int i = 0; i < subMessages.length; i++) {
-                        Intent intent = new Intent(messageEvent);
+                        Intent intent = new Intent(bluetoothMessageEvent);
                         // You can also include some extra data.
                         intent.putExtra("message", subMessages[i]);
                         LocalBroadcastManager.getInstance(mManager.getContext()).sendBroadcast(intent);
                     }
                 } else {
-                    Intent intent = new Intent(messageEvent);
+                    Intent intent = new Intent(bluetoothMessageEvent);
                     // You can also include some extra data.
                     intent.putExtra("message", finalMessage);
                     LocalBroadcastManager.getInstance(mManager.getContext()).sendBroadcast(intent);
