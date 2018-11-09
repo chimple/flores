@@ -1028,6 +1028,10 @@ public class P2PDBApiImpl {
         return db.p2pSyncDao().fetchLatestConversationsByUser(firstUserId);
     }
 
+    public String getBluetoothAddress(String deviceId) {
+        return db.btInfoDao().getBluetoothAddress(deviceId);        
+    }    
+
     public List<String> fetchAllSyncedDevices() {
         List<String> staticSupportedDevices = Arrays.asList(db.btInfoDao().fetchAllSyncedDevices());
         return staticSupportedDevices;

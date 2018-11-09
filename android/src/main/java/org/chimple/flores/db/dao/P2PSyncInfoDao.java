@@ -120,8 +120,4 @@ public interface P2PSyncInfoDao {
 
     @Query("DELETE FROM P2PSyncInfo WHERE id not in (:ids)")
     public void purgeMessages(List<Long> ids);
-
-    @Query("SELECT distinct(device_id) from P2PSyncInfo")
-    public String[] fetchAllSyncedDevices();
-
 }

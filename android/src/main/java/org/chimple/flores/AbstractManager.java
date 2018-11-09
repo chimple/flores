@@ -62,7 +62,7 @@ import static org.chimple.flores.application.P2PContext.uiMessageEvent;
 import static org.chimple.flores.db.AppDatabase.SYNC_NUMBER_OF_LAST_MESSAGES;
 
 public abstract class AbstractManager {
-
+	private static final String TAG = AbstractManager.class.getSimpleName();
 	protected Context context;
 	protected final AtomicBoolean isConnected = new AtomicBoolean(false);
 
@@ -100,6 +100,7 @@ public abstract class AbstractManager {
         intent.putExtra("message", consoleMessage);
         intent.putExtra("type", type);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        Log.d(TAG, "notify : " + consoleMessage);
     } 	
 
     public abstract void processInComingMessage(final String message, final String fromIP);
