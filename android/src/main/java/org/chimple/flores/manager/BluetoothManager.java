@@ -250,10 +250,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
                             @Override
                             public void onFinish() {
-                                if (instance.isBluetoothEnabled()) {
-                                    Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
-                                    instance.isSyncStarted.set(false);                                    
-                                    instance.startSync(false);
+                                synchronized(BluetoothManager.class) {
+                                    if (instance.isBluetoothEnabled()) {
+                                        Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
+                                        instance.isSyncStarted.set(false);                                    
+                                        instance.startSync(false);
+                                    }                                    
                                 }
                             }
                         };
@@ -283,12 +285,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
                         @Override
                         public void onFinish() {
-                            Log.d(TAG, "immediateSyncActivityTimer finished staring Sync ....");
-                            instance.immediateSyncActivityTimer = null;
-                            instance.isSyncStarted.set(false);
-                            if (instance.isBluetoothEnabled()) {                                
-                                instance.startSync(false);
-                            }                            
+                            synchronized(BluetoothManager.class) {
+                                Log.d(TAG, "immediateSyncActivityTimer finished staring Sync ....");
+                                instance.immediateSyncActivityTimer = null;                                
+                                if (instance.isBluetoothEnabled() && !instance.isSyncStarted.get()) {                                
+                                    instance.isSyncStarted.set(false);
+                                    instance.startSync(false);
+                                }                                                            
+                            }
                         }
                     }.start();                    
                 }            
@@ -331,7 +335,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     instance.immediateSyncActivityTimer = null;
                 }
                 
-                if(!isImmediate && instance.peerDevices != null) {                
+                if(instance.peerDevices != null) {                
                     instance.peerDevices.clear();                
                 }
 
