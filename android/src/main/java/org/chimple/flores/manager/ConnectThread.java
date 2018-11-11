@@ -56,7 +56,9 @@ public class ConnectThread extends Thread {
             // This is a blocking call and will only return on a
             // successful connection or an exception
             mManager.startHandShakeTimer();
-            mmSocket.connect();
+            if(mmSocket != null) {
+                mmSocket.connect();    
+            }            
         } catch (IOException e) {
             // Close the socket
             try {

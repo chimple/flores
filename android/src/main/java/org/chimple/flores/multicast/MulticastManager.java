@@ -312,30 +312,36 @@ public class MulticastManager extends AbstractManager {
         LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
     }
 
+
     private BroadcastReceiver refreshDeviceReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            synchronized (MulticastManager.class) {
+            synchronized (BluetoothManager.class) {
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {
                         notifyUI("Clear ALL...", " ------> ", CLEAR_CONSOLE_TYPE);
-                        List<P2PSyncInfo> allInfos = p2PDBApiImpl.refreshAllMessages();
-                        if (allInfos != null) {
+                        List<P2PSyncInfo> allInfos = new ArrayList<P2PSyncInfo>();                        
+                        try {
+                            allInfos = p2PDBApiImpl.refreshAllMessages();
+                            if (allInfos != null) {
                             Iterator<P2PSyncInfo> allInfosIt = allInfos.iterator();
                             while (allInfosIt.hasNext()) {
                                 P2PSyncInfo p = allInfosIt.next();
                                 instance.getAllSyncInfosReceived().add(p.getDeviceId() + "_" + p.getUserId() + "_" + Long.valueOf(p.getSequence().longValue()));
                                 String sender = p.getSender().equals(P2PContext.getCurrentDevice()) ? "You" : p.getSender();
-                                // notifyUI(p.message, sender, CONSOLE_TYPE);
+                                notifyUI(p.message, sender, CONSOLE_TYPE);
                             }
                         }
-                        Log.d(TAG, "rebuild sync info received cache and updated UI");
+                        Log.d(TAG, "rebuild sync info received cache and updated UI");                            
+                        } catch (Exception e) {
+
+                        }                                                
                     }
 
                 });
             }
         }
-    };
+    };    
 
     private BroadcastReceiver newMessageAddedReceiver = new BroadcastReceiver() {
 
