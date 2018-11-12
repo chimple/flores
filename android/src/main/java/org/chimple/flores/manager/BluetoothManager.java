@@ -1493,21 +1493,23 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
         } finally {
             try { 
                 if(instance.isBluetoothEnabled()) {
-                //start incoming listener - accept new connections
-                instance.startAcceptListener();
+                    //start incoming listener - accept new connections
+                    instance.startAcceptListener();
 
-                if(isDisconnectAfterSync) {
-                    notifyUI("Start Next Device to Sync ....", " ----> ", LOG_TYPE);
-                    instance.startNextDeviceToSync();
-                } 
-                else  {
-                    instance.startAgain();                
+                    if(isDisconnectAfterSync) {
+                        notifyUI("Start Next Device to Sync ....", " ----> ", LOG_TYPE);
+                        instance.startNextDeviceToSync();
+                    } 
+                    else  {
+                        instance.startAgain();                
+                    }
+                } else {
+                    instance.stopBlueToothConnections();
                 }
-            }
             }
             catch (Exception ex) {
                 ex.printStackTrace();
-            }        
+            }    
         }        
     }
 
