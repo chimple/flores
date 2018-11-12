@@ -150,7 +150,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                             @Override
                             public void onFinish() {
                                 instance.notifyUI("startHandShakeTimer TimeOut", " ------>", LOG_TYPE);
-                                instance.HandShakeFailed("TimeOut", true);
+                                instance.HandShakeFailed("TimeOut", false);
                             }
                         };
                     }
@@ -805,7 +805,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         synchronized (BluetoothManager.class) {
             final String tmp = reason;
             Log.d(TAG, "LISTEN Error: " + tmp);
-            instance.HandShakeFailed("LISTEN Error: " + tmp, true);
+            instance.HandShakeFailed("LISTEN Error: " + tmp, false);
         }
     }
 

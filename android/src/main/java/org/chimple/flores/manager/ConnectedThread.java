@@ -23,7 +23,7 @@ public class ConnectedThread extends Thread {
     private final BluetoothManager mManager;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
-    private final BtCallback mCallback;
+    private final BtCallback mCallback;    
 
     public ConnectedThread(BluetoothSocket socket, String socketType, BtCallback callback, Context context) {
         Log.d(TAG, "create ConnectedThread: " + socketType);
@@ -36,18 +36,21 @@ public class ConnectedThread extends Thread {
 
 
         // Get the BluetoothSocket input and output streams
-        try {
+        try {            
             tmpIn = socket.getInputStream();
-            tmpOut = socket.getOutputStream();
+            tmpOut = socket.getOutputStream();            
         } catch (IOException e) {
             Log.e(TAG, "temp sockets not created", e);
             mManager.notifyUI("temp sockets not created" + e.toString(), " ------>", LOG_TYPE);
+        } catch (Exception e) {
+            Log.e(TAG, "temp sockets not created", e);
+            mManager.notifyUI("temp sockets not created" + e.toString(), " ------>", LOG_TYPE);
+            mCallback.PollSocketFailed(e.toString());
         }
-
         mmInStream = tmpIn;
         mmOutStream = tmpOut;
-        mManager.setmState(STATE_CONNECTED);
-    }
+        mManager.setmState(STATE_CONNECTED);        
+    }    
 
     public void run() {
         Log.i(TAG, "BEGIN mConnectedThread");

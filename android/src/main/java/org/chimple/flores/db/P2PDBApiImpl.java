@@ -1039,7 +1039,7 @@ public class P2PDBApiImpl {
     }    
 
     public List<String> fetchAllSyncedDevices() {
-        List<String> staticSupportedDevices = Arrays.asList(db.btInfoDao().fetchAllSyncedDevices());
+        List<String> staticSupportedDevices = Arrays.asList(db.btInfoDao().fetchAllSyncedDevices());        
         return staticSupportedDevices;
     }
 
