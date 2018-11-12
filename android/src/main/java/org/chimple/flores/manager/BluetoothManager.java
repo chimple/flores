@@ -262,7 +262,6 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     }
                 });
             }  
-            instance.p2PDBApiImpl.saveBtAddress(P2PContext.getCurrentDevice(), instance.getBluetoothMacAddress());
             if(instance.isBluetoothEnabled() && !instance.isConnected.get()) {
                 instance.startAcceptListener();
             }            
