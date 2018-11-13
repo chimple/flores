@@ -334,11 +334,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     instance.immediateSyncActivityTimer = null;
                 }
                 
-                if(instance.peerDevices != null) {                
-                    instance.peerDevices.clear();                
-                }
-
-                instance.Start(0);
+                instance.Start(instance.pollingIndex);
             }            
         }        
     }
@@ -587,13 +583,23 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         mConnectThread.start();
     }
 
-    private synchronized String getNextToSync() {
+    private void removeDuplicates() {
+        synchronized(BluetoothManager.class) {
+            if(instance.peerDevices != null) {
+                Set<String> hs = new HashSet<>();
+                hs.addAll(instance.peerDevices);
+                instance.peerDevices.clear(); 
+                instance.addAll(hs);
+            }
+        }
+    }
 
+    private synchronized String getNextToSync() {
         String ret = null;
         if(instance.peerDevices == null || instance.peerDevices.size() == 0) {
             instance.peerDevices.addAll(instance.supportedDevices);
         }
-        
+        instance.removeDuplicates();
         if (peerDevices != null && peerDevices.size() > 0) {
             String myAddress = getBluetoothMacAddress();
             List<String> sDevices = new ArrayList<String>();
@@ -743,6 +749,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     private void startAgain() {
         instance.isSyncStarted.set(false);
+        instance.pollingIndex = instance.pollingIndex + 1; // start with next
         notifyUI("WAITING FOR NEXT SYNC ROUND ....", " ----> ", LOG_TYPE);
         instance.Stop();
         instance.startAcceptListener();
