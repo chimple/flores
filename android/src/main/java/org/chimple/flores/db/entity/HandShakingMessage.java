@@ -5,17 +5,23 @@ import java.util.List;
 
 public class HandShakingMessage {
     @Expose(serialize = true, deserialize = true)
-    @SerializedName("message_type")
+    @SerializedName("mt")
     String messageType;
 
     @Expose(serialize = true, deserialize = true)
-    @SerializedName("reply")
+    @SerializedName("r")
     String reply;
 
 
     @Expose(serialize = true, deserialize = true)
-    @SerializedName("from")
+    @SerializedName("f")
     String from;
+
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName("bt")
+    String bt;
+
+    public String getBt() { return bt; }
 
     public String getFrom() { return from; }
 
@@ -30,14 +36,15 @@ public class HandShakingMessage {
     }
 
     @Expose(serialize = true, deserialize = true)
-    @SerializedName("infos")
+    @SerializedName("i")
     List<HandShakingInfo> infos;
 
-    public HandShakingMessage(String from, String messageType, String reply, List<HandShakingInfo> infos) {
+    public HandShakingMessage(String from, String messageType, String reply, List<HandShakingInfo> infos, String bt) {
         this.messageType = messageType;
         this.infos = infos;
         this.from = from;
         this.reply = reply;
+        this.bt = bt;
     }
 
 

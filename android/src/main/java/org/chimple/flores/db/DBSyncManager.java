@@ -21,6 +21,7 @@ public class DBSyncManager {
     public enum MessageTypes {
         PHOTO("Photo"),
         CHAT("Chat"),
+        MISSING("missing"),
         GAME("Game");
 
         private String type;
@@ -102,6 +103,14 @@ public class DBSyncManager {
         P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
         return p2pdbapi.getLatestConversationsByUser(firstUserId);
     }
+
+    public void saveBtAddress(String from, String btAddress) {
+        if(from != null && btAddress != null) {
+            P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+            p2pdbapi.saveBtAddress(from, btAddress);            
+        }
+    }
+
 
     public boolean loggedInUser(String userId, String deviceId) {
         SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0); // 0 - for private mode

@@ -5,7 +5,7 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
-
+import android.util.Log;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
@@ -25,7 +25,7 @@ public class P2PSyncInfo implements Serializable {
     }
 
     @Ignore
-    public P2PSyncInfo(String userId, String deviceId, Long sequence, String recipientUserId, String message, String messageType) {
+    public P2PSyncInfo(String userId, String deviceId, Long sequence, String recipientUserId, String message, String messageType, Date createdAt) {
         this.userId = userId;
         this.deviceId = deviceId;
         this.sequence = sequence;
@@ -34,6 +34,13 @@ public class P2PSyncInfo implements Serializable {
         this.messageType = messageType;
         this.sender = deviceId;
         this.loggedAt = new Date();
+        if(createdAt != null) {
+            this.createdAt = createdAt;
+        } else {
+            this.createdAt = new Date();
+        }
+        Log.d("P2P Sync Info", "loggedAt:" + this.loggedAt);
+        Log.d("P2P Sync Info", "createdAt:" + this.createdAt);
     }
 
 
@@ -74,10 +81,28 @@ public class P2PSyncInfo implements Serializable {
     public Long step;
 
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Expose(serialize = false, deserialize = false)
     @ColumnInfo(name = "logged_at")
     public Date loggedAt;
 
+    @Expose(serialize = true, deserialize = true)
+    @ColumnInfo(name = "created_at")
+    public Date createdAt;
 
+    private String sender;
 
     public void setStatus(Boolean status) {
         this.status = status;
@@ -170,8 +195,4 @@ public class P2PSyncInfo implements Serializable {
     public void setSender(String sender) {
         this.sender = sender;
     }
-
-    private String sender;
 }
-
-

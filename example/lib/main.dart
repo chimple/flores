@@ -6,6 +6,7 @@ import 'package:flores/flores.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+
 void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String deviceId = prefs.getString('deviceId');
@@ -100,7 +101,7 @@ class FriendScreen extends StatelessWidget {
       body: ListView(
           children: AppStateContainer.of(context)
               .users
-              .where((u) => u['userId'] != userId)
+              .where((u) => (u['userId'] != null && u['userId'] != userId))
               .map((u) => Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RaisedButton(
@@ -113,7 +114,7 @@ class FriendScreen extends StatelessWidget {
                                   friendName: u['message'],
                                 )));
                       },
-                      child: Text(u['message']),
+                      child: Text(u['message'] ?? ''),
                     ),
                   ))
               .toList(growable: false)),
@@ -141,6 +142,11 @@ class ChatScreen extends StatelessWidget {
                   itemCount: messages.length,
                   reverse: true,
                   itemBuilder: (context, index) {
+                    String msg = messages[index]['message'];
+                    msg = msg.startsWith('!@!@!@!@')
+                        ? 'Big message (${msg.length})'
+                        : msg;
+                    print('msg: $msg');
                     return (messages[index]['userId'] == friendId)
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -150,14 +156,12 @@ class ChatScreen extends StatelessWidget {
                                     child: CircleAvatar(
                                       child: Text(friendName),
                                     )),
-                                Flexible(
-                                    child: Text(messages[index]['message']))
+                                Flexible(child: Text(msg))
                               ])
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[
-                                Flexible(
-                                    child: Text(messages[index]['message'])),
+                                Flexible(child: Text(msg)),
                                 Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: CircleAvatar(
@@ -221,7 +225,7 @@ class CommentTextFieldState extends State<CommentTextField> {
               _isComposing = text.trim().isNotEmpty;
             });
           },
-          onSubmitted: (String text) => _handleSubmitted(context, text),
+          onSubmitted: (String text) => _handleSubmitted(context, text, false),
           decoration: new InputDecoration.collapsed(hintText: 'Send message'),
         ),
       ),
@@ -230,17 +234,31 @@ class CommentTextFieldState extends State<CommentTextField> {
           child: IconButton(
             icon: new Icon(Icons.send),
             onPressed: _isComposing
-                ? () => _handleSubmitted(context, _textController.text)
+                ? () => _handleSubmitted(context, _textController.text, false)
+                : null,
+          )),
+      Container(
+          margin: new EdgeInsets.symmetric(horizontal: 4.0),
+          child: IconButton(
+            icon: new Icon(Icons.airplanemode_active),
+            onPressed: _isComposing
+                ? () => _handleSubmitted(context, _textController.text, true)
                 : null,
           )),
     ]);
   }
 
-  Future<Null> _handleSubmitted(BuildContext context, String text) async {
+  Future<Null> _handleSubmitted(
+      BuildContext context, String text, bool isHuge) async {
     _textController.clear();
     setState(() {
       _isComposing = false;
     });
+    if (isHuge) {
+      List x = [];
+      for (int i = 0; i < 1000; i++) x.add(text);
+      text = '!@!@!@!@${x.join()}';
+    }
     widget.addComment(text);
     _focusNode.unfocus();
   }
