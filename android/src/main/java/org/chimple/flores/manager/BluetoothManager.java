@@ -589,7 +589,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                 Set<String> hs = new HashSet<>();
                 hs.addAll(instance.peerDevices);
                 instance.peerDevices.clear(); 
-                instance.addAll(hs);
+                instance.peerDevices.addAll(hs);
             }
         }
     }
