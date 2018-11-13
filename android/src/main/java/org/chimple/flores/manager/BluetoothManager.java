@@ -197,7 +197,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         instance.startAllBlueToothActivityTimer = new CountDownTimer(START_ALL_BLUETOOTH_ACTIVITY, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
-
+                                Log.d(TAG, "startAllBlueToothActivityTimer ticking ....");
                             }
 
                             @Override
@@ -244,7 +244,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         instance.repeatSyncActivityTimer = new CountDownTimer(LONG_TIME_ALARM, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
-
+                                Log.d(TAG, "repeatSyncActivityTimer ticking ...");
                             }
 
                             @Override
@@ -326,15 +326,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     private void startSync(boolean isImmediate) {
         synchronized(BluetoothManager.class) {
         Log.d(TAG, "in startSync : should start sync:" + !instance.isSyncStarted.get());
-            if (!instance.isSyncStarted.get()) {
-                instance.isSyncStarted.set(true);
-                if (instance.immediateSyncActivityTimer != null) {
-                    instance.immediateSyncActivityTimer.cancel();
-                    instance.immediateSyncActivityTimer = null;
-                }
-                
-                instance.Start(instance.pollingIndex);
-            }            
+            instance.isSyncStarted.set(true);
+            if (instance.immediateSyncActivityTimer != null) {
+                instance.immediateSyncActivityTimer.cancel();
+                instance.immediateSyncActivityTimer = null;
+            }
+            instance.Start(instance.pollingIndex);
         }        
     }
 
