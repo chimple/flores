@@ -23,8 +23,8 @@ import org.chimple.flores.db.entity.P2PSyncInfo;
         DateConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
     public static final String DATABASE_NAME = "p2p_db";
-    public static final int SYNC_NUMBER_OF_LAST_MESSAGES = 5;
-    public static final int PURGE_MESSAGE_LIMIT = 10;
+    public static final int SYNC_NUMBER_OF_LAST_MESSAGES = 15;
+    public static final int PURGE_MESSAGE_LIMIT = 20;
 
     /**
      * The only instance

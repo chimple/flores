@@ -76,8 +76,6 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     List<String> supportedDevices = Collections.synchronizedList(new ArrayList<String>());
     private Handler mHandler = null;
     private int bluetoothState = -1;
-
-
     private final AtomicBoolean isSyncStarted = new AtomicBoolean(false);
 
 
@@ -241,7 +239,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                 instance.mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        instance.repeatSyncActivityTimer = new CountDownTimer(LONG_TIME_ALARM, 1000) {
+                        instance.repeatSyncActivityTimer = new CountDownTimer(LONG_TIME_ALARM, 20000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
                                 Log.d(TAG, "repeatSyncActivityTimer ticking ...");
@@ -298,6 +296,39 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         });
     }
 
+
+    private final BroadcastReceiver btBrowdCastReceiver = new BroadcastReceiver() {
+        @Override
+         public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction(); 
+            Log.d(TAG, "BtBrowdCastReceiver action received:" + action);
+            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                Log.d(TAG, "started ACTION_DISCOVERY_STARTED");
+                notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_STARTED", "---------->", LOG_TYPE);
+            } else if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
+                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
+                if (instance != null) {                    
+                    instance.BluetoothStateChanged(mode);
+                }
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // If it's already paired, skip it, because it's been listed already
+                Log.d(TAG, "Adding device to list: " + device.getName() + "\n" + device.getAddress());
+                notifyUI("Adding device to list: " + device.getName() + "\n" + device.getAddress(), " ----> ", LOG_TYPE);
+                peerDevices.add(device.getAddress());
+                // When discovery is finished, change the Activity title
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
+                instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
+                instance.peerDevices.addAll(instance.supportedDevices);
+                instance.stopDiscovery();
+                instance.startNextPolling();
+            }            
+        } 
+    };
+    
     private void createDisconnectTimer() {
         instance.mHandler.post(new Runnable() {
             @Override
@@ -405,22 +436,21 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         instance.Stop();
 
         if(btBrowdCastReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(btBrowdCastReceiver);
-            btBrowdCastReceiver = null;
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(btBrowdCastReceiver);            
         }
 
         if (newMessageAddedReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(newMessageAddedReceiver);
             newMessageAddedReceiver = null;
         }
 
         if (refreshDeviceReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(refreshDeviceReceiver);
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(refreshDeviceReceiver);
             refreshDeviceReceiver = null;
         }
 
         if (mMessageEventReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(mMessageEventReceiver);
             mMessageEventReceiver = null;
         }        
     }
@@ -476,21 +506,21 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
 
     private void registerReceivers() {
-        IntentFilter scanModeChangedFilter = new IntentFilter();
-        scanModeChangedFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        LocalBroadcastManager.getInstance(instance.context).registerReceiver(btBrowdCastReceiver, scanModeChangedFilter);           
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        this.context.registerReceiver(btBrowdCastReceiver, filter);
 
-        IntentFilter actionDiscoveryFinishedFilter = new IntentFilter();
-        actionDiscoveryFinishedFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        LocalBroadcastManager.getInstance(instance.context).registerReceiver(btBrowdCastReceiver, actionDiscoveryFinishedFilter);           
+        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        this.context.registerReceiver(btBrowdCastReceiver, filter);
 
-        IntentFilter actionDiscoveryStartedFilter = new IntentFilter();
-        actionDiscoveryStartedFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        LocalBroadcastManager.getInstance(instance.context).registerReceiver(btBrowdCastReceiver, actionDiscoveryStartedFilter);           
 
-        IntentFilter actionFoundFilter = new IntentFilter();
-        actionFoundFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        LocalBroadcastManager.getInstance(instance.context).registerReceiver(btBrowdCastReceiver, actionFoundFilter);           
+        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        this.context.registerReceiver(btBrowdCastReceiver, filter);
+
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        this.context.registerReceiver(btBrowdCastReceiver, filter); 
+
+        Log.d(TAG, "REGISTERED BLUETOOTH RECEIVERS ....");     
 
         LocalBroadcastManager.getInstance(instance.context).registerReceiver(mMessageEventReceiver, new IntentFilter(bluetoothMessageEvent));           
         LocalBroadcastManager.getInstance(instance.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
@@ -927,36 +957,37 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         }
     }
 
-    private BroadcastReceiver btBrowdCastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction(); 
+    // private BroadcastReceiver btBrowdCastReceiver = new BroadcastReceiver() {
+    //     @Override
+    //     public void onReceive(Context context, Intent intent) {
+    //         String action = intent.getAction(); 
 
-            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                Log.d(TAG, "started ACTION_DISCOVERY_STARTED");
-                notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_STARTED", "---------->", LOG_TYPE);
-            } else if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
-                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-                if (instance != null) {
-                    instance.BluetoothStateChanged(mode);
-                }
-            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // If it's already paired, skip it, because it's been listed already
-                Log.d(TAG, "Adding device to list: " + device.getName() + "\n" + device.getAddress());
-                notifyUI("Adding device to list: " + device.getName() + "\n" + device.getAddress(), " ----> ", LOG_TYPE);
-                peerDevices.add(device.getAddress());
-                // When discovery is finished, change the Activity title
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
-                instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
-                instance.peerDevices.addAll(instance.supportedDevices);
-                instance.stopDiscovery();
-                instance.startNextPolling();
-            }            
-        }
-    };  
+    //         if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+    //             Log.d(TAG, "started ACTION_DISCOVERY_STARTED");
+    //             notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_STARTED", "---------->", LOG_TYPE);
+    //         } else if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
+    //             int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+    //             Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
+    //             if (instance != null) {                    
+    //                 instance.BluetoothStateChanged(mode);
+    //             }
+    //         } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+    //             // Get the BluetoothDevice object from the Intent
+    //             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+    //             // If it's already paired, skip it, because it's been listed already
+    //             Log.d(TAG, "Adding device to list: " + device.getName() + "\n" + device.getAddress());
+    //             notifyUI("Adding device to list: " + device.getName() + "\n" + device.getAddress(), " ----> ", LOG_TYPE);
+    //             peerDevices.add(device.getAddress());
+    //             // When discovery is finished, change the Activity title
+    //         } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+    //             Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
+    //             instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
+    //             instance.peerDevices.addAll(instance.supportedDevices);
+    //             instance.stopDiscovery();
+    //             instance.startNextPolling();
+    //         }            
+    //     }
+    // };  
 
 
     private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
