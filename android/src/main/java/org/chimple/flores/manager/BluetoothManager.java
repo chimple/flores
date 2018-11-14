@@ -248,10 +248,11 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                             @Override
                             public void onFinish() {
                                 synchronized(BluetoothManager.class) {
-                                    if (instance.isBluetoothEnabled()) {
+                                    if (instance.isBluetoothEnabled() && !instance.isSyncStarted.get()) {
                                         Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
                                         instance.isSyncStarted.set(false);                                    
                                         instance.startSync(false);
+                                        instance.repeatSyncActivityTimer.start();
                                     }                                    
                                 }
                             }
@@ -417,9 +418,9 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                             String d = (String) it.next();
                             notifyUI("supportedDevices:" + d, " ------> ", LOG_TYPE);
                         }        
-
-                        instance.startListener();
+                        
                         pollingIndex = index;
+                        instance.startListener();
                         if (instance.peerDevices != null && instance.peerDevices.size() == 0) {
                             notifyUI("startDiscoveryTimer ...", "---------->", LOG_TYPE);
                             instance.startDiscoveryTimer();
@@ -695,10 +696,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     private void reset() {
+        Log.d(TAG, "in startAcceptListener .... ");    
         if (mConnectThread != null) {
             mConnectThread.Stop();
             mConnectThread = null;
             notifyUI("mConnectThread stopped", " ------>", LOG_TYPE);
+            Log.d(TAG, "mConnectThread stopped");
         }
 
         // Cancel any thread currently running a connection
@@ -706,6 +709,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             mConnectedThread.Stop();
             mConnectedThread = null;
             notifyUI("mConnectedThread stopped", " ------>", LOG_TYPE);
+            Log.d(TAG, "mConnectedThread stopped");
         }
     }
 
@@ -735,7 +739,8 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         }
     }
 
-    private void startAcceptListener() {        
+    private void startAcceptListener() {    
+        Log.d(TAG, "in startAcceptListener .... ");    
         if (mInsecureAcceptThread == null && this.mAdapter != null) {
             mInsecureAcceptThread = new AcceptThread(this.context, instance);
             mInsecureAcceptThread.start();
@@ -753,8 +758,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         if (instance.repeatSyncActivityTimer != null) {
             instance.repeatSyncActivityTimer.cancel();
             instance.repeatSyncActivityTimer.start();
-        }
-
+        }        
         if(instance.immediateSyncActivityTimer != null) {
             instance.immediateSyncActivityTimer.cancel();
             instance.immediateSyncActivityTimer = null;
@@ -826,6 +830,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     private void startListener() {
         synchronized (BluetoothManager.class) {
             if(instance.isBluetoothEnabled()) {
+                Log.d(TAG, "in startListener ....");
                 instance.reset();
                 instance.startAcceptListener();                
             }
@@ -1172,18 +1177,13 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         if (pullSyncInfo != null) {
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
             instance.sendMessages(jsons);
+        } else {
+            if (instance.repeatSyncActivityTimer != null) {
+                instance.repeatSyncActivityTimer.cancel();
+                instance.repeatSyncActivityTimer.start();
+            }
         }
-        return jsons;        
-        // if (pullSyncInfo != null && pullSyncInfo.size() > 0) {
-        //     jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
-        //     instance.sendMessages(jsons);
-        // } else {
-        //     Log.d(TAG, "generateSyncInfoPullRequest count 0 .....");
-        //     instance.notifyUI("generateSyncInfoPullRequest count 0 .....", " ------->", LOG_TYPE);
-        //     // disconnect as data had been exchanged
-        //     instance.createDisconnectTimer();
-        // }
-        // return jsons;
+        return jsons;     
     }
 
     private void sendMessages(List<String> computedMessages) {
