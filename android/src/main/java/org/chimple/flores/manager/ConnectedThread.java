@@ -70,11 +70,13 @@ public class ConnectedThread extends Thread {
                     sBuffer = new StringBuffer();
                 }
                 // Read from the InputStream
-                bytes = mmInStream.read(buffer);
+                if(mmInStream != null) {
+                    bytes = mmInStream.read(buffer);    
+                }                
                 synchronized (ConnectedThread.class) {
                     this.broadcastIncomingMessage(sBuffer, new String(buffer, 0, bytes));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "disconnected", e);
                 mManager.notifyUI("disconnected: " + e.toString(), " ------>", LOG_TYPE);
                 mCallback.ConnectionFailed(e.toString());
