@@ -77,11 +77,13 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     private Handler mHandler = null;
     private int bluetoothState = -1;
     private final AtomicBoolean isSyncStarted = new AtomicBoolean(false);
+    private final AtomicBoolean anyPeersFound = new AtomicBoolean(false); 
 
 
     public static final long START_ALL_BLUETOOTH_ACTIVITY = 5 * 1000;
     public static final long STOP_ALL_BLUETOOTH_ACTIVITY = 5 * 1000;
     public static final long LONG_TIME_ALARM = 1 * 60 * 1000; // 2 min cycle
+    public static final long FAILED_DISCOVERY_LONG_TIME_ALARM = 5 * 60 * 1000; // 5 min cycle
     public static final long IMMEDIATE_TIME_ALARM = 15 * 1000;
     private static final int START_HANDSHAKE_TIMER = 15 * 1000; // 15 sec
     private static final int STOP_DISCOVERY_TIMER = 5 * 1000; // 5 sec
@@ -189,6 +191,8 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         };
                     }
                 });
+                
+
                 instance.mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -202,17 +206,16 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                             public void onFinish() {
                                 if (instance.isBluetoothEnabled()) {
                                     instance.startAcceptListener();
-
-                                    if (instance.repeatSyncActivityTimer != null) {
-                                        instance.repeatSyncActivityTimer.cancel();
-                                        instance.repeatSyncActivityTimer.start();
-                                        Log.d(TAG, "restarting repeatSyncActivityTimer timer ....");
-                                    }                                                                    
+                                    Log.d(TAG, "restarting repeatSyncActivityTimer timer ....");
+                                    instance.stopRepeatSyncActivityTimer();
+                                    instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);
                                 }
                             }
                         };
                     }
                 });
+
+                
 
                 instance.mHandler.post(new Runnable() {
                     @Override
@@ -226,39 +229,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                             @Override
                             public void onFinish() {
                                 if (instance.isBluetoothEnabled()) {
-                                    instance.stopAcceptListener();
+                                    instance.stopAcceptListener();                                    
                                     instance.Stop();
                                 }
                             }
                         };
                     }
-                });
-
+                });            
                 
-
-                instance.mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        instance.repeatSyncActivityTimer = new CountDownTimer(LONG_TIME_ALARM, 20000) {
-                            @Override
-                            public void onTick(long millisUntilFinished) {
-                                Log.d(TAG, "repeatSyncActivityTimer ticking ...");
-                            }
-
-                            @Override
-                            public void onFinish() {
-                                synchronized(BluetoothManager.class) {
-                                    if (instance.isBluetoothEnabled() && !instance.isSyncStarted.get()) {
-                                        Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
-                                        instance.isSyncStarted.set(false);                                    
-                                        instance.startSync(false);
-                                        instance.repeatSyncActivityTimer.start();
-                                    }                                    
-                                }
-                            }
-                        };
-                    }
-                });
             }  
             if(instance.isBluetoothEnabled() && !instance.isConnected.get()) {
                 instance.startAcceptListener();
@@ -322,8 +300,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                 // When discovery is finished, change the Activity title
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
-                instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
-                instance.peerDevices.addAll(instance.supportedDevices);
+                instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);                
                 instance.stopDiscovery();
                 instance.startNextPolling();
             }            
@@ -482,9 +459,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             stopAllBlueToothActivityTimer.cancel();
         }
 
-        if (instance.repeatSyncActivityTimer != null) {
-            instance.repeatSyncActivityTimer.cancel();
-        }
+        instance.stopRepeatSyncActivityTimer();
 
         if (instance.immediateSyncActivityTimer != null) {
             instance.immediateSyncActivityTimer.cancel();
@@ -596,6 +571,9 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         String ret = null;
         if(instance.peerDevices == null || instance.peerDevices.size() == 0) {
             instance.peerDevices.addAll(instance.supportedDevices);
+            instance.anyPeersFound.set(false);
+        } else {
+            instance.anyPeersFound.set(true);
         }
         instance.removeDuplicates();
         if (peerDevices != null && peerDevices.size() > 0) {
@@ -749,16 +727,50 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
 
+    private void createRepeatSyncActivityTimer(final long milliSeconds) {
+        instance.mHandler.post(new Runnable() {
+            @Override
+            public void run() {           
+                Log.d(TAG, "create repeatSyncActivityTimer with delay ..." + milliSeconds); 
+                instance.repeatSyncActivityTimer = new CountDownTimer(milliSeconds, 10000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        Log.d(TAG, "repeatSyncActivityTimer ticking ...");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        synchronized(BluetoothManager.class) {
+                            try {
+                                if (instance.isBluetoothEnabled() && !instance.isSyncStarted.get()) {
+                                    Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");                                    
+                                    instance.isSyncStarted.set(false);                                    
+                                    instance.startSync(false);
+                                } 
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                             
+                        }
+                    }
+                }.start();
+            }
+        });
+    }
+
     private void startAgain() {
         instance.isSyncStarted.set(false);
         instance.pollingIndex = instance.pollingIndex + 1; // start with next
         notifyUI("WAITING FOR NEXT SYNC ROUND ....", " ----> ", LOG_TYPE);
         instance.Stop();
         instance.startAcceptListener();
-        if (instance.repeatSyncActivityTimer != null) {
-            instance.repeatSyncActivityTimer.cancel();
-            instance.repeatSyncActivityTimer.start();
-        }        
+        instance.stopRepeatSyncActivityTimer();
+        if(instance.anyPeersFound.get()) {            
+            instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);    
+        } else {
+            instance.createRepeatSyncActivityTimer(FAILED_DISCOVERY_LONG_TIME_ALARM);
+        }
+        
         if(instance.immediateSyncActivityTimer != null) {
             instance.immediateSyncActivityTimer.cancel();
             instance.immediateSyncActivityTimer = null;
@@ -781,6 +793,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             mConnectedThread = new ConnectedThread(socket, socketType, instance, instance.context);
             mConnectedThread.start();
         }
+    }
+
+
+    private void stopRepeatSyncActivityTimer() {
+        if(instance.repeatSyncActivityTimer != null) {
+            instance.repeatSyncActivityTimer.cancel();
+            instance.repeatSyncActivityTimer = null;   
+        }                   
     }
 
     @Override
@@ -962,39 +982,6 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         }
     }
 
-    // private BroadcastReceiver btBrowdCastReceiver = new BroadcastReceiver() {
-    //     @Override
-    //     public void onReceive(Context context, Intent intent) {
-    //         String action = intent.getAction(); 
-
-    //         if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-    //             Log.d(TAG, "started ACTION_DISCOVERY_STARTED");
-    //             notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_STARTED", "---------->", LOG_TYPE);
-    //         } else if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
-    //             int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-    //             Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
-    //             if (instance != null) {                    
-    //                 instance.BluetoothStateChanged(mode);
-    //             }
-    //         } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-    //             // Get the BluetoothDevice object from the Intent
-    //             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-    //             // If it's already paired, skip it, because it's been listed already
-    //             Log.d(TAG, "Adding device to list: " + device.getName() + "\n" + device.getAddress());
-    //             notifyUI("Adding device to list: " + device.getName() + "\n" + device.getAddress(), " ----> ", LOG_TYPE);
-    //             peerDevices.add(device.getAddress());
-    //             // When discovery is finished, change the Activity title
-    //         } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-    //             Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
-    //             instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
-    //             instance.peerDevices.addAll(instance.supportedDevices);
-    //             instance.stopDiscovery();
-    //             instance.startNextPolling();
-    //         }            
-    //     }
-    // };  
-
-
     private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
@@ -1047,7 +1034,6 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         instance.processInComingSyncInfoMessage(message);
                     } else if (instance.isBluetoothSyncCompleteMessage(message)) {
                         instance.createDisconnectTimer();
-                        // instance.startNextDeviceToSync();
                     }
                 }
             });
@@ -1178,10 +1164,8 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
             instance.sendMessages(jsons);
         } else {
-            if (instance.repeatSyncActivityTimer != null) {
-                instance.repeatSyncActivityTimer.cancel();
-                instance.repeatSyncActivityTimer.start();
-            }
+            instance.stopRepeatSyncActivityTimer();
+            instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);
         }
         return jsons;     
     }

@@ -81,10 +81,12 @@ public class MulticastManager extends AbstractManager {
     private CountDownTimer waitForHandShakingMessagesTimer = null;
     private CountDownTimer stopMulticastTimer = null;
     private CountDownTimer startMulticastTimer = null;
+    private CountDownTimer repeatHandShakeTimer = null;
 
     private static final int WAIT_FOR_HAND_SHAKING_MESSAGES = 5 * 1000; // 5 sec
     private static final int STOP_MULTICAST_TIMER = 1 * 1000; // 1 sec
     private static final int START_MULTICAST_TIMER = 3 * 1000; // 3 sec
+    private static final int REPEAT_HANDSHAKE_TIMER = 1 * 60 * 1000; // 1 min
 
 
     public static MulticastManager getInstance(Context context) {
@@ -97,6 +99,7 @@ public class MulticastManager extends AbstractManager {
                 instance.dbSyncManager = DBSyncManager.getInstance(context);
                 instance.p2PDBApiImpl = P2PDBApiImpl.getInstance(context);
                 instance.broadCastRefreshDevice();
+                instance.createRepeatHandShakeTimer();
             }
 
         }
@@ -115,10 +118,30 @@ public class MulticastManager extends AbstractManager {
 
     public void onCleanUp() {
         stopListening();
+        
         stopThreads();
+        
         if (instance != null) {
             instance.unregisterMulticastBroadcasts();
         }
+
+        if(instance.waitForHandShakingMessagesTimer != null) {
+            instance.waitForHandShakingMessagesTimer.cancel();
+        }
+
+        if(instance.stopMulticastTimer != null) {
+            instance.stopMulticastTimer.cancel();
+        }
+
+
+        if(instance.startMulticastTimer != null) {
+            instance.startMulticastTimer.cancel();
+        }
+
+        if(instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();
+        }
+
         instance = null;
     }
 
@@ -232,14 +255,21 @@ public class MulticastManager extends AbstractManager {
             instance.bluetoothManager.updateNetworkConnected(false);
         }
         instance.stopListening();
+        if(instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();            
+        }
     }
 
     public void startMultiCastOperations() {
         if(instance.bluetoothManager != null) {
             instance.bluetoothManager.updateNetworkConnected(true);
-            instance.bluetoothManager.stopBlueToothConnections();
+            instance.bluetoothManager.stopBlueToothConnections();            
         }
         instance.startListening();
+        if(instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();
+            instance.repeatHandShakeTimer.start();
+        }        
         if (P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null) {
             Log.d(TAG, "in sendFindBuddyMessage");
             Log.d(TAG, "startMultiCastOperations getCurrentDevice ----> " + P2PContext.getCurrentDevice());
@@ -296,7 +326,6 @@ public class MulticastManager extends AbstractManager {
                                 @Override
                                 public void onFinish() {
                                     notifyUI("starting multicast operations", " ------> ", LOG_TYPE);
-
                                     instance.startMultiCastOperations();
                                 }
                             }.start();
@@ -366,6 +395,11 @@ public class MulticastManager extends AbstractManager {
 
     public void processInComingMessage(final String message, final String fromIP) {
         if(isConnected.get()) {
+            // Cancel timer
+            if(instance.repeatHandShakeTimer != null) {
+                instance.repeatHandShakeTimer.cancel();            
+            }        
+
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -420,12 +454,13 @@ public class MulticastManager extends AbstractManager {
                                 AsyncTask.execute(new Runnable() {
                                   @Override
                                       public void run() {
-                                        instance.generateSyncInfoPullRequest(instance.getAllHandShakeMessagesInCurrentLoop());
                                         if (waitForHandShakingMessagesTimer != null) {
                                             waitForHandShakingMessagesTimer.cancel();
                                             Log.d(TAG, "waitForHandShakingMessagesTimer => reset to cancelled");
                                             waitForHandShakingMessagesTimer = null;
                                         }
+
+                                        instance.generateSyncInfoPullRequest(instance.getAllHandShakeMessagesInCurrentLoop());
                                       }
                                   });
                             }
@@ -439,6 +474,30 @@ public class MulticastManager extends AbstractManager {
         }
     }
 
+    private void createRepeatHandShakeTimer() {
+        synchronized (MulticastManager.class) 
+        { 
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {               
+                    instance.repeatHandShakeTimer = new CountDownTimer(REPEAT_HANDSHAKE_TIMER, 10000) {
+                        public void onTick(long millisUntilFinished) {
+                            Log.d(TAG, "repeatHandShakeTimer ticking ...");
+                        }
+
+                        public void onFinish() {                           
+                            if (instance.isListening) {
+                                Log.d(TAG, "repeatHandShakeTimer finished ... sending initial handshaking ...");
+                                instance.sendFindBuddyMessage();   
+                                instance.repeatHandShakeTimer.start();                             
+                            }
+                        }
+                    };
+                }
+            });
+        }
+    }
+
     public List<String> generateSyncInfoPullRequest(final Map<String, HandShakingMessage> messages) {
         List<String> jsons = new ArrayList<String>();
         final Collection<HandShakingInfo> pullSyncInfo = instance.computeSyncInfoRequired(messages);
@@ -447,6 +506,11 @@ public class MulticastManager extends AbstractManager {
         if (pullSyncInfo != null) {
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
             instance.sendMessages(jsons);
+        } else {
+            if (instance.repeatHandShakeTimer != null) {
+                instance.repeatHandShakeTimer.cancel();
+                instance.repeatHandShakeTimer.start();
+            }
         }
         return jsons;
     }
@@ -484,7 +548,7 @@ public class MulticastManager extends AbstractManager {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-//                Log.d(TAG, "processInComingSyncInfoMessage -> " + message + " fromIP -> " + fromIP);
+                Log.d(TAG, "processInComingSyncInfoMessage -> " + message + " fromIP -> " + fromIP);
                 Iterator<P2PSyncInfo> infos = p2PDBApiImpl.deSerializeP2PSyncInfoFromJson(message).iterator();
                 while (infos.hasNext()) {
                     P2PSyncInfo info = infos.next();
