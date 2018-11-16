@@ -151,7 +151,7 @@ public class ConnectedThread extends Thread {
             if (mmInStream != null) {
                 mmInStream.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.e(TAG, "close() of connect mmInStream failed", ex);
         }
 
@@ -159,12 +159,12 @@ public class ConnectedThread extends Thread {
             if (mmOutStream != null) {
                 mmOutStream.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.e(TAG, "close() of connect mmOutStream failed", ex);
         }
-        try {
+        try {            
             mmSocket.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "close() of connect socket failed", e);
         }
     }
