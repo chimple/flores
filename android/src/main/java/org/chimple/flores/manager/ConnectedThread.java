@@ -54,7 +54,10 @@ public class ConnectedThread extends Thread {
 
     public void run() {
         Log.i(TAG, "BEGIN mConnectedThread");
-        mManager.notifyUI("BEGIN mConnectedThread to remote" + mmSocket.getRemoteDevice().getAddress(), "------->", LOG_TYPE);
+        if(mmSocket != null) {
+            mManager.notifyUI("BEGIN mConnectedThread to remote" + mmSocket.getRemoteDevice().getAddress(), "------->", LOG_TYPE);    
+        }
+        
         byte[] buffer = new byte[64 * 1024];
         int bytes;
         StringBuffer sBuffer = null;
