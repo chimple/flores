@@ -34,8 +34,7 @@ public class ConnectThread extends Thread {
             tmp = device.createInsecureRfcommSocketToServiceRecord(
                     MY_UUID_INSECURE);
 
-        } catch (IOException e) {
-
+        } catch (Exception e) {
             Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
             callback.PollSocketFailed(e.toString());
         }
