@@ -58,7 +58,7 @@ public class MulticastThread extends Thread {
             String error = "Error: Cannot bind Address or Port.";
             if (multicastPort < 1024)
                 error += "\nTry binding to a port larger than 1024.";
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             handler.post(new Runnable() {
                 public void run() {
