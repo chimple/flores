@@ -69,10 +69,9 @@ public class ConnectedThread extends Thread {
                 if (sBuffer == null) {
                     sBuffer = new StringBuffer();
                 }
-                // Read from the InputStream
-                if(mmInStream != null) {
-                    bytes = mmInStream.read(buffer);    
-                }                
+                // Read from the InputStream                
+                bytes = mmInStream.read(buffer);    
+                
                 synchronized (ConnectedThread.class) {
                     this.broadcastIncomingMessage(sBuffer, new String(buffer, 0, bytes));
                 }
