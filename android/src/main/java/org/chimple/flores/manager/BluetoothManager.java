@@ -77,13 +77,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     private Handler mHandler = null;
     private int bluetoothState = -1;
     private final AtomicBoolean isSyncStarted = new AtomicBoolean(false);
-    private final AtomicBoolean anyPeersFound = new AtomicBoolean(false); 
+    // private final AtomicBoolean anyPeersFound = new AtomicBoolean(false); 
 
 
     public static final long START_ALL_BLUETOOTH_ACTIVITY = 5 * 1000;
     public static final long STOP_ALL_BLUETOOTH_ACTIVITY = 5 * 1000;
     public static final long LONG_TIME_ALARM = 1 * 60 * 1000; // 2 min cycle
-    public static final long FAILED_DISCOVERY_LONG_TIME_ALARM = 5 * 60 * 1000; // 5 min cycle
     public static final long IMMEDIATE_TIME_ALARM = 15 * 1000;
     private static final int START_HANDSHAKE_TIMER = 15 * 1000; // 15 sec
     private static final int STOP_DISCOVERY_TIMER = 5 * 1000; // 5 sec
@@ -192,6 +191,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     }
                 });
                 
+                instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);
 
                 instance.mHandler.post(new Runnable() {
                     @Override
@@ -207,8 +207,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                                 if (instance.isBluetoothEnabled()) {
                                     instance.startAcceptListener();
                                     Log.d(TAG, "restarting repeatSyncActivityTimer timer ....");
-                                    instance.stopRepeatSyncActivityTimer();
-                                    instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);
+                                    if (instance.repeatSyncActivityTimer != null) {
+                                        instance.repeatSyncActivityTimer.cancel();
+                                        instance.repeatSyncActivityTimer.start();
+                                    }
                                 }
                             }
                         };
@@ -571,9 +573,9 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         String ret = null;
         if(instance.peerDevices == null || instance.peerDevices.size() == 0) {
             instance.peerDevices.addAll(instance.supportedDevices);
-            instance.anyPeersFound.set(false);
+            // instance.anyPeersFound.set(false);
         } else {
-            instance.anyPeersFound.set(true);
+            // instance.anyPeersFound.set(true);
         }
         instance.removeDuplicates();
         if (peerDevices != null && peerDevices.size() > 0) {
@@ -746,6 +748,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                                     Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");                                    
                                     instance.isSyncStarted.set(false);                                    
                                     instance.startSync(false);
+                                    instance.repeatSyncActivityTimer.start();
                                 } 
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -764,12 +767,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         notifyUI("WAITING FOR NEXT SYNC ROUND ....", " ----> ", LOG_TYPE);
         instance.Stop();
         instance.startAcceptListener();
-        instance.stopRepeatSyncActivityTimer();
-        if(instance.anyPeersFound.get()) {            
-            instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);    
-        } else {
-            instance.createRepeatSyncActivityTimer(FAILED_DISCOVERY_LONG_TIME_ALARM);
-        }
+        if (instance.repeatSyncActivityTimer != null) {
+            instance.repeatSyncActivityTimer.cancel();
+            instance.repeatSyncActivityTimer.start();
+        }   
         
         if(instance.immediateSyncActivityTimer != null) {
             instance.immediateSyncActivityTimer.cancel();
@@ -798,8 +799,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     private void stopRepeatSyncActivityTimer() {
         if(instance.repeatSyncActivityTimer != null) {
-            instance.repeatSyncActivityTimer.cancel();
-            instance.repeatSyncActivityTimer = null;   
+            instance.repeatSyncActivityTimer.cancel();            
         }                   
     }
 
@@ -1164,8 +1164,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
             instance.sendMessages(jsons);
         } else {
-            instance.stopRepeatSyncActivityTimer();
-            instance.createRepeatSyncActivityTimer(LONG_TIME_ALARM);
+            if (instance.repeatSyncActivityTimer != null) {
+                instance.repeatSyncActivityTimer.cancel();
+                instance.repeatSyncActivityTimer.start();
+            }
         }
         return jsons;     
     }
