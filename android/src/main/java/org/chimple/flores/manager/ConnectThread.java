@@ -64,9 +64,9 @@ public class ConnectThread extends Thread {
                 mmSocket.close();
             } catch (Exception e2) {
                 Log.e(TAG, "unable to close() " + mSocketType +
-                        " socket during connection failure", e2);
-                mCallback.ConnectionFailed(e2.toString());
+                        " socket during connection failure", e2);                
             }
+            mCallback.ConnectionFailed("Connection Failed");
             return;
         }
 
