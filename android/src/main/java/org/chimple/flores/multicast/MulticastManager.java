@@ -395,11 +395,6 @@ public class MulticastManager extends AbstractManager {
 
     public void processInComingMessage(final String message, final String fromIP) {
         if(isConnected.get()) {
-            // Cancel timer
-            if(instance.repeatHandShakeTimer != null) {
-                instance.repeatHandShakeTimer.cancel();            
-            }        
-
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -506,11 +501,6 @@ public class MulticastManager extends AbstractManager {
         if (pullSyncInfo != null) {
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
             instance.sendMessages(jsons);
-        } else {
-            if (instance.repeatHandShakeTimer != null) {
-                instance.repeatHandShakeTimer.cancel();
-                instance.repeatHandShakeTimer.start();
-            }
         }
         return jsons;
     }
@@ -905,10 +895,8 @@ public class MulticastManager extends AbstractManager {
                         instance.sendInitialHandShakingMessage(true);                
                     }
             });
-
-        
     }
-
+ 
     public Map<String, HandShakingMessage> getAllHandShakeMessagesInCurrentLoop() {
         synchronized (MulticastManager.class) {
             Map<String, HandShakingMessage> messagesTillNow = Collections.unmodifiableMap(handShakingMessagesInCurrentLoop);
