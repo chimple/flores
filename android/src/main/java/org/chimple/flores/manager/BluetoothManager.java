@@ -84,7 +84,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public static final long STOP_ALL_BLUETOOTH_ACTIVITY = 5 * 1000;
     public static final long LONG_TIME_ALARM = 1 * 60 * 1000; // 2 min cycle
     private static final int START_HANDSHAKE_TIMER = 15 * 1000; // 15 sec
-    private static final int STOP_DISCOVERY_TIMER = 15 * 1000; // 15 sec
+    private static final int STOP_DISCOVERY_TIMER = 30 * 1000; // 30 sec
     private CountDownTimer startBluetoothDiscoveryTimer;
     private CountDownTimer handShakeFailedTimer;
     private CountDownTimer nextRoundTimer;
@@ -271,6 +271,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
                 instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);                
+                if(instance.peerDevices == null || instance.peerDevices.size() == 0) {
+                    instance.peerDevices.addAll(instance.supportedDevices);
+                    instance.notifyUI("adding all supported devices as no peer found ... : found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);                
+                } 
                 instance.stopDiscovery();
                 instance.startNextPolling();
             }            
