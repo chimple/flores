@@ -84,7 +84,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public static final long STOP_ALL_BLUETOOTH_ACTIVITY = 5 * 1000;
     public static final long LONG_TIME_ALARM = 1 * 60 * 1000; // 2 min cycle
     private static final int START_HANDSHAKE_TIMER = 15 * 1000; // 15 sec
-    private static final int STOP_DISCOVERY_TIMER = 5 * 1000; // 5 sec
+    private static final int STOP_DISCOVERY_TIMER = 15 * 1000; // 15 sec
     private CountDownTimer startBluetoothDiscoveryTimer;
     private CountDownTimer handShakeFailedTimer;
     private CountDownTimer nextRoundTimer;
@@ -530,14 +530,9 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     private synchronized String getNextToSync() {
         String ret = null;
-        if(instance.peerDevices == null || instance.peerDevices.size() == 0) {
-            instance.peerDevices.addAll(instance.supportedDevices);
-            // instance.anyPeersFound.set(false);
-        } else {
-            // instance.anyPeersFound.set(true);
-        }
-        instance.removeDuplicates();
+        
         if (peerDevices != null && peerDevices.size() > 0) {
+            instance.removeDuplicates();
             String myAddress = getBluetoothMacAddress();
             List<String> sDevices = new ArrayList<String>();
             sDevices.addAll(supportedDevices);
