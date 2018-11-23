@@ -100,8 +100,13 @@ public class MulticastManager extends AbstractManager {
                 instance.p2PDBApiImpl = P2PDBApiImpl.getInstance(context);
                 instance.broadCastRefreshDevice();
                 instance.createRepeatHandShakeTimer();
-            }
 
+                WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);                
+                if (wifi != null) {
+                    wifi.setWifiEnabled(true);
+                }
+                
+            }
         }
         return instance;
     }
