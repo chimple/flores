@@ -34,8 +34,7 @@ public class ConnectThread extends Thread {
             tmp = device.createInsecureRfcommSocketToServiceRecord(
                     MY_UUID_INSECURE);
 
-        } catch (IOException e) {
-
+        } catch (Exception e) {
             Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
             callback.PollSocketFailed(e.toString());
         }
@@ -59,15 +58,15 @@ public class ConnectThread extends Thread {
             if(mmSocket != null) {
                 mmSocket.connect();    
             }            
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Close the socket
             try {
                 mmSocket.close();
-            } catch (IOException e2) {
+            } catch (Exception e2) {
                 Log.e(TAG, "unable to close() " + mSocketType +
-                        " socket during connection failure", e2);
-                mCallback.ConnectionFailed(e2.toString());
+                        " socket during connection failure", e2);                
             }
+            mCallback.ConnectionFailed("Connection Failed");
             return;
         }
 
@@ -83,7 +82,7 @@ public class ConnectThread extends Thread {
     public void Stop() {
         try {
             mmSocket.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "close() of connect " + mSocketType + " socket failed", e);
         }
     }

@@ -135,13 +135,12 @@ public class P2PDBApiImpl {
         String userId = pref.getString("USER_ID", null); // getting String
         try {
             // one more recipient id 0
-            if ((userId != null 
-                && message.recipientUserId != null 
+            if ((message.recipientUserId != null 
                 && (message.getRecipientUserId().equals("0") 
                 || userId.equals(message.getRecipientUserId()))) 
                 || message.messageType.equals("Photo")) {
-                Log.i(TAG, "messageReceived intent constructing for user" + userId);
-                // this.appendLog("messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
+                // Log.i(TAG, "messageReceived intent constructing for user" + userId);
+                Log.d(TAG, "messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
                 FloresPlugin.onMessageReceived(message);
                 //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
                 Log.i(TAG, "messageReceived intent sent successfully");
@@ -200,12 +199,11 @@ public class P2PDBApiImpl {
                 SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0);
                 String userId = pref.getString("USER_ID", null); // getting String
                 try {
-                    if ((userId != null 
-                    && message.recipientUserId != null 
+                    if ((message.recipientUserId != null 
                     && (message.getRecipientUserId().equals("0") 
                     || userId.equals(message.getRecipientUserId()))) 
                     || message.messageType.equals("Photo")) {
-                        Log.i(TAG, "messageReceived intent constructing for user" + userId);
+                       Log.d(TAG, "messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);                        
                        FloresPlugin.onMessageReceived(message);
                        // this.appendLog("messageReceived intent constructing for user" + userId + " and type:" + message.messageType + " with content:" + message.message);
                         //LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
@@ -489,7 +487,9 @@ public class P2PDBApiImpl {
             if(bluetoothAddress == null) {
                 bluetoothAddress = bluetoothManager.getBluetoothMacAddress();
                 Log.d(TAG, "BT ADDRESS:" + bluetoothAddress);
-                this.saveBtAddress(P2PContext.getCurrentDevice(), bluetoothAddress);
+                if(bluetoothAddress != null) {
+                    this.saveBtAddress(P2PContext.getCurrentDevice(), bluetoothAddress);    
+                }                
             }
             HandShakingMessage message = new HandShakingMessage(P2PContext.getCurrentDevice(), "handshaking", reply, handShakingInfos, bluetoothAddress);
             Type handShakingType = new TypeToken<HandShakingMessage>() {

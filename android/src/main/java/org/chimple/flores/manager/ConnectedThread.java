@@ -54,7 +54,10 @@ public class ConnectedThread extends Thread {
 
     public void run() {
         Log.i(TAG, "BEGIN mConnectedThread");
-        mManager.notifyUI("BEGIN mConnectedThread to remote" + mmSocket.getRemoteDevice().getAddress(), "------->", LOG_TYPE);
+        if(mmSocket != null) {
+            mManager.notifyUI("BEGIN mConnectedThread to remote" + mmSocket.getRemoteDevice().getAddress(), "------->", LOG_TYPE);    
+        }
+        
         byte[] buffer = new byte[64 * 1024];
         int bytes;
         StringBuffer sBuffer = null;
@@ -69,12 +72,13 @@ public class ConnectedThread extends Thread {
                 if (sBuffer == null) {
                     sBuffer = new StringBuffer();
                 }
-                // Read from the InputStream
-                bytes = mmInStream.read(buffer);
+                // Read from the InputStream                
+                bytes = mmInStream.read(buffer);    
+                
                 synchronized (ConnectedThread.class) {
                     this.broadcastIncomingMessage(sBuffer, new String(buffer, 0, bytes));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "disconnected", e);
                 mManager.notifyUI("disconnected: " + e.toString(), " ------>", LOG_TYPE);
                 mCallback.ConnectionFailed(e.toString());
@@ -147,7 +151,7 @@ public class ConnectedThread extends Thread {
             if (mmInStream != null) {
                 mmInStream.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.e(TAG, "close() of connect mmInStream failed", ex);
         }
 
@@ -155,12 +159,12 @@ public class ConnectedThread extends Thread {
             if (mmOutStream != null) {
                 mmOutStream.close();
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Log.e(TAG, "close() of connect mmOutStream failed", ex);
         }
-        try {
+        try {            
             mmSocket.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "close() of connect socket failed", e);
         }
     }
