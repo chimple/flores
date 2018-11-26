@@ -480,19 +480,21 @@ public class MulticastManager extends AbstractManager {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {               
-                    instance.repeatHandShakeTimer = new CountDownTimer(REPEAT_HANDSHAKE_TIMER, 10000) {
-                        public void onTick(long millisUntilFinished) {
-                            Log.d(TAG, "repeatHandShakeTimer ticking ...");
-                        }
-
-                        public void onFinish() {                           
-                            if (instance.isListening) {
-                                Log.d(TAG, "repeatHandShakeTimer finished ... sending initial handshaking ...");
-                                instance.sendFindBuddyMessage();   
-                                instance.repeatHandShakeTimer.start();                             
+                    if(instance != null) {                    
+                        instance.repeatHandShakeTimer = new CountDownTimer(REPEAT_HANDSHAKE_TIMER, 10000) {
+                            public void onTick(long millisUntilFinished) {
+                                Log.d(TAG, "repeatHandShakeTimer ticking ...");
                             }
-                        }
-                    };
+
+                            public void onFinish() {                           
+                                if (instance.isListening) {
+                                    Log.d(TAG, "repeatHandShakeTimer finished ... sending initial handshaking ...");
+                                    instance.sendFindBuddyMessage();   
+                                    instance.repeatHandShakeTimer.start();                             
+                                }
+                            }
+                        };
+                    }
                 }
             });
         }
