@@ -20,6 +20,7 @@ public class MainActivity extends FlutterActivity {
     
     private static MainActivity activity;
     private static final String TAG = MainActivity.class.getName();
+    private static boolean isAppLaunched = false;
     private static Context context;
     public static AppDatabase db;
     public static MulticastManager manager;
@@ -42,6 +43,7 @@ public class MainActivity extends FlutterActivity {
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +56,7 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        MainActivity.isAppLaunched = false;
     }
 
     @Override
@@ -61,6 +64,7 @@ public class MainActivity extends FlutterActivity {
         super.onDestroy();
         manager.onCleanUp();
         BluetoothManager.onCleanUp();
+        MainActivity.isAppLaunched = false;
     }
 
     private void initialize() {
@@ -108,5 +112,13 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+    }
+
+    public static void launchApp() {
+        MainActivity.isAppLaunched = true;
+    }
+
+    public static boolean isAppLunched() {
+        return MainActivity.isAppLaunched;
     }
 }
