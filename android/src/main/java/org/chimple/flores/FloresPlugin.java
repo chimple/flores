@@ -33,6 +33,8 @@ import org.chimple.flores.db.entity.P2PUserIdMessage;
 public class FloresPlugin implements MethodCallHandler, StreamHandler {
     private static final String TAG = FloresPlugin.class.getName();
     private static MethodChannel methodChannel;
+    private static boolean isAppLaunched = false;
+    
   /**
    * Plugin registration.
    */
@@ -331,5 +333,14 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
             methodChannel.invokeMethod("messageReceived", message);
             finish();
         }
+    }
+
+
+    public static void launchApp() {
+        FloresPlugin.isAppLaunched = true;
+    }
+
+    public static boolean isAppLunched() {
+        return FloresPlugin.isAppLaunched;
     }
 }
