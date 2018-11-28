@@ -436,10 +436,6 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         instance.Stop();
 
         instance.unRegisterReceivers();
-        btBrowdCastReceiver = null;
-        newMessageAddedReceiver = null;
-        refreshDeviceReceiver = null;
-        mMessageEventReceiver = null;            
     }
 
     public void Stop() {
@@ -952,7 +948,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         dbSyncManager.addMessage(P2PContext.getLoggedInUser(), null, "Chat", message);
     }
 
-    private BroadcastReceiver newMessageAddedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver newMessageAddedReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
             final P2PSyncInfo info = (P2PSyncInfo) intent.getSerializableExtra(NEW_MESSAGE_ADDED);
@@ -984,7 +980,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         }
     }
 
-    private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
             String message = intent.getStringExtra("message");
@@ -1433,7 +1429,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
         LocalBroadcastManager.getInstance(this.context).sendBroadcast(intent);
     }
 
-    private BroadcastReceiver refreshDeviceReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver refreshDeviceReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             synchronized (BluetoothManager.class) {
                 AsyncTask.execute(new Runnable() {

@@ -228,26 +228,20 @@ public class MulticastManager extends AbstractManager {
 
     private void unregisterMulticastBroadcasts() {
         if (netWorkChangerReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(netWorkChangerReceiver);
-            netWorkChangerReceiver = null;
+            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(netWorkChangerReceiver);            
         }
 
         if (newMessageAddedReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);
-            newMessageAddedReceiver = null;
+            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);            
         }
 
         if (refreshDeviceReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(refreshDeviceReceiver);
-            refreshDeviceReceiver = null;
+            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(refreshDeviceReceiver);            
         }
 
         if (mMessageEventReceiver != null) {
-            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);
-            mMessageEventReceiver = null;
+            LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);            
         }        
-
-
     }
 
     private void registerMulticastBroadcasts() {
@@ -286,7 +280,7 @@ public class MulticastManager extends AbstractManager {
         }
     }
 
-    private BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageEventReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
             String message = intent.getStringExtra("message");
@@ -295,7 +289,7 @@ public class MulticastManager extends AbstractManager {
         }
     };  
 
-    private BroadcastReceiver netWorkChangerReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver netWorkChangerReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
             synchronized (MulticastManager.class) {
@@ -350,7 +344,7 @@ public class MulticastManager extends AbstractManager {
     }
 
 
-    private BroadcastReceiver refreshDeviceReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver refreshDeviceReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             synchronized (BluetoothManager.class) {
                 AsyncTask.execute(new Runnable() {
@@ -380,7 +374,7 @@ public class MulticastManager extends AbstractManager {
         }
     };    
 
-    private BroadcastReceiver newMessageAddedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver newMessageAddedReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
             P2PSyncInfo info = (P2PSyncInfo) intent.getSerializableExtra(NEW_MESSAGE_ADDED);
