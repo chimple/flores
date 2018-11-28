@@ -398,26 +398,48 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     public void onCleanUp() {
+        if(instance.startBluetoothDiscoveryTimer != null) {
+            instance.startBluetoothDiscoveryTimer.cancel();
+            instance.startBluetoothDiscoveryTimer = null;
+        }
+
+        if(instance.handShakeFailedTimer != null) {
+            instance.handShakeFailedTimer.cancel();
+            instance.handShakeFailedTimer = null;
+        }
+
+        if(instance.nextRoundTimer != null) {
+            instance.nextRoundTimer.cancel();
+            instance.nextRoundTimer = null;
+        }
+
+        if(instance.startAllBlueToothActivityTimer != null) {
+            instance.startAllBlueToothActivityTimer.cancel();
+            instance.startAllBlueToothActivityTimer = null;
+        }
+
+        if(instance.stopAllBlueToothActivityTimer != null) {
+            instance.stopAllBlueToothActivityTimer.cancel();
+            instance.stopAllBlueToothActivityTimer = null;
+        }
+
+        if(instance.repeatSyncActivityTimer != null) {
+            instance.repeatSyncActivityTimer.cancel();
+            instance.repeatSyncActivityTimer = null;
+        }
+
+        if(instance.disconnectTimer != null) {
+            instance.disconnectTimer.cancel();
+            instance.disconnectTimer = null;
+        }
+
         instance.Stop();
 
-        if(btBrowdCastReceiver != null) {
-            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(btBrowdCastReceiver);            
-        }
-
-        if (newMessageAddedReceiver != null) {
-            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(newMessageAddedReceiver);
-            newMessageAddedReceiver = null;
-        }
-
-        if (refreshDeviceReceiver != null) {
-            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(refreshDeviceReceiver);
-            refreshDeviceReceiver = null;
-        }
-
-        if (mMessageEventReceiver != null) {
-            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(mMessageEventReceiver);
-            mMessageEventReceiver = null;
-        }        
+        instance.unRegisterReceivers();
+        btBrowdCastReceiver = null;
+        newMessageAddedReceiver = null;
+        refreshDeviceReceiver = null;
+        mMessageEventReceiver = null;            
     }
 
     public void Stop() {
@@ -462,21 +484,32 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         // }
     }
 
+    private void unRegisterReceivers() {
+        Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS ....");     
+        if(btBrowdCastReceiver != null) {
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(btBrowdCastReceiver);                        
+        }
 
-    private void registerReceivers() {
+        if (newMessageAddedReceiver != null) {
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(newMessageAddedReceiver);         
+        }
+
+        if (refreshDeviceReceiver != null) {
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(refreshDeviceReceiver);            
+        }
+
+        if (mMessageEventReceiver != null) {
+            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(mMessageEventReceiver);            
+        }          
+    }
+
+
+    private void registerReceivers() {        
+        this.unRegisterReceivers();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        this.context.registerReceiver(btBrowdCastReceiver, filter);
-
-        // filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        // this.context.registerReceiver(btBrowdCastReceiver, filter);
-
-
-        // filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        // this.context.registerReceiver(btBrowdCastReceiver, filter);
-
-        // filter.addAction(BluetoothDevice.ACTION_FOUND);
-        // this.context.registerReceiver(btBrowdCastReceiver, filter); 
+        this.context.registerReceiver(btBrowdCastReceiver, filter);        
 
         Log.d(TAG, "REGISTERED BLUETOOTH RECEIVERS ....");     
 

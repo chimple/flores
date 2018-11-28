@@ -122,6 +122,28 @@ public class MulticastManager extends AbstractManager {
 
 
     public void onCleanUp() {
+
+        if(instance.waitForHandShakingMessagesTimer != null) {
+            instance.waitForHandShakingMessagesTimer.cancel();
+            instance.waitForHandShakingMessagesTimer = null;
+        }
+
+        if(instance.stopMulticastTimer != null) {
+            instance.stopMulticastTimer.cancel();
+            instance.stopMulticastTimer = null;
+        }
+
+
+        if(instance.startMulticastTimer != null) {
+            instance.startMulticastTimer.cancel();
+            instance.startMulticastTimer = null;
+        }
+
+        if(instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();
+            instance.repeatHandShakeTimer = null;
+        }
+
         stopListening();
         
         stopThreads();
@@ -129,25 +151,6 @@ public class MulticastManager extends AbstractManager {
         if (instance != null) {
             instance.unregisterMulticastBroadcasts();
         }
-
-        if(instance.waitForHandShakingMessagesTimer != null) {
-            instance.waitForHandShakingMessagesTimer.cancel();
-        }
-
-        if(instance.stopMulticastTimer != null) {
-            instance.stopMulticastTimer.cancel();
-        }
-
-
-        if(instance.startMulticastTimer != null) {
-            instance.startMulticastTimer.cancel();
-        }
-
-        if(instance.repeatHandShakeTimer != null) {
-            instance.repeatHandShakeTimer.cancel();
-        }
-
-        instance = null;
     }
 
     public synchronized void startListening() {
@@ -475,29 +478,33 @@ public class MulticastManager extends AbstractManager {
     }
 
     private void createRepeatHandShakeTimer() {
-        synchronized (MulticastManager.class) 
-        { 
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {               
-                    if(instance != null) {                    
-                        instance.repeatHandShakeTimer = new CountDownTimer(REPEAT_HANDSHAKE_TIMER, 10000) {
-                            public void onTick(long millisUntilFinished) {
-                                Log.d(TAG, "repeatHandShakeTimer ticking ...");
-                            }
-
-                            public void onFinish() {                           
-                                if (instance.isListening) {
-                                    Log.d(TAG, "repeatHandShakeTimer finished ... sending initial handshaking ...");
-                                    instance.sendFindBuddyMessage();   
-                                    instance.repeatHandShakeTimer.start();                             
+        try {
+            synchronized (MulticastManager.class) 
+            { 
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {               
+                        if(instance != null) {                    
+                            instance.repeatHandShakeTimer = new CountDownTimer(REPEAT_HANDSHAKE_TIMER, 10000) {
+                                public void onTick(long millisUntilFinished) {
+                                    Log.d(TAG, "repeatHandShakeTimer ticking ...");
                                 }
-                            }
-                        };
+
+                                public void onFinish() {                           
+                                    if (instance.isListening) {
+                                        Log.d(TAG, "repeatHandShakeTimer finished ... sending initial handshaking ...");
+                                        instance.sendFindBuddyMessage();   
+                                        instance.repeatHandShakeTimer.start();                             
+                                    }
+                                }
+                            };
+                        }
                     }
-                }
-            });
-        }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }        
     }
 
     public List<String> generateSyncInfoPullRequest(final Map<String, HandShakingMessage> messages) {
