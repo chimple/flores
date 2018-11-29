@@ -1490,7 +1490,9 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
 
     public void startHandShakeTimer() {
         synchronized (BluetoothManager.class) {
-            instance.handShakeFailedTimer.start();
+            if(instance != null && instance.handShakeFailedTimer != null) {
+                instance.handShakeFailedTimer.start();    
+            }            
         }
     }
 
