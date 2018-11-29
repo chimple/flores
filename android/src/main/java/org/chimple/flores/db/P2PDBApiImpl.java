@@ -14,6 +14,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import android.os.Environment;
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import org.apache.commons.io.FilenameUtils;
+import java.io.FilenameFilter;
+import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1036,11 +1041,65 @@ public class P2PDBApiImpl {
 
     public String getBluetoothAddress(String deviceId) {
         return db.btInfoDao().getBluetoothAddress(deviceId);        
-    }    
+    }   
+
+    public static class BluetoothFilter implements FilenameFilter {
+
+        private String ext;
+
+        public BluetoothFilter(String ext) {
+            this.ext = ext.toLowerCase();
+        }
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.toLowerCase().contains(ext);
+        }
+
+    }
+ 
 
     public List<String> fetchAllSyncedDevices() {
-        List<String> staticSupportedDevices = Arrays.asList(db.btInfoDao().fetchAllSyncedDevices());        
-        return staticSupportedDevices;
+        Log.d(TAG, "in fetchAllSyncedDevices...");
+        List<String> staticSupportedDevices = Arrays.asList(db.btInfoDao().fetchAllSyncedDevices()); 
+        List<String> allS = new ArrayList<String>();
+        allS.addAll(staticSupportedDevices);
+
+        try {
+            String matchingPattern = "bluetooth.address";
+            File downloadDirectoryFolder = Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS);
+            File bluetoothAddressFileFolder = new File (downloadDirectoryFolder.getPath() + "/bluetoothAdr");
+            boolean isBluetoothAddressAvailable = bluetoothAddressFileFolder.exists();
+            Log.d(TAG, "in fetchAllSyncedDevices... isBluetoothAddressAvailable " + isBluetoothAddressAvailable);
+
+            if (isBluetoothAddressAvailable) 
+            {
+                File[] listOfFiles = bluetoothAddressFileFolder.listFiles(new BluetoothFilter(matchingPattern));
+                if (listOfFiles != null) {
+                    for (int i = 0; i < listOfFiles.length; i++) {
+                        if (listOfFiles[i].isFile()) {
+                            Log.d(TAG, "bluetooth getCanonicalPath: " + listOfFiles[i].getCanonicalPath());
+                            String bluetoothFileName = FilenameUtils.getName(listOfFiles[i].getCanonicalPath());
+                            if(bluetoothFileName != null) {                                
+                                bluetoothFileName = bluetoothFileName.replaceAll("bluetooth.address.", "");
+                                bluetoothFileName = bluetoothFileName.replaceAll(".txt", "");
+                                bluetoothFileName = bluetoothFileName.replaceAll("-", ":");
+                                bluetoothFileName = bluetoothFileName.toUpperCase();
+                                Log.d(TAG, "bluetooth address from downloaded files:" + bluetoothFileName);                                                    
+                                if(!allS.contains(bluetoothFileName))
+                                {
+                                    allS.add(bluetoothFileName);
+                                }                                
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return allS;
     }
 
     public void saveBtAddress(String from, String btAddress) {
