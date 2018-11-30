@@ -56,7 +56,8 @@ public class P2PContext {
         if (initialized) {
             return;
         }
-
+        
+        Log.d(TAG, "P2P Context initialize");
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(networkChangeReceiver, intentFilter);
@@ -66,7 +67,6 @@ public class P2PContext {
         BluetoothManager bManager = BluetoothManager.getInstance(context);
         mManager.setBluetoothMangager(bManager);
         initialized = true;
-
     }
 
     private BroadcastReceiver networkChangeReceiver = new BroadcastReceiver() {

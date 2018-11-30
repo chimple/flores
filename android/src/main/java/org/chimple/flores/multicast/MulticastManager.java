@@ -92,6 +92,7 @@ public class MulticastManager extends AbstractManager {
     public static MulticastManager getInstance(Context context) {
         if (instance == null) {
             synchronized (MulticastManager.class) {
+                Log.d(TAG, "MulticastManager initialize");
                 instance = new MulticastManager(context);
                 instance.setMulticastIpAddress(MULTICAST_IP_ADDRESS);
                 instance.setMulticastPort(MULTICAST_IP_PORT);
@@ -151,6 +152,8 @@ public class MulticastManager extends AbstractManager {
         if (instance != null) {
             instance.unregisterMulticastBroadcasts();
         }
+
+        instance = null;
     }
 
     public synchronized void startListening() {

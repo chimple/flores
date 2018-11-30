@@ -128,6 +128,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         if (instance == null) 
         {
             synchronized (BluetoothManager.class) {
+                Log.d(TAG, "BluetoothManager initialize");
                 instance = new BluetoothManager(context);
                 instance.mHandler = new Handler(context.getMainLooper());
                 instance.dbSyncManager = DBSyncManager.getInstance(context);
@@ -438,7 +439,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
         instance.Stop();
 
-        
+        instance = null;    
     }
 
     public void Stop() {        
