@@ -118,5 +118,14 @@ public class P2PContext {
         return context;
     }
 
+    public void onCleanUp() {
+        
+        Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....");     
+        if(networkChangeReceiver != null) {
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(networkChangeReceiver);                        
+        }
+
+    }
+
    
 }
