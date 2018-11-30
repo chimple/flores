@@ -39,11 +39,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
    * Plugin registration.
    */
   public static void registerWith(PluginRegistry.Registrar registrar) {
-      if (methodChannel != null) {
-          Log.i(TAG, "You should not call registerWith more than once.");
-      } else {
-        methodChannel = new MethodChannel(registrar.messenger(), "chimple.org/flores");      
-      }
+    methodChannel = new MethodChannel(registrar.messenger(), "chimple.org/flores");      
 
     final EventChannel eventChannel =
         new EventChannel(registrar.messenger(), "chimple.org/flores_event");
