@@ -119,7 +119,7 @@ public class P2PContext {
     }
 
     public void onCleanUp() {
-        
+        initialized = false;
         Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....");     
         if(networkChangeReceiver != null) {
             Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....networkChangeReceiver");     
