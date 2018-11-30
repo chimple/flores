@@ -398,6 +398,9 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     public void onCleanUp() {
+        
+        instance.unRegisterReceivers();
+
         if(instance.startBluetoothDiscoveryTimer != null) {
             instance.startBluetoothDiscoveryTimer.cancel();
             instance.startBluetoothDiscoveryTimer = null;
@@ -435,10 +438,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
         instance.Stop();
 
-        instance.unRegisterReceivers();
+        
     }
 
-    public void Stop() {
+    public void Stop() {        
         // Cancel the thread that completed the connection
         instance.reset();
         instance.stopDiscovery();
@@ -483,26 +486,28 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     private void unRegisterReceivers() {
         Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS ....");     
         if(btBrowdCastReceiver != null) {
-            LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(btBrowdCastReceiver);                        
+            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... btBrowdCastReceiver");     
+            instance.context.unregisterReceiver(btBrowdCastReceiver);                        
         }
 
         if (newMessageAddedReceiver != null) {
+            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... newMessageAddedReceiver");     
             LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(newMessageAddedReceiver);         
         }
 
         if (refreshDeviceReceiver != null) {
+            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... refreshDeviceReceiver");     
             LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(refreshDeviceReceiver);            
         }
 
         if (mMessageEventReceiver != null) {
+            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... mMessageEventReceiver");     
             LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(mMessageEventReceiver);            
         }          
     }
 
 
     private void registerReceivers() {        
-        this.unRegisterReceivers();
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         this.context.registerReceiver(btBrowdCastReceiver, filter);        

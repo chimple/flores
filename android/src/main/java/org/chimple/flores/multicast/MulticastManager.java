@@ -227,19 +227,24 @@ public class MulticastManager extends AbstractManager {
     }
 
     private void unregisterMulticastBroadcasts() {
+        Log.d(TAG, "multicast manager unregisterMulticastBroadcasts");
         if (netWorkChangerReceiver != null) {
+            Log.d(TAG, "multicast manager unregisterMulticastBroadcasts netWorkChangerReceiver");
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(netWorkChangerReceiver);            
         }
 
         if (newMessageAddedReceiver != null) {
+            Log.d(TAG, "multicast manager unregisterMulticastBroadcasts newMessageAddedReceiver");
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(newMessageAddedReceiver);            
         }
 
         if (refreshDeviceReceiver != null) {
+            Log.d(TAG, "multicast manager unregisterMulticastBroadcasts refreshDeviceReceiver");
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(refreshDeviceReceiver);            
         }
 
         if (mMessageEventReceiver != null) {
+            Log.d(TAG, "multicast manager unregisterMulticastBroadcasts mMessageEventReceiver");
             LocalBroadcastManager.getInstance(this.context).unregisterReceiver(mMessageEventReceiver);            
         }        
     }

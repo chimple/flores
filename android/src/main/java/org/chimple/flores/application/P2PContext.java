@@ -122,7 +122,8 @@ public class P2PContext {
         
         Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....");     
         if(networkChangeReceiver != null) {
-            LocalBroadcastManager.getInstance(context).unregisterReceiver(networkChangeReceiver);                        
+            Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....networkChangeReceiver");     
+            context.unregisterReceiver(networkChangeReceiver);                        
         }
 
     }
