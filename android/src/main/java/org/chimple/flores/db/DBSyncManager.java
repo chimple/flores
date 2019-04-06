@@ -61,11 +61,16 @@ public class DBSyncManager {
         return p2pdbapi.addMessage(userId, recipientId, messageType, message, status, sessionId);
     }
 
-
     public boolean addMessage(String userId, String recipientId, String messageType, String message) {
         P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
         return p2pdbapi.addMessage(userId, recipientId, messageType, message);
     }
+
+    public boolean addGroupMessage(String userId, String recipientId, String messageType, String message, Boolean status, String sessionId) {
+        P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
+        return p2pdbapi.addGroupMessage(userId, recipientId, messageType, message, status, sessionId);
+    }
+
 
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
         Log.i(TAG, "Called getUsers");

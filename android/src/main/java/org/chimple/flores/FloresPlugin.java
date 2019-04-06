@@ -153,6 +153,28 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
               
               break;
           }
+          case "addGroupMessage":
+          {
+              AsyncTask.execute(new Runnable() {
+                  @Override
+                  public void run() {
+                      Map<String, String> arg = (Map<String, String>)call.arguments;
+                      String userId = arg.get("userId");
+                      String recipientId = arg.get("recipientId");
+                      String messageType = arg.get("messageType");
+                      String message = arg.get("message");
+                      String statusStr = arg.get("status");
+                      Boolean status = Boolean.valueOf(statusStr);
+                      String sessionId = arg.get("sessionId");
+                      boolean retStatus =
+                              DBSyncManager.getInstance(registrar.context())
+                                      .addGroupMessage(userId, recipientId, messageType, message, status, sessionId);
+                      result.success(retStatus);
+                  }
+              });
+
+              break;
+          }
           case "getLatestMessages":
           {
             AsyncTask.execute(new Runnable() {

@@ -88,6 +88,15 @@ public abstract class AbstractManager {
         return isSyncInfoMessage;
     }
 
+    protected boolean isGroupNonRepeatMessage(String message) {
+        boolean isGroupNonRepeatMessage = false;
+        if (message != null) {
+            String groupMessageMatch = "\"mt\":\"groupMessage\"";
+            isGroupNonRepeatMessage = message.contains(groupMessageMatch);
+        }
+        return isGroupNonRepeatMessage;
+    }
+
     protected boolean isSyncRequestMessage(String message) {
         String messageType = "\"mt\":\"syncInfoRequestMessage\"";       
         return message != null && message.contains(messageType);
