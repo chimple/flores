@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.chimple.flores.application.P2PContext;
@@ -29,7 +28,6 @@ import org.chimple.flores.db.entity.HandShakingInfo;
 import org.chimple.flores.db.entity.HandShakingMessage;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.SyncInfoItem;
-import org.chimple.flores.db.entity.SyncInfoMessage;
 import org.chimple.flores.db.entity.SyncInfoRequestMessage;
 
 import java.lang.reflect.Field;
@@ -59,7 +57,6 @@ import static org.chimple.flores.application.P2PContext.NEW_MESSAGE_ADDED;
 import static org.chimple.flores.application.P2PContext.bluetoothMessageEvent;
 import static org.chimple.flores.application.P2PContext.newMessageAddedOnDevice;
 import static org.chimple.flores.application.P2PContext.refreshDevice;
-import static org.chimple.flores.application.P2PContext.uiMessageEvent;
 import static org.chimple.flores.db.AppDatabase.SYNC_NUMBER_OF_LAST_MESSAGES;
 
 public class BluetoothManager extends AbstractManager implements BtListenCallback, BtCallback, BluetoothStatusChanged {
@@ -1112,7 +1109,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public List<String> processInComingSyncRequestMessage(String message) {
         Log.d(TAG, "processInComingSyncRequestMessage => " + message);
         List<String> jsonRequests = new CopyOnWriteArrayList<String>();
-        SyncInfoRequestMessage request = p2PDBApiImpl.buildSyncRequstMessage(message);
+        SyncInfoRequestMessage request = p2PDBApiImpl.buildSyncRequestMessage(message);
         // process only if matching current device id
         if (request != null && request.getmDeviceId().equalsIgnoreCase(P2PContext.getCurrentDevice())) {
             Log.d(TAG, "processInComingSyncRequestMessage => device id matches with: " + P2PContext.getCurrentDevice());

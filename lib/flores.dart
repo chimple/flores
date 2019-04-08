@@ -125,4 +125,20 @@ Future<bool> addTextMessage(String message) async {
         .then<bool>((dynamic result) => result);
   }
 
+  Future<bool> addGroupMessage(String userId, String recipientId, String messageType, String message, bool status, String sessionId) async {
+    final Map<String, String> params = <String, String>{
+      'userId': userId,
+      'recipientId': recipientId,
+      'messageType': messageType,
+      'message': message,
+      'status': '$status',
+      'sessionId': sessionId
+    };
+
+    return _methodChannel
+        .invokeMethod('addGroupMessage', params)
+        .then<bool>((dynamic result) => result);
+  }
+
+
 }

@@ -15,6 +15,7 @@ import org.chimple.flores.manager.BluetoothManager;
 public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
     public static final String newMessageAddedOnDevice = "new-message-added-event";
+    public static final String newGroupMessageAddedOnDevice = "new-group-message-added-event";
     public static final String refreshDevice = "refresh-device-event";
     public static final String MULTICAST_IP_ADDRESS = "232.1.1.2";
     public static final String MULTICAST_IP_PORT = "4461";
@@ -24,6 +25,7 @@ public class P2PContext {
     public static final String USER_ID = "USER_ID";
     public static final String DEVICE_ID = "DEVICE_ID";
     public static final String NEW_MESSAGE_ADDED = "NEW_MESSAGE_ADDED";
+    public static final String NEW_GROUP_MESSAGE_ADDED = "NEW_GROUP_MESSAGE_ADDED";
     public static final String REFRESH_DEVICE = "REFRESH_DEVICE";
     public static final String messageEvent = "message-event";
     public static final String bluetoothMessageEvent = "bluetooth-message-event";
