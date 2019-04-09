@@ -266,7 +266,8 @@ public class MulticastManager extends AbstractManager {
 
     private void stopMultiCastOperations() {
         if (instance.bluetoothManager != null) {
-            instance.bluetoothManager.updateNetworkConnected(false);
+            // stop bluetooth for now ...
+            // instance.bluetoothManager.updateNetworkConnected(false);
         }
         instance.stopListening();
         if (instance.repeatHandShakeTimer != null) {
