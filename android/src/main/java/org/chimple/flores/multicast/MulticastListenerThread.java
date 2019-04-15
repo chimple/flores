@@ -27,10 +27,10 @@ public class MulticastListenerThread extends MulticastThread {
 
         while (running.get()) {
             packet.setData(new byte[61440]);
-            Log.d(TAG, "MulticastListenerThread run loop " + (multicastSocket != null));
+            //Log.d(TAG, "MulticastListenerThread run loop " + (multicastSocket != null));
             try {
                 if (multicastSocket != null && !multicastSocket.isClosed()) {
-                    Log.d(TAG, "MulticastListenerThread running ->" + running.get());
+                    //Log.d(TAG, "MulticastListenerThread running ->" + running.get());
                     multicastSocket.receive(packet);
                 } else {
                     break;
@@ -48,7 +48,7 @@ public class MulticastListenerThread extends MulticastThread {
 
     private void broadcastIncomingMessage(String message, String fromIP, boolean isLoopback) {
         if (!isLoopback) {
-            Log.d(TAG, "received incoming message:" + message + " from IP:" + fromIP);
+            //Log.d(TAG, "received incoming message:" + message + " from IP:" + fromIP);
             Intent intent = new Intent(messageEvent);
             // You can also include some extra data.
             intent.putExtra("message", message);
@@ -60,7 +60,7 @@ public class MulticastListenerThread extends MulticastThread {
     public void cleanUp() {
         if (multicastSocket != null && !running.get() && !multicastSocket.isClosed()) {
             try {
-                Log.d(TAG, "MulticastListenerThread -> multicastSocket -> closed");
+                //Log.d(TAG, "MulticastListenerThread -> multicastSocket -> closed");
                 this.multicastSocket.close();
             } catch (Exception e) {
                 e.printStackTrace();

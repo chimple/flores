@@ -125,7 +125,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         if (instance == null) 
         {
             synchronized (BluetoothManager.class) {
-                Log.d(TAG, "BluetoothManager initialize");
+                //Log.d(TAG, "BluetoothManager initialize");
                 instance = new BluetoothManager(context);
                 instance.mHandler = new Handler(context.getMainLooper());
                 instance.dbSyncManager = DBSyncManager.getInstance(context);
@@ -172,7 +172,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                             @Override
                             public void onFinish() {
                                 instance.notifyUI("STOP_DISCOVERY_TIMER ...finished ", " ----->", LOG_TYPE);
-                                Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");                                
+                                //Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
                                 instance.peerDevices.addAll(instance.supportedDevices);
                                 instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);                                
                                 instance.stopDiscovery();
@@ -206,14 +206,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         instance.startAllBlueToothActivityTimer = new CountDownTimer(START_ALL_BLUETOOTH_ACTIVITY, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
-                                Log.d(TAG, "startAllBlueToothActivityTimer ticking ....");
+                                //Log.d(TAG, "startAllBlueToothActivityTimer ticking ....");
                             }
 
                             @Override
                             public void onFinish() {
                                 if (instance.isBluetoothEnabled()) {
                                     instance.startAcceptListener();
-                                    Log.d(TAG, "restarting repeatSyncActivityTimer timer ....");
+                                    //Log.d(TAG, "restarting repeatSyncActivityTimer timer ....");
                                     if (instance.repeatSyncActivityTimer != null) {
                                         instance.repeatSyncActivityTimer.cancel();
                                         instance.repeatSyncActivityTimer.start();
@@ -259,13 +259,13 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         @Override
          public void onReceive(Context context, Intent intent) {
             String action = intent.getAction(); 
-            Log.d(TAG, "BtBrowdCastReceiver action received:" + action);
+            //Log.d(TAG, "BtBrowdCastReceiver action received:" + action);
             // if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-            //     Log.d(TAG, "started ACTION_DISCOVERY_STARTED");
+            //     //Log.d(TAG, "started ACTION_DISCOVERY_STARTED");
             //     notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_STARTED", "---------->", LOG_TYPE);
             // } else if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
             //     int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-            //     Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
+            //     //Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
             //     if (instance != null) {                    
             //         instance.BluetoothStateChanged(mode);
             //     }
@@ -273,12 +273,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             //     // Get the BluetoothDevice object from the Intent
             //     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             //     // If it's already paired, skip it, because it's been listed already
-            //     Log.d(TAG, "Adding device to list: " + device.getName() + "\n" + device.getAddress());
+            //     //Log.d(TAG, "Adding device to list: " + device.getName() + "\n" + device.getAddress());
             //     notifyUI("Adding device to list: " + device.getName() + "\n" + device.getAddress(), " ----> ", LOG_TYPE);
             //     peerDevices.add(device.getAddress());
             //     // When discovery is finished, change the Activity title
             // } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-            //     Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
+            //     //Log.d(TAG, "started ACTION_DISCOVERY_FINISHED");
             //     instance.notifyUI("startDiscoveryTimer ...ACTION_DISCOVERY_FINISHED: found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);                
             //     instance.peerDevices.addAll(instance.supportedDevices);
             //     instance.notifyUI("adding all supported devices as no peer found ... : found peers:" + instance.peerDevices.size(), "---------->", LOG_TYPE);
@@ -288,7 +288,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
             if (BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
                 int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-                Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
+                //Log.d(TAG, "Bluetooth ACTION_SCAN_MODE_CHANGED");
                 if (instance != null) {                    
                     instance.BluetoothStateChanged(mode);
                 }
@@ -300,17 +300,17 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         instance.mHandler.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "in createDisconnectTimer 111: " + (instance.disconnectTimer == null));
+                //Log.d(TAG, "in createDisconnectTimer 111: " + (instance.disconnectTimer == null));
                 if(instance.disconnectTimer == null) {
                         instance.disconnectTimer = new CountDownTimer(DISCONNECT_TIMER, 1000) {
                         @Override
                         public void onTick(long millisUntilFinished) {
-                            Log.d(TAG, "disconnectTimer ticking ...");
+                            //Log.d(TAG, "disconnectTimer ticking ...");
                         }
 
                         @Override
                         public void onFinish() {
-                            Log.d(TAG, "disconnectTimer finished staring disconnect from...." + instance.connectedAddress);
+                            //Log.d(TAG, "disconnectTimer finished staring disconnect from...." + instance.connectedAddress);
                             instance.disconnectTimer = null;
                             instance.notifyUI("BLUETOOTH SYNC COMPLETED ....", " ------> ", LOG_TYPE);
                             instance.startNextDeviceToSync();                                                    
@@ -323,7 +323,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     private void startSync(boolean isImmediate) {
         synchronized(BluetoothManager.class) {
-        Log.d(TAG, "in startSync : should start sync:" + !instance.isSyncStarted.get());            
+        //Log.d(TAG, "in startSync : should start sync:" + !instance.isSyncStarted.get());
             instance.Start(instance.pollingIndex);
         }        
     }
@@ -335,10 +335,10 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     private void startBluetoothBased() {
         synchronized(BluetoothManager.class) {
-            Log.d(TAG, "is network connected:" + instance.isConnected.get());
+            //Log.d(TAG, "is network connected:" + instance.isConnected.get());
             if (instance.isConnected.get())
             {
-                Log.d(TAG, "still connected with network - no blue tooth");
+                //Log.d(TAG, "still connected with network - no blue tooth");
                 instance.stopBlueToothConnections();             
             } 
             else 
@@ -353,7 +353,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     private void startBluetoothConnections() {
-        Log.d(TAG, "network is not connected and  bluetooth is enabled ...starting all bluetooth activity");
+        //Log.d(TAG, "network is not connected and  bluetooth is enabled ...starting all bluetooth activity");
         if (stopAllBlueToothActivityTimer != null) {
             stopAllBlueToothActivityTimer.cancel();
         }
@@ -482,24 +482,24 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     private void unRegisterReceivers() {
-        Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS ....");     
+        //Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS ....");
         if(btBrowdCastReceiver != null) {
-            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... btBrowdCastReceiver");     
+            //Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... btBrowdCastReceiver");
             instance.context.unregisterReceiver(btBrowdCastReceiver);                        
         }
 
         if (newMessageAddedReceiver != null) {
-            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... newMessageAddedReceiver");     
+            //Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... newMessageAddedReceiver");
             LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(newMessageAddedReceiver);         
         }
 
         if (refreshDeviceReceiver != null) {
-            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... refreshDeviceReceiver");     
+            //Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... refreshDeviceReceiver");
             LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(refreshDeviceReceiver);            
         }
 
         if (mMessageEventReceiver != null) {
-            Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... mMessageEventReceiver");     
+            //Log.d(TAG, "UNREGISTERED BLUETOOTH RECEIVERS .... mMessageEventReceiver");
             LocalBroadcastManager.getInstance(instance.context).unregisterReceiver(mMessageEventReceiver);            
         }          
     }
@@ -510,7 +510,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         this.context.registerReceiver(btBrowdCastReceiver, filter);        
 
-        Log.d(TAG, "REGISTERED BLUETOOTH RECEIVERS ....");     
+        //Log.d(TAG, "REGISTERED BLUETOOTH RECEIVERS ....");
 
         LocalBroadcastManager.getInstance(instance.context).registerReceiver(mMessageEventReceiver, new IntentFilter(bluetoothMessageEvent));           
         LocalBroadcastManager.getInstance(instance.context).registerReceiver(newMessageAddedReceiver, new IntentFilter(newMessageAddedOnDevice));
@@ -528,11 +528,11 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
 
     private void DoNextPollingRound() {
-        Log.d(TAG, "finding next to sync with .....");
+        //Log.d(TAG, "finding next to sync with .....");
         String nextDevice = getNextToSync();
         if (nextDevice != null) {
             instance.notifyUI("Starting Connection with: " + nextDevice, " ----->", LOG_TYPE);
-            Log.d(TAG, "Starting Connection with: " + nextDevice);
+            //Log.d(TAG, "Starting Connection with: " + nextDevice);
             instance.connectedAddress = nextDevice;
             BluetoothDevice device = instance.mAdapter.getRemoteDevice(nextDevice.trim());
             instance.isSyncStarted.set(true);
@@ -542,13 +542,13 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                 instance.nextRoundTimer.cancel();
             }            
         } else {            
-            Log.d(TAG, "DoNextPollingRound -> isSyncStarted false");
+            //Log.d(TAG, "DoNextPollingRound -> isSyncStarted false");
             instance.startAgain();            
         }
     }
 
     public synchronized void connect(BluetoothDevice device) {
-        Log.d(TAG, "start connect to: " + device);
+        //Log.d(TAG, "start connect to: " + device);
         notifyUI("start connect to: " + device, " ----->", LOG_TYPE);
 
         // Cancel any thread attempting to make a connection
@@ -596,11 +596,11 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             }
 
             for(int i = 0; i < peerDevices.size(); i++) {
-                Log.d(TAG, "peer contains:" + peerDevices.get(i));
+                //Log.d(TAG, "peer contains:" + peerDevices.get(i));
             }
 
             for(int i = 0; i < sDevices.size(); i++) {
-                Log.d(TAG, "support devices contains:" + sDevices.get(i));
+                //Log.d(TAG, "support devices contains:" + sDevices.get(i));
             }
 
             List<String> blueToothDevices = (List<String>) CollectionUtils.intersection(peerDevices, sDevices);
@@ -612,13 +612,13 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
                 if (ret == null && pollingIndex >= 0 && pollingIndex < blueToothDevices.size()) {
                     ret = blueToothDevices.get(pollingIndex);
-                    Log.d(TAG, "polling index: " + pollingIndex + ", ret: " + ret + ", size: " + blueToothDevices.size());
+                    //Log.d(TAG, "polling index: " + pollingIndex + ", ret: " + ret + ", size: " + blueToothDevices.size());
                     notifyUI("polling index: " + pollingIndex + ", ret: " + ret + ", size: " + blueToothDevices.size(), " ------>", CONSOLE_TYPE);
                 }
             }
         }
 
-        Log.d(TAG, "whom we are sync with:" + ret);
+        //Log.d(TAG, "whom we are sync with:" + ret);
 
 
         return ret;
@@ -683,12 +683,12 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     private void reset() {
-        Log.d(TAG, "in startAcceptListener .... ");    
+        //Log.d(TAG, "in startAcceptListener .... ");
         if (mConnectThread != null) {
             mConnectThread.Stop();
             mConnectThread = null;
             notifyUI("mConnectThread stopped", " ------>", LOG_TYPE);
-            Log.d(TAG, "mConnectThread stopped");
+            //Log.d(TAG, "mConnectThread stopped");
         }
 
         // Cancel any thread currently running a connection
@@ -696,14 +696,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
             mConnectedThread.Stop();
             mConnectedThread = null;
             notifyUI("mConnectedThread stopped", " ------>", LOG_TYPE);
-            Log.d(TAG, "mConnectedThread stopped");
+            //Log.d(TAG, "mConnectedThread stopped");
         }
     }
 
     @Override
     public void Connected(BluetoothSocket socket, BluetoothDevice device, String socketType) {
         synchronized (BluetoothManager.class) {
-            Log.d(TAG, "Connected, Socket Type:" + socketType);
+            //Log.d(TAG, "Connected, Socket Type:" + socketType);
             notifyUI("Connected, Socket Type:" + socketType, " ----->", LOG_TYPE);
 
             instance.startHandShakeTimer();
@@ -727,7 +727,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     private void startAcceptListener() {    
-        Log.d(TAG, "in startAcceptListener .... ");    
+        //Log.d(TAG, "in startAcceptListener .... ");
         if (mInsecureAcceptThread == null && this.mAdapter != null) {
             mInsecureAcceptThread = new AcceptThread(this.context, instance);
             mInsecureAcceptThread.start();
@@ -740,11 +740,11 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         instance.mHandler.post(new Runnable() {
             @Override
             public void run() {           
-                Log.d(TAG, "create repeatSyncActivityTimer with delay ..." + milliSeconds); 
+                //Log.d(TAG, "create repeatSyncActivityTimer with delay ..." + milliSeconds);
                 instance.repeatSyncActivityTimer = new CountDownTimer(milliSeconds, 10000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
-                        Log.d(TAG, "repeatSyncActivityTimer ticking ..." + !instance.isSyncStarted.get());
+                        //Log.d(TAG, "repeatSyncActivityTimer ticking ..." + !instance.isSyncStarted.get());
                     }
 
                     @Override
@@ -752,14 +752,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                         synchronized(BluetoothManager.class) {
                             try {
                                 if (instance.isBluetoothEnabled() && !instance.isSyncStarted.get()) {
-                                    Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
+                                    //Log.d(TAG, "repeatSyncActivityTimer finished staring Sync ....");
                                     instance.startSync(false);
                                     if(instance.repeatSyncActivityTimer != null) {
                                         instance.repeatSyncActivityTimer.cancel();
                                         instance.repeatSyncActivityTimer.start();
                                     }                                    
                                 } else {
-                                    Log.d(TAG, "repeatSyncActivityTimer finished but sync already in progress ....");
+                                    //Log.d(TAG, "repeatSyncActivityTimer finished but sync already in progress ....");
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -788,7 +788,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     @Override
     public void GotConnection(BluetoothSocket socket, BluetoothDevice device, String socketType) {
         synchronized (BluetoothManager.class) {
-            Log.d(TAG, "GotConnection connected, Socket Type:" + socketType);
+            //Log.d(TAG, "GotConnection connected, Socket Type:" + socketType);
             notifyUI("GotConnection connected, Socket Type:" + socketType, " ----->", LOG_TYPE);
 
             instance.startHandShakeTimer();
@@ -814,7 +814,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public void PollSocketFailed(String reason) {
         synchronized (BluetoothManager.class) {
             final String tmp = reason;
-            Log.d(TAG, "conn PollSocketFailed: " + tmp);
+            //Log.d(TAG, "conn PollSocketFailed: " + tmp);
             instance.HandShakeFailed("conn PollSocketFailed: " + tmp, false);
         }
     }
@@ -823,7 +823,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public void CreateSocketFailed(String reason) {
         synchronized (BluetoothManager.class) {
             final String tmp = reason;
-            Log.d(TAG, "CreateSocketFailed Error: " + tmp);
+            //Log.d(TAG, "CreateSocketFailed Error: " + tmp);
             instance.HandShakeFailed("CreateSocketFailed Error: " + tmp, false);
         }
     }
@@ -839,7 +839,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public void ListeningFailed(String reason) {
         synchronized (BluetoothManager.class) {
             final String tmp = reason;
-            Log.d(TAG, "LISTEN Error: " + tmp);
+            //Log.d(TAG, "LISTEN Error: " + tmp);
             instance.HandShakeFailed("LISTEN Error: " + tmp, false);
         }
     }
@@ -857,7 +857,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     private void startListener() {
         synchronized (BluetoothManager.class) {
             if(instance.isBluetoothEnabled()) {
-                Log.d(TAG, "in startListener ....");
+                //Log.d(TAG, "in startListener ....");
                 instance.reset();
                 instance.startAcceptListener();                
             }
@@ -870,13 +870,13 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         instance.bluetoothState = state;
         if (state == BluetoothAdapter.SCAN_MODE_NONE) {
             instance.stopAllBlueToothActivityTimer.start();
-            Log.d(TAG, "Bluetooth DISABLED, stopping");            
+            //Log.d(TAG, "Bluetooth DISABLED, stopping");
             if (instance.repeatSyncActivityTimer != null) {
                 instance.repeatSyncActivityTimer.cancel();
             }
         } else if (state == BluetoothAdapter.SCAN_MODE_CONNECTABLE
                 || state == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Log.d(TAG, "Bluetooth enabled, re-starting");
+            //Log.d(TAG, "Bluetooth enabled, re-starting");
             instance.startBluetoothBased();
         }
     }
@@ -890,7 +890,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
      */
     private void doDiscovery() {
         if (!isDiscoverying.get()) {
-            Log.d(TAG, "doDiscovery()");
+            //Log.d(TAG, "doDiscovery()");
             isDiscoverying.set(true);
             // Indicate scanning in the title
             // If we're already discovering, stop it
@@ -918,7 +918,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
                         if (btManagerService != null) {
                             bluetoothMacAddress = (String) btManagerService.getClass().getMethod("getAddress").invoke(btManagerService);
-                            Log.d(TAG, "inside getBluetoothMacAddress 222: " + bluetoothMacAddress);
+                            //Log.d(TAG, "inside getBluetoothMacAddress 222: " + bluetoothMacAddress);
                         }
                     } catch (NoSuchFieldException e) {
 
@@ -931,7 +931,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     }
                 } else {                    
                     bluetoothMacAddress = bluetoothAdapter.getAddress();
-                    Log.d(TAG, "inside getBluetoothMacAddress 222: " + bluetoothMacAddress);
+                    //Log.d(TAG, "inside getBluetoothMacAddress 222: " + bluetoothMacAddress);
                 }
                 return bluetoothMacAddress;
             } else {
@@ -1004,7 +1004,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }
 
     public void stopBlueToothConnections() {
-        Log.d(TAG, "network is connected or bluetooth is not enabled ...stopping all bluetooth activity");        
+        //Log.d(TAG, "network is connected or bluetooth is not enabled ...stopping all bluetooth activity");
         if (startAllBlueToothActivityTimer != null) {
             startAllBlueToothActivityTimer.cancel();
         }
@@ -1047,23 +1047,23 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         boolean isValid = true;
         String iKey = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
         String iPreviousKey = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue() - 1);
-        Log.d(TAG, "validIncomingSyncMessage previousKey" + iPreviousKey);
+        //Log.d(TAG, "validIncomingSyncMessage previousKey" + iPreviousKey);
         // remove duplicates
         if (allSyncInfosReceived.contains(iKey)) {
-            Log.d(TAG, "sync data message as key already found" + iKey);
+            //Log.d(TAG, "sync data message as key already found" + iKey);
             status.setDuplicateMessage(true);
             status.setOutOfSyncMessage(false);
             isValid = false;
         } else if ((info.getSequence().longValue() - 1) != 0
                 && !allSyncInfosReceived.contains(iPreviousKey)) {
-            Log.d(TAG, "found sync data message as out of sequence => previous key not found " + iPreviousKey + " for key:" + iKey);
+            //Log.d(TAG, "found sync data message as out of sequence => previous key not found " + iPreviousKey + " for key:" + iKey);
             isValid = false;
             status.setDuplicateMessage(false);
             status.setOutOfSyncMessage(true);
         }
 
         if (isValid) {
-            Log.d(TAG, "validIncomingSyncMessage adding to allSyncInfosReceived for key:" + iKey);
+            //Log.d(TAG, "validIncomingSyncMessage adding to allSyncInfosReceived for key:" + iKey);
             allSyncInfosReceived.add(iKey);
         }
 
@@ -1074,7 +1074,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-               Log.d(TAG, "processInComingSyncInfoMessage -> " + message);
+               //Log.d(TAG, "processInComingSyncInfoMessage -> " + message);
                 Iterator<P2PSyncInfo> infos = p2PDBApiImpl.deSerializeP2PSyncInfoFromJson(message).iterator();
                 while (infos.hasNext()) {
                     P2PSyncInfo info = infos.next();
@@ -1086,16 +1086,16 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
                     } else if (status.isOutOfSyncMessage()) {
                         notifyUI(info.message + " with sequence " + info.getSequence() + " ---------> out of sync processed with filling Missing type message ", info.getSender(), LOG_TYPE);
                         String key = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
-                        Log.d(TAG, "processing out of sync data message for key:" + key + " and sequence:" + info.sequence);
+                        //Log.d(TAG, "processing out of sync data message for key:" + key + " and sequence:" + info.sequence);
                         String rMessage = p2PDBApiImpl.persistOutOfSyncP2PSyncMessage(info);
                         // generate handshaking request
                         if (status.isOutOfSyncMessage()) {
-                            Log.d(TAG, "validIncomingSyncMessage -> out of order -> sendInitialHandShakingMessage");
+                            //Log.d(TAG, "validIncomingSyncMessage -> out of order -> sendInitialHandShakingMessage");
                             sendInitialHandShakingMessage(true);
                         }
                     } else if (!status.isOutOfSyncMessage() && !status.isDuplicateMessage()) {
                         String key = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
-                        Log.d(TAG, "processing sync data message for key:" + key + " and message:" + info.message);
+                        //Log.d(TAG, "processing sync data message for key:" + key + " and message:" + info.message);
                         String rMessage = p2PDBApiImpl.persistP2PSyncInfo(info);
                     } else {
                         infos.remove();
@@ -1107,16 +1107,16 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     }    
 
     public List<String> processInComingSyncRequestMessage(String message) {
-        Log.d(TAG, "processInComingSyncRequestMessage => " + message);
+        //Log.d(TAG, "processInComingSyncRequestMessage => " + message);
         List<String> jsonRequests = new CopyOnWriteArrayList<String>();
         SyncInfoRequestMessage request = p2PDBApiImpl.buildSyncRequestMessage(message);
         // process only if matching current device id
         if (request != null && request.getmDeviceId().equalsIgnoreCase(P2PContext.getCurrentDevice())) {
-            Log.d(TAG, "processInComingSyncRequestMessage => device id matches with: " + P2PContext.getCurrentDevice());
+            //Log.d(TAG, "processInComingSyncRequestMessage => device id matches with: " + P2PContext.getCurrentDevice());
             notifyUI("sync request message received", " ------> ", LOG_TYPE);
             List<SyncInfoItem> items = request.getItems();
             for (SyncInfoItem a : items) {
-                Log.d(TAG, "processInComingSyncRequestMessage => adding to jsonRequest for sync messages");
+                //Log.d(TAG, "processInComingSyncRequestMessage => adding to jsonRequest for sync messages");
                 jsonRequests.addAll(p2PDBApiImpl.fetchP2PSyncInfoBySyncRequest(a));
             }
         }
@@ -1126,7 +1126,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
     public void processInComingHandShakingMessage(String message) {
 
-        Log.d(TAG, "processInComingHandShakingMessage: " + message);
+        //Log.d(TAG, "processInComingHandShakingMessage: " + message);
         notifyUI("handshaking message received", " ------> ", LOG_TYPE);
         //parse message and add to all messages
         HandShakingMessage handShakingMessage = instance.parseHandShakingMessage(message);
@@ -1138,7 +1138,7 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
 
         // send handshaking information if message received "from" first time
         if (shouldSendAck) {
-            Log.d(TAG, "replying back with initial hand shaking message with needAck => false");
+            //Log.d(TAG, "replying back with initial hand shaking message with needAck => false");
             notifyUI("handshaking message sent with ack false", " ------> ", LOG_TYPE);
             sendInitialHandShakingMessage(false);
         }
@@ -1159,14 +1159,14 @@ public class BluetoothManager extends AbstractManager implements BtListenCallbac
     public List<String> generateSyncInfoPullRequest(final Map<String, HandShakingMessage> messages) {
         List<String> jsons = new ArrayList<String>();
         final Collection<HandShakingInfo> pullSyncInfo = instance.computeSyncInfoRequired(messages);
-        Log.d(TAG, "generateSyncInfoPullRequest -> computeSyncInfoRequired ->" + pullSyncInfo.size());
+        //Log.d(TAG, "generateSyncInfoPullRequest -> computeSyncInfoRequired ->" + pullSyncInfo.size());
         notifyUI("generateSyncInfoPullRequest -> computeSyncInfoRequired ->" + pullSyncInfo.size(), " ------> ", LOG_TYPE);
         if (pullSyncInfo != null && pullSyncInfo.size() > 0) {
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
             instance.sendMessages(jsons);
         } else {
             instance.isSyncStarted.set(false);
-            Log.d(TAG, "generateSyncInfoPullRequest -> sync completed:" + !instance.isSyncStarted.get());
+            //Log.d(TAG, "generateSyncInfoPullRequest -> sync completed:" + !instance.isSyncStarted.get());
             if (instance.repeatSyncActivityTimer != null) {
                 instance.repeatSyncActivityTimer.cancel();
                 instance.repeatSyncActivityTimer.start();
@@ -1256,7 +1256,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
             Iterator<String> keys = uniqueHandShakeInfosReceived.keySet().iterator();
             while (keys.hasNext()) {
                 String userKey = keys.next();
-                Log.d(TAG, "computeSyncInfoRequired user key:" + userKey);
+                //Log.d(TAG, "computeSyncInfoRequired user key:" + userKey);
                 if (myHandShakingMessages.keySet().contains(userKey)) {
                     HandShakingInfo infoFromOtherDevice = uniqueHandShakeInfosReceived.get(userKey);
                     HandShakingInfo infoFromMyDevice = myHandShakingMessages.get(userKey);
@@ -1273,7 +1273,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
 
                         final long askedThreshold = infoFromMyDevice.getSequence().longValue() > SYNC_NUMBER_OF_LAST_MESSAGES ? infoFromMyDevice.getSequence().longValue() + 1 - SYNC_NUMBER_OF_LAST_MESSAGES : -1;
                         if (infoFromMyDevice.getSequence().longValue() > infoFromOtherDevice.getSequence().longValue()) {
-                            Log.d(TAG, "removing from uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromMyDevice.getSequence()" + infoFromMyDevice.getSequence() + " infoFromOtherDevice.getSequence()" + infoFromOtherDevice.getSequence());
+                            //Log.d(TAG, "removing from uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromMyDevice.getSequence()" + infoFromMyDevice.getSequence() + " infoFromOtherDevice.getSequence()" + infoFromOtherDevice.getSequence());
                             uniqueHandShakeInfosReceived.remove(userKey);
                         } else if (infoFromMyDevice.getSequence().longValue() == infoFromOtherDevice.getSequence().longValue()) {
                             //check for missing keys, if the same then remove otherwise only add missing key for infoFromMyDevice
@@ -1301,14 +1301,14 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
                                 infoFromOtherDevice.setMissingMessages(StringUtils.join(missingMessagesSetToAsk, ","));
                                 infoFromOtherDevice.setStartingSequence(infoFromOtherDevice.getSequence() + 1);
                             } else {
-                                Log.d(TAG, "removing from uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromMyDevice.getSequence()" + infoFromMyDevice.getSequence() + " infoFromOtherDevice.getSequence()" + infoFromOtherDevice.getSequence());
+                                //Log.d(TAG, "removing from uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromMyDevice.getSequence()" + infoFromMyDevice.getSequence() + " infoFromOtherDevice.getSequence()" + infoFromOtherDevice.getSequence());
                                 uniqueHandShakeInfosReceived.remove(userKey);
                             }
                             missingSequencesToAsk = null;
                             missingMessagesSetToAsk = null;
 
                         } else {
-                            Log.d(TAG, "uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromOtherDevice.setStartingSequence" + infoFromMyDevice.getSequence().longValue());
+                            //Log.d(TAG, "uniqueHandShakeInfosReceived for key:" + userKey + " as infoFromOtherDevice.setStartingSequence" + infoFromMyDevice.getSequence().longValue());
                             // take other device's missing keys remove
                             // take my missing keys and remove if the same as other device's missing keys
                             // ask for all messages my sequence + 1
@@ -1370,7 +1370,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
             Iterator itValues = values.iterator();
             while (itValues.hasNext()) {
                 HandShakingInfo t = (HandShakingInfo) itValues.next();
-                Log.d(TAG, "validating : " + t.getUserId() + " " + t.getDeviceId() + " " + t.getStartingSequence() + " " + t.getSequence());
+                //Log.d(TAG, "validating : " + t.getUserId() + " " + t.getDeviceId() + " " + t.getStartingSequence() + " " + t.getSequence());
 
                 if (t.getMissingMessages() != null && t.getMissingMessages().length() > 0) {
 
@@ -1402,7 +1402,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
     private boolean shouldSendAckForHandShakingMessage(HandShakingMessage handShakingMessage) {
         if (handShakingMessage != null) {
             boolean sendAck = handShakingMessage.getReply().equalsIgnoreCase("true");
-            Log.d(TAG, "shouldSendAckForHandShaking: " + handShakingMessage.getFrom() + " sendAck:" + sendAck);
+            //Log.d(TAG, "shouldSendAckForHandShaking: " + handShakingMessage.getFrom() + " sendAck:" + sendAck);
             return sendAck;
         } else {
             return false;
@@ -1413,7 +1413,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
     public HandShakingMessage parseHandShakingMessage(String message) {
         HandShakingMessage handShakingMessage = p2PDBApiImpl.deSerializeHandShakingInformationFromJson(message);
         if (handShakingMessage != null) {
-            Log.d(TAG, "storing handShakingMessage from : " + handShakingMessage.getFrom() + " in handShakingMessagesInCurrentLoop");
+            //Log.d(TAG, "storing handShakingMessage from : " + handShakingMessage.getFrom() + " in handShakingMessagesInCurrentLoop");
             instance.handShakingMessagesInCurrentLoop.put(handShakingMessage.getFrom(), handShakingMessage);
         }
         return handShakingMessage;
@@ -1451,7 +1451,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
                                 notifyUI(p.message, sender, CONSOLE_TYPE);
                             }
                         }
-                        Log.d(TAG, "rebuild sync info received cache and updated UI");                            
+                        //Log.d(TAG, "rebuild sync info received cache and updated UI");
                         } catch (Exception e) {
 
                         }                                                
@@ -1487,7 +1487,7 @@ private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, Ha
         // put in queue - TBD
         // send one by one from queue - TBD
         String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(needAck);
-        Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
+        //Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
         instance.sendMulticastMessage(serializedHandShakingMessage);
     }
 

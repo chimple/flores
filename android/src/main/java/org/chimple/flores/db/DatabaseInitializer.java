@@ -41,7 +41,7 @@ public class DatabaseInitializer {
                 String[] columns = line.split(",");
 
                 if (columns.length < 1) {
-                    Log.d(TAG + "AppDatabase", "Skipping bad row");
+                    //Log.d(TAG + "AppDatabase", "Skipping bad row");
                 }
 
                 String message = columns[0];

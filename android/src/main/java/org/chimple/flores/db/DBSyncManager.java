@@ -73,7 +73,7 @@ public class DBSyncManager {
 
 
     public List<P2PUserIdDeviceIdAndMessage> getUsers() {
-        Log.i(TAG, "Called getUsers");
+        //Log.i(TAG, "Called getUsers");
 
         P2PDBApiImpl p2pdbapi = P2PDBApiImpl.getInstance(DBSyncManager.instance.context);
         return p2pdbapi.getUsers();
@@ -120,8 +120,8 @@ public class DBSyncManager {
     public boolean loggedInUser(String userId, String deviceId) {
         SharedPreferences pref = this.context.getSharedPreferences(SHARED_PREF, 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
-        Log.d(TAG, "loggedInUser userId: ---->" + userId);
-        Log.d(TAG, "loggedInUser deviceId: ---->" + deviceId);
+        //Log.d(TAG, "loggedInUser userId: ---->" + userId);
+        //Log.d(TAG, "loggedInUser deviceId: ---->" + deviceId);
         editor.putString("USER_ID", userId);
         editor.putString("DEVICE_ID", deviceId);
         editor.commit();        

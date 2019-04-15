@@ -31,7 +31,7 @@ public class P2PApplication extends Application {
 
 
     private void initialize() {
-        Log.d(TAG, "Initializing...");
+        //Log.d(TAG, "Initializing...");
 
         Thread initializationThread = new Thread() {
 
@@ -41,7 +41,7 @@ public class P2PApplication extends Application {
                 db = AppDatabase.getInstance(P2PApplication.this);
                 multicastManager = MulticastManager.getInstance(P2PApplication.this);
                 bluetoothManager = BluetoothManager.getInstance(P2PApplication.this);
-                Log.i(TAG, "app database instance" + String.valueOf(db));
+                //Log.i(TAG, "app database instance" + String.valueOf(db));
 
                 initializationComplete();
             }
@@ -67,7 +67,7 @@ public class P2PApplication extends Application {
 
 
     private void initializationComplete() {
-        Log.i(TAG, "Initialization complete...");
+        //Log.i(TAG, "Initialization complete...");
     }
 
     public static Context getContext() {

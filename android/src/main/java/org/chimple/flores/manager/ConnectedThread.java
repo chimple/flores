@@ -26,7 +26,7 @@ public class ConnectedThread extends Thread {
     private final BtCallback mCallback;    
 
     public ConnectedThread(BluetoothSocket socket, String socketType, BtCallback callback, Context context) {
-        Log.d(TAG, "create ConnectedThread: " + socketType);
+        //Log.d(TAG, "create ConnectedThread: " + socketType);
         mmSocket = socket;
         mManager = BluetoothManager.getInstance(context);
         mManager.notifyUI("create ConnectedThread", " ------->", LOG_TYPE);
@@ -53,7 +53,7 @@ public class ConnectedThread extends Thread {
     }    
 
     public void run() {
-        Log.i(TAG, "BEGIN mConnectedThread");
+        //Log.i(TAG, "BEGIN mConnectedThread");
         if(mmSocket != null) {
             mManager.notifyUI("BEGIN mConnectedThread to remote" + mmSocket.getRemoteDevice().getAddress(), "------->", LOG_TYPE);    
         }
@@ -88,7 +88,7 @@ public class ConnectedThread extends Thread {
     }
 
     private void broadcastIncomingMessage(StringBuffer sBuffer, String message) {
-        Log.d(TAG, "message got:" + message);
+        //Log.d(TAG, "message got:" + message);
         boolean shouldProcess = false;
         if (message.startsWith("START") && message.endsWith("END")) {
             sBuffer.append(message);
@@ -110,7 +110,7 @@ public class ConnectedThread extends Thread {
             if (finalMessage != null) {
                 finalMessage = finalMessage.replaceAll("^START", "");
                 finalMessage = finalMessage.replaceAll("END$", "");
-                Log.d(TAG, "received incoming message:" + finalMessage);
+                //Log.d(TAG, "received incoming message:" + finalMessage);
 
                 String[] subMessages = finalMessage.split("ENDSTART");
                 if(subMessages != null && subMessages.length > 0) {

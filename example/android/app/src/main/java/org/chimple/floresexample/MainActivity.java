@@ -65,7 +65,7 @@ public class MainActivity extends FlutterActivity {
     }
 
     private void initialize() {
-        Log.d(TAG, "Initializing...");
+        //Log.d(TAG, "Initializing...");
 
         Thread initializationThread = new Thread() {
             @Override
@@ -75,7 +75,7 @@ public class MainActivity extends FlutterActivity {
                 db = AppDatabase.getInstance(MainActivity.activity);
                 manager = MulticastManager.getInstance(MainActivity.activity);
                 BluetoothManager = BluetoothManager.getInstance(MainActivity.activity);
-                Log.i(TAG, "app database instance" + String.valueOf(db));
+                //Log.i(TAG, "app database instance" + String.valueOf(db));
                 initializationComplete();                
             }
         };
@@ -85,7 +85,7 @@ public class MainActivity extends FlutterActivity {
 
 
     private void initializationComplete() {
-        Log.i(TAG, "Initialization complete...");
+        //Log.i(TAG, "Initialization complete...");
     }
 
     public static Context getContext() {

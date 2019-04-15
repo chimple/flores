@@ -43,7 +43,7 @@ public class ConnectThread extends Thread {
     }
 
     public void run() {
-        Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
+        //Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
         setName("ConnectThread" + mSocketType);
         mManager.notifyUI("BEGIN mConnectThread SocketType:" + mSocketType +" and device :" + mmDevice.getAddress(), "------->", LOG_TYPE);
 

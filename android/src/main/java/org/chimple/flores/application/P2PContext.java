@@ -59,7 +59,7 @@ public class P2PContext {
             return;
         }
         
-        Log.d(TAG, "P2P Context initialize");
+        //Log.d(TAG, "P2P Context initialize");
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(networkChangeReceiver, intentFilter);
@@ -78,10 +78,10 @@ public class P2PContext {
             int status = NetworkUtil.getConnectivityStatusString(context);
             if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
                 if (status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
-                    Log.d(TAG, "NETWORK_STATUS_NOT_CONNECTED");
+                    //Log.d(TAG, "NETWORK_STATUS_NOT_CONNECTED");
                     isNetWorkConnected = false;
                 } else {
-                    Log.d(TAG, "NETWORK_STATUS_CONNECTED");
+                    //Log.d(TAG, "NETWORK_STATUS_CONNECTED");
                     isNetWorkConnected = true;
                 }
                 this.notifyNetWorkChange(context, isNetWorkConnected);
@@ -89,7 +89,7 @@ public class P2PContext {
         }
 
         private void notifyNetWorkChange(Context context, boolean isNetWorkConnected) {
-            Log.d(TAG, "Broadcasting message notifyNetWorkChange for MultiCast");
+            //Log.d(TAG, "Broadcasting message notifyNetWorkChange for MultiCast");
             Intent intent = new Intent(multiCastConnectionChangedEvent);
             intent.putExtra("isConnected", isNetWorkConnected);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -104,7 +104,7 @@ public class P2PContext {
     public static String getLoggedInUser() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String
-        Log.d(TAG, "GOT User ID -------------->" +  userId);
+        //Log.d(TAG, "GOT User ID -------------->" +  userId);
         return userId;
     }
 
@@ -112,7 +112,7 @@ public class P2PContext {
     public static String getCurrentDevice() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String deviceId = pref.getString("DEVICE_ID", null); // getting String
-        Log.d(TAG, "GOT Device ID -------------->" +  deviceId);
+        //Log.d(TAG, "GOT Device ID -------------->" +  deviceId);
         return deviceId;
     }    
 
@@ -122,9 +122,9 @@ public class P2PContext {
 
     public void onCleanUp() {
         initialized = false;
-        Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....");     
+        //Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....");
         if(networkChangeReceiver != null) {
-            Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....networkChangeReceiver");     
+            //Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....networkChangeReceiver");
             context.unregisterReceiver(networkChangeReceiver);                        
         }
 

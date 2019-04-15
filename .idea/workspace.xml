@@ -2,25 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1310217c-1bb1-4731-8937-69d4e680bb10" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/flores.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.packages" beforeDir="false" afterPath="$PROJECT_DIR$/.packages" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/android/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/AbstractManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/AbstractManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/OnAutoReceiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/OnAutoReceiver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PContext.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/DBSyncManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/DBSyncManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/DatabaseInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/DatabaseInitializer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/P2PDBApiImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/P2PDBApiImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/entity/P2PSyncInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/entity/P2PSyncInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/AcceptThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/AcceptThread.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/BluetoothManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/BluetoothManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/ConnectThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/ConnectThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/ConnectedThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/manager/ConnectedThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/multicast/MulticastListenerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/multicast/MulticastListenerThread.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/multicast/MulticastManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/multicast/MulticastManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/flores.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/flores.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/android/app/src/main/java/org/chimple/floresexample/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/src/main/java/org/chimple/floresexample/MainActivity.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -35,20 +33,21 @@
           <entry key="project.closed" value="2" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="1" />
+          <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="dart" value="1" />
-          <entry key="java" value="5" />
+          <entry key="java" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Dart" value="1" />
-          <entry key="JAVA" value="5" />
+          <entry key="JAVA" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -65,11 +64,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/flores.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="117">
-              <caret line="123" column="42" selection-start-line="123" selection-start-column="42" selection-end-line="123" selection-end-column="42" />
+            <state relative-caret-position="417">
+              <caret line="138" column="26" selection-start-line="138" selection-start-column="26" selection-end-line="138" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PApplication.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="100">
+              <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -79,6 +87,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>addMessage</find>
+      <find>logger</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -88,6 +97,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/lib/flores.dart" />
+        <option value="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PApplication.java" />
       </list>
     </option>
   </component>
@@ -101,6 +111,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -165,7 +176,6 @@
         </subPane>
       </pane>
       <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -240,7 +250,7 @@
     <frame x="0" y="23" width="1680" height="984" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23687424" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23931624" />
       <window_info id="Structure" order="1" weight="0.24964234" />
       <window_info id="Designer" order="2" />
       <window_info id="Captures" order="3" weight="0.25" />
@@ -258,7 +268,7 @@
       <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.3295964" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.3295964" />
       <window_info anchor="bottom" id="Version Control" order="12" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -297,8 +307,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/flores.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="123" column="42" selection-start-line="123" selection-start-column="42" selection-end-line="123" selection-end-column="42" />
+        <state relative-caret-position="417">
+          <caret line="138" column="26" selection-start-line="138" selection-start-column="26" selection-end-line="138" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
         </state>
       </provider>
     </entry>

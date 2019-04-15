@@ -109,7 +109,7 @@ public abstract class AbstractManager {
         intent.putExtra("message", consoleMessage);
         intent.putExtra("type", type);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        Log.d(TAG, "notify : " + consoleMessage);
+        //Log.d(TAG, "notify : " + consoleMessage);
     } 	
 
     public abstract void processInComingMessage(final String message, final String fromIP);

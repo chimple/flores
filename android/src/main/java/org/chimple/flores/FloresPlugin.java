@@ -69,7 +69,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                 public void run() {
                     List<P2PUserIdDeviceIdAndMessage> udList = DBSyncManager.getInstance(registrar.context()).getUsers();
                     List<Map<String, String>> users = new ArrayList<Map<String, String>>();
-                    Log.i(TAG, "getUsers: "+users);
+                    //Log.i(TAG, "getUsers: "+users);
       
                     for (P2PUserIdDeviceIdAndMessage ud: udList
                             ) {
@@ -99,7 +99,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     Map<String, String> arg = (Map<String, String>)call.arguments;
                     String userId = arg.get("userId");
                     String deviceId = arg.get("deviceId");
-                    Log.i(TAG, "addUser with user id: "+userId+ " and device id:" + deviceId);
+                    //Log.i(TAG, "addUser with user id: "+userId+ " and device id:" + deviceId);
                     String message = arg.get("message");
                     boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
                     String bluetoothAddress = BluetoothManager.getInstance(registrar.context()).getBluetoothMacAddress();                    
@@ -221,9 +221,9 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     List<P2PSyncInfo> messageList =
                     DBSyncManager.getInstance(registrar.context())
                                     .getConversations(userId, secondUserId, messageType);
-                    Log.i(TAG, "getConversations: "+messageType+userId+secondUserId);
+                    //Log.i(TAG, "getConversations: "+messageType+userId+secondUserId);
                     List<Map<String, String>> messages = convertToListOfMaps(messageList);
-                    Log.i(TAG, messages.toString());
+                    //Log.i(TAG, messages.toString());
                     if (messages.size() >= 0) {
                         result.success(messages);
                     } else {
@@ -317,7 +317,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
           message.put("status", m.status.toString());
         if(m.step != null)
           message.put("step", m.step.toString());
-        Log.i(TAG, "convertToMap: "+message.toString());
+        //Log.i(TAG, "convertToMap: "+message.toString());
         return message;
     }
 
@@ -331,7 +331,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            Log.i(TAG, "messageReceivedActivity created");
+            //Log.i(TAG, "messageReceivedActivity created");
 
             // Get the Intent that started this activity and extract the string
             Intent intent = getIntent();
@@ -346,7 +346,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
             Long sequence = intent.getLongExtra("sequence", 0);
             boolean status = intent.getBooleanExtra("status", true);
             Long step = intent.getLongExtra("step", 0);
-            Log.i(TAG, "messageReceivedActivity: "+message);
+            //Log.i(TAG, "messageReceivedActivity: "+message);
 
             methodChannel.invokeMethod("messageReceived", message);
             finish();

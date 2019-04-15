@@ -39,8 +39,8 @@ public class P2PSyncInfo implements Serializable {
         } else {
             this.createdAt = new Date();
         }
-        Log.d("P2P Sync Info", "loggedAt:" + this.loggedAt);
-        Log.d("P2P Sync Info", "createdAt:" + this.createdAt);
+        //Log.d("P2P Sync Info", "loggedAt:" + this.loggedAt);
+        //Log.d("P2P Sync Info", "createdAt:" + this.createdAt);
     }
 
 

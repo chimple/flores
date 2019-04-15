@@ -42,8 +42,7 @@ public class AcceptThread extends Thread {
     }
 
     public void run() {
-        Log.d(TAG, "Socket Type: " + mSocketType +
-                "BEGIN mAcceptThread" + this);
+        //Log.d(TAG, "Socket Type: " + mSocketType +"BEGIN mAcceptThread" + this);
 
         mManager.notifyUI("Socket Type: " + mSocketType +
                 "BEGIN mAcceptThread", " -----> ", LOG_TYPE);
@@ -89,12 +88,12 @@ public class AcceptThread extends Thread {
                 }
             }
         }
-        Log.i(TAG, "END mAcceptThread, socket Type: " + mSocketType);
+        //Log.i(TAG, "END mAcceptThread, socket Type: " + mSocketType);
 
     }
 
     public void Stop() {
-        Log.d(TAG, "Socket Type" + mSocketType + "cancel " + this);
+        //Log.d(TAG, "Socket Type" + mSocketType + "cancel " + this);
         try {
             mmServerSocket.close();
         } catch (IOException e) {
