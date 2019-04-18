@@ -5,6 +5,7 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^0.4.2
+  permission: ^0.1.1
   uuid: ^1.0.3
 
   # The following adds the Cupertino Icons font to your application.
