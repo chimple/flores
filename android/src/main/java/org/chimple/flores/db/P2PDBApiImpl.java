@@ -43,8 +43,8 @@ import org.chimple.flores.db.entity.SyncInfoMessageDeserializer;
 import org.chimple.flores.db.entity.SyncInfoRequestMessage;
 import org.chimple.flores.db.entity.SyncItemDeserializer;
 import org.chimple.flores.db.entity.SyncRequestMessageDeserializer;
-import org.chimple.flores.manager.BluetoothManager;
 import org.chimple.flores.multicast.MulticastManager;
+import org.chimple.flores.nearby.NearByManager;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -85,19 +85,19 @@ public class P2PDBApiImpl {
     private Context context;
     private static P2PDBApiImpl p2pDBApiInstance;
     private static MulticastManager manager;
-    private static BluetoothManager bluetoothManager;
+    private static NearByManager bluetoothManager;
 
     public static P2PDBApiImpl getInstance(Context context) {
         synchronized (P2PDBApiImpl.class) {
             if (p2pDBApiInstance == null) {
-                p2pDBApiInstance = new P2PDBApiImpl(AppDatabase.getInstance(context), MulticastManager.getInstance(context), BluetoothManager.getInstance(context), context);
+                p2pDBApiInstance = new P2PDBApiImpl(AppDatabase.getInstance(context), MulticastManager.getInstance(context), NearByManager.getInstance(context), context);
             }
             return p2pDBApiInstance;
         }
     }
 
 
-    private P2PDBApiImpl(AppDatabase db, MulticastManager manager, BluetoothManager bluetoothManager, Context context) {
+    private P2PDBApiImpl(AppDatabase db, MulticastManager manager, NearByManager bluetoothManager, Context context) {
         this.db = db;
         this.context = context;
         this.manager = manager;

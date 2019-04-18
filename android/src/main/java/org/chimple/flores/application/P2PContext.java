@@ -6,11 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.content.SharedPreferences;
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
-import org.chimple.flores.manager.BluetoothManager;
+import org.chimple.flores.nearby.NearByManager;
 
 public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
@@ -66,7 +65,7 @@ public class P2PContext {
         instance.context = context;
         AppDatabase.getInstance(context);
         MulticastManager mManager = MulticastManager.getInstance(context);
-        BluetoothManager bManager = BluetoothManager.getInstance(context);
+        NearByManager bManager = NearByManager.getInstance(context);
         mManager.setBluetoothMangager(bManager);
         initialized = true;
     }

@@ -4,26 +4,25 @@ import android.os.Bundle;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-import android.app.Application;
+
 import android.content.Context;
-import android.util.Log;
 import android.content.SharedPreferences;
+import android.util.Log;
+
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
-import org.chimple.flores.manager.BluetoothManager;
 import org.chimple.flores.application.P2PContext;
-import static org.chimple.flores.application.P2PContext.CLEAR_CONSOLE_TYPE;
-import static org.chimple.flores.application.P2PContext.refreshDevice;
+import org.chimple.flores.nearby.NearByManager;
 
 
 public class MainActivity extends FlutterActivity {
-    
+
     private static MainActivity activity;
-    private static final String TAG = MainActivity.class.getName();    
+    private static final String TAG = MainActivity.class.getName();
     private static Context context;
     public static AppDatabase db;
     public static MulticastManager manager;
-    public static BluetoothManager BluetoothManager;
+    public static NearByManager bluetoothManager;
 
     public static final String SHARED_PREF = "shardPref";
     public static final String USER_ID = "USER_ID";
@@ -42,7 +41,6 @@ public class MainActivity extends FlutterActivity {
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,17 +49,17 @@ public class MainActivity extends FlutterActivity {
         initialize();
         context = this;
     }
-    
+
     @Override
     protected void onStop() {
-        super.onStop();        
+        super.onStop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         manager.onCleanUp();
-        BluetoothManager.onCleanUp();        
+        bluetoothManager.onCleanUp();
     }
 
     private void initialize() {
@@ -74,9 +72,10 @@ public class MainActivity extends FlutterActivity {
                 P2PContext.getInstance().initialize(MainActivity.activity);
                 db = AppDatabase.getInstance(MainActivity.activity);
                 manager = MulticastManager.getInstance(MainActivity.activity);
-                BluetoothManager = BluetoothManager.getInstance(MainActivity.activity);
-                //Log.i(TAG, "app database instance" + String.valueOf(db));
-                initializationComplete();                
+                bluetoothManager = NearByManager.getInstance(MainActivity.activity);
+                bluetoothManager.setTeacher(true);
+                Log.i(TAG, "app database instance" + String.valueOf(db));
+                initializationComplete();
             }
         };
 

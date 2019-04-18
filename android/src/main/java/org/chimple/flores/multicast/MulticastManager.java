@@ -28,7 +28,7 @@ import org.chimple.flores.db.entity.HandShakingMessage;
 import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.SyncInfoItem;
 import org.chimple.flores.db.entity.SyncInfoRequestMessage;
-import org.chimple.flores.manager.BluetoothManager;
+import org.chimple.flores.nearby.NearByManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +69,7 @@ public class MulticastManager extends AbstractManager {
     private int multicastPort;
     private P2PDBApiImpl p2PDBApiImpl;
     private DBSyncManager dbSyncManager;
-    private BluetoothManager bluetoothManager;
+    private NearByManager bluetoothManager;
     private Map<String, HandShakingMessage> handShakingMessagesInCurrentLoop = new ConcurrentHashMap<>();
     private Set<String> allSyncInfosReceived = new HashSet<String>();
 
@@ -114,7 +114,7 @@ public class MulticastManager extends AbstractManager {
         this.context = context;
     }
 
-    public void setBluetoothMangager(BluetoothManager m) {
+    public void setBluetoothMangager(NearByManager m) {
         instance.bluetoothManager = m;
     }
 
@@ -277,7 +277,6 @@ public class MulticastManager extends AbstractManager {
     public void startMultiCastOperations() {
         if (instance.bluetoothManager != null) {
             instance.bluetoothManager.updateNetworkConnected(true);
-            instance.bluetoothManager.stopBlueToothConnections();
         }
         instance.startListening();
         if (instance.repeatHandShakeTimer != null) {
@@ -358,7 +357,7 @@ public class MulticastManager extends AbstractManager {
 
     private final BroadcastReceiver refreshDeviceReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            synchronized (BluetoothManager.class) {
+            synchronized (MulticastManager.class) {
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {

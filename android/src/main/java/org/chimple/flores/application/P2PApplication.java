@@ -3,11 +3,10 @@ package org.chimple.flores.application;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
-import org.chimple.flores.manager.BluetoothManager;
+import org.chimple.flores.nearby.NearByManager;
 
 import java.util.UUID;
 
@@ -20,7 +19,7 @@ public class P2PApplication extends Application {
     private P2PApplication that;
     public static AppDatabase db;
     public static MulticastManager multicastManager;
-    public static BluetoothManager bluetoothManager;
+    public static NearByManager bluetoothManager;
 
     public void onCreate() {
         super.onCreate();
@@ -40,7 +39,7 @@ public class P2PApplication extends Application {
                 P2PApplication.this.createShardProfilePreferences();
                 db = AppDatabase.getInstance(P2PApplication.this);
                 multicastManager = MulticastManager.getInstance(P2PApplication.this);
-                bluetoothManager = BluetoothManager.getInstance(P2PApplication.this);
+                bluetoothManager = NearByManager.getInstance(P2PApplication.this);
                 //Log.i(TAG, "app database instance" + String.valueOf(db));
 
                 initializationComplete();
@@ -55,10 +54,10 @@ public class P2PApplication extends Application {
         SharedPreferences.Editor editor = pref.edit();
         String uuid = UUID.randomUUID().toString();
         editor.putString("USER_ID", uuid);
-        String deviceId = BluetoothManager.getInstance(this.context).getBluetoothMacAddress();
+        String deviceId = NearByManager.getInstance(this.context).getBluetoothMacAddress();
 
         if (deviceId != null) {
-            editor.putString("DEVICE_ID", deviceId);            
+            editor.putString("DEVICE_ID", deviceId);
         } else {
             editor.putString("DEVICE_ID", uuid + "-device");
         }
