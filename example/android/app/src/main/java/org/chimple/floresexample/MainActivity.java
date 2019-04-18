@@ -4,16 +4,15 @@ import android.os.Bundle;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-import android.app.Application;
+
 import android.content.Context;
-import android.util.Log;
 import android.content.SharedPreferences;
+import android.util.Log;
+
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
-import org.chimple.flores.manager.BluetoothManager;
 import org.chimple.flores.application.P2PContext;
-import static org.chimple.flores.application.P2PContext.CLEAR_CONSOLE_TYPE;
-import static org.chimple.flores.application.P2PContext.refreshDevice;
+import org.chimple.flores.nearby.NearByManager;
 
 
 public class MainActivity extends FlutterActivity {
@@ -23,7 +22,7 @@ public class MainActivity extends FlutterActivity {
     private static Context context;
     public static AppDatabase db;
     public static MulticastManager manager;
-    public static BluetoothManager BluetoothManager;
+    public static NearByManager nearByManager;
 
     public static final String SHARED_PREF = "shardPref";
     public static final String USER_ID = "USER_ID";
@@ -61,11 +60,11 @@ public class MainActivity extends FlutterActivity {
     protected void onDestroy() {
         super.onDestroy();
         manager.onCleanUp();
-        BluetoothManager.onCleanUp();        
+        nearByManager.onCleanUp();
     }
 
     private void initialize() {
-        //Log.d(TAG, "Initializing...");
+        Log.d(TAG, "Initializing...");
 
         Thread initializationThread = new Thread() {
             @Override
@@ -74,8 +73,9 @@ public class MainActivity extends FlutterActivity {
                 P2PContext.getInstance().initialize(MainActivity.activity);
                 db = AppDatabase.getInstance(MainActivity.activity);
                 manager = MulticastManager.getInstance(MainActivity.activity);
-                BluetoothManager = BluetoothManager.getInstance(MainActivity.activity);
-                //Log.i(TAG, "app database instance" + String.valueOf(db));
+                nearByManager = NearByManager.getInstance(MainActivity.activity);
+                nearByManager.setTeacher(false);
+                Log.i(TAG, "app database instance" + String.valueOf(db));
                 initializationComplete();                
             }
         };
@@ -85,7 +85,7 @@ public class MainActivity extends FlutterActivity {
 
 
     private void initializationComplete() {
-        //Log.i(TAG, "Initialization complete...");
+        Log.i(TAG, "Initialization complete...");
     }
 
     public static Context getContext() {

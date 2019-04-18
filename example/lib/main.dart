@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flores/flores.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
 void main() async {
+  Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.location]);
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String deviceId = prefs.getString('deviceId');
   if (deviceId == null) {
