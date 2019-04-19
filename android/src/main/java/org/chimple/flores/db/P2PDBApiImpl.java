@@ -881,7 +881,7 @@ public class P2PDBApiImpl {
             maxSequence++;
             P2PSyncInfo info = new P2PSyncInfo(userId, deviceId, maxSequence, recipientId, message, messageType, new Date());
             db.p2pSyncDao().insertP2PSyncInfo(info);
-//            Log.i(TAG, "inserted data" + info);
+            Log.i(TAG, "inserted data" + info);
             broadcastNewMessageAdded(info);
             return true;
         } catch (Exception e) {
@@ -923,7 +923,7 @@ public class P2PDBApiImpl {
     }
 
     private void broadcastNewMessageAdded(P2PSyncInfo info) {
-//        Log.d(TAG, "broadcastNewMessageAdded ----> " + info.getMessage());
+        Log.d(TAG, "broadcastNewMessageAdded ----> " + info.getMessage());
         Intent intent = new Intent(newMessageAddedOnDevice);
         intent.putExtra(NEW_MESSAGE_ADDED, info);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);

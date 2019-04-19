@@ -73,7 +73,7 @@ public class MainActivity extends FlutterActivity {
                 db = AppDatabase.getInstance(MainActivity.activity);
                 manager = MulticastManager.getInstance(MainActivity.activity);
                 bluetoothManager = NearByManager.getInstance(MainActivity.activity);
-                bluetoothManager.setTeacher(true);
+                bluetoothManager.setTeacher(false);
                 Log.i(TAG, "app database instance" + String.valueOf(db));
                 initializationComplete();
             }

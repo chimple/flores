@@ -100,7 +100,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     Map<String, String> arg = (Map<String, String>)call.arguments;
                     String userId = arg.get("userId");
                     String deviceId = arg.get("deviceId");
-                    //Log.i(TAG, "addUser with user id: "+userId+ " and device id:" + deviceId);
+                    Log.i(TAG, "addUser with user id: "+userId+ " and device id:" + deviceId);
                     String message = arg.get("message");
                     boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
                     String bluetoothAddress = NearByManager.getInstance(registrar.context()).getBluetoothMacAddress();

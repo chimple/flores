@@ -475,6 +475,7 @@ public class NearbyHelper {
         }
 
         mConnectionsClient.stopDiscovery();
+        setState(State.UNKNOWN);
     }
 
     /**
@@ -485,6 +486,7 @@ public class NearbyHelper {
         mIsAdvertising = false;
         mConnectionsClient.stopAdvertising();
         info.onStopAdvertising();
+        setState(State.UNKNOWN);
     }
 
     /**
@@ -742,6 +744,7 @@ public class NearbyHelper {
                 }
                 break;
             case UNKNOWN:
+                break;
             case DISCONNECT:
                 stopAllEndpoints();
                 break;
