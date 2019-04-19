@@ -4,12 +4,9 @@
     <list default="true" id="1310217c-1bb1-4731-8937-69d4e680bb10" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/AbstractManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/AbstractManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/P2PDBApiImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/P2PDBApiImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearByManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearByManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearbyHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearbyHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/android/app/src/main/java/org/chimple/floresexample/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/src/main/java/org/chimple/floresexample/MainActivity.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

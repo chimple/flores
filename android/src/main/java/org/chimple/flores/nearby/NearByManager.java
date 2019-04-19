@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -30,6 +32,7 @@ import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.SyncInfoItem;
 import org.chimple.flores.db.entity.SyncInfoRequestMessage;
 import org.chimple.flores.manager.MessageStatus;
+import org.chimple.flores.multicast.MulticastManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -70,6 +73,8 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
     private NearbyHelper nearbyHelper;
     private boolean isTeacher = false;
     private Handler mHandler = null;
+    private CountDownTimer repeatHandShakeTimer = null;
+    private static final int REPEAT_HANDSHAKE_TIMER = 1 * 60 * 1000; // 1 min
 
     public static NearByManager getInstance(Context context) {
         if (instance == null) {
@@ -83,6 +88,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                 instance.nearbyHelper = NearbyHelper.getInstance(instance, context);
                 instance.registerReceivers();
                 instance.nearbyHelper.setBluetooth(true);
+                instance.createRepeatHandShakeTimer();
             }
         }
         return instance;
@@ -459,6 +465,41 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         }
     }
 
+    private void startRepeatHandShakeTimer() {
+        if (instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();
+            instance.repeatHandShakeTimer.start();
+        }
+    }
+
+    private void createRepeatHandShakeTimer() {
+        try {
+            synchronized (NearByManager.class) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (instance != null) {
+                            instance.repeatHandShakeTimer = new CountDownTimer(REPEAT_HANDSHAKE_TIMER, 10000) {
+                                public void onTick(long millisUntilFinished) {
+                                    Log.d(TAG, "repeatHandShakeTimer ticking ..." + millisUntilFinished);
+                                }
+
+                                public void onFinish() {
+                                    Log.d(TAG, "repeatHandShakeTimer finished ... sending initial handshaking ...");
+                                    instance.sendFindBuddyMessage();
+                                    instance.startRepeatHandShakeTimer();
+                                }
+                            };
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void sendFindBuddyMessage() {
         AsyncTask.execute(new Runnable() {
             @Override
@@ -468,13 +509,17 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         });
     }
 
-    private void sendInitialHandShakingMessage(boolean needAck) {
-        // construct handshaking message(s)
-        // put in queue - TBD
-        // send one by one from queue - TBD
-        String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(needAck);
-        Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
-        instance.sendMulticastMessage(serializedHandShakingMessage);
+    public void sendInitialHandShakingMessage(boolean needAck) {
+        try {
+            // construct handshaking message(s)
+            // put in queue - TBD
+            // send one by one from queue - TBD
+            String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(needAck);
+            Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
+            instance.sendMulticastMessage(serializedHandShakingMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateNetworkConnected(boolean connected) {
@@ -483,6 +528,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
 
             if (instance.isConnected.get()) {
                 instance.onStop();
+
             } else {
                 instance.nearbyHelper.startNearbyActivity(instance.isTeacher);
             }
@@ -682,6 +728,9 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
 
 
     public void onStop() {
+        if (instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();
+        }
         instance.nearbyHelper.setState(NearbyHelper.State.STOP_ADVERTISING);
         instance.nearbyHelper.setState(NearbyHelper.State.STOP_DISCOVERING);
         instance.nearbyHelper.disconnectFromAllEndpoints();
@@ -691,6 +740,10 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
     public void onCleanUp() {
         instance.unRegisterReceivers();
         instance.onStop();
+        if (instance.repeatHandShakeTimer != null) {
+            instance.repeatHandShakeTimer.cancel();
+            instance.repeatHandShakeTimer = null;
+        }
         instance.nearbyHelper = null;
         instance = null;
     }
@@ -743,6 +796,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
     public void onEndpointConnected(EndPoint endpoint) {
         notifyUI("*******onEndpointConnected********* id:" + endpoint.getId() + " name:" + endpoint.getName(), " --------->", CONSOLE_TYPE);
         instance.sendFindBuddyMessage();
+        instance.startRepeatHandShakeTimer();
     }
 
     @Override

@@ -474,7 +474,7 @@ public class P2PDBApiImpl {
             if (bluetoothAddress == null) {
                 bluetoothAddress = bluetoothManager.getBluetoothMacAddress();
 //                Log.d(TAG, "BT ADDRESS:" + bluetoothAddress);
-                if (bluetoothAddress != null) {
+                if (bluetoothAddress != null && P2PContext.getCurrentDevice() != null) {
                     this.saveBtAddress(P2PContext.getCurrentDevice(), bluetoothAddress);
                 }
             }
@@ -1127,16 +1127,18 @@ public class P2PDBApiImpl {
     public void saveBtAddress(String from, String btAddress) {
         try {
             db.beginTransaction();
-            String storedBlueToothAddress = db.btInfoDao().getBluetoothAddress(from);
-            if (storedBlueToothAddress != null && !storedBlueToothAddress.equalsIgnoreCase(btAddress)) {
-                BtAddress newAddress = new BtAddress(from, btAddress);
-                db.btInfoDao().insertBtInfo(newAddress);
-            } else {
-                BtAddress newAddress = new BtAddress(from, btAddress);
-                db.btInfoDao().insertBtInfo(newAddress);
+            if (from != null && btAddress != null && !from.isEmpty() && !btAddress.isEmpty()) {
+                String storedBlueToothAddress = db.btInfoDao().getBluetoothAddress(from);
+                if (storedBlueToothAddress != null && !storedBlueToothAddress.equalsIgnoreCase(btAddress)) {
+                    BtAddress newAddress = new BtAddress(from, btAddress);
+                    db.btInfoDao().insertBtInfo(newAddress);
+                } else {
+                    BtAddress newAddress = new BtAddress(from, btAddress);
+                    db.btInfoDao().insertBtInfo(newAddress);
+                }
+                Log.d(TAG, "saving bt address: " + storedBlueToothAddress + " for device id:" + from);
+                db.setTransactionSuccessful();
             }
-//            Log.d(TAG, "saving bt address: " + storedBlueToothAddress + " for device id:" + from);
-            db.setTransactionSuccessful();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

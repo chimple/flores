@@ -612,15 +612,20 @@ public class NearbyHelper {
     }
 
     private void send(Payload payload, String endpoint) {
-        mConnectionsClient
-                .sendPayload(endpoint, payload)
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(Exception e) {
-                                logW("sendPayload() failed.", e);
-                            }
-                        });
+        try {
+            mConnectionsClient
+                    .sendPayload(endpoint, payload)
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(Exception e) {
+                                    logW("sendPayload() failed.", e);
+                                }
+                            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void send(Payload payload, Set<String> endpoints) {
