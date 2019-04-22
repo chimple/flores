@@ -60,7 +60,7 @@ class UserScreen extends StatelessWidget {
                           child: RaisedButton(
                             onPressed: () async {
                               await AppStateContainer.of(context)
-                                  .setLoggedInUser(u['userId'], u['message']);
+                                  .setLoggedInUser(u['userId'], u['message'], u['message'] == 'teacher');
                               await AppStateContainer.of(context).getUsers();
                               Navigator.of(context).push(
                                   MaterialPageRoute<Null>(
@@ -77,7 +77,7 @@ class UserScreen extends StatelessWidget {
                 String userId =
                     await AppStateContainer.of(context).addUser(text);
                 await AppStateContainer.of(context)
-                    .setLoggedInUser(userId, text);
+                    .setLoggedInUser(userId, text, text == 'teacher');
                 await AppStateContainer.of(context).getUsers();
                 Navigator.of(context).push(MaterialPageRoute<Null>(
                     builder: (BuildContext context) => FriendScreen()));

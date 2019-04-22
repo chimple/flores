@@ -63,9 +63,9 @@ class AppStateContainerState extends State<AppStateContainer> {
     return userId;
   }
 
-  Future<void> setLoggedInUser(String userId, String userName) async {
+  Future<void> setLoggedInUser(String userId, String userName, bool isTeacher) async {
     try {
-      await Flores().loggedInUser(userId, deviceId);
+      await Flores().loggedInUser(userId, deviceId, isTeacher);
     } on PlatformException {
       print('Flores: Failed loggedInUser');
     } catch (e, s) {
