@@ -88,7 +88,6 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                 instance.registerReceivers();
                 instance.nearbyHelper.setBluetooth(true);
                 instance.createRepeatHandShakeTimer();
-                instance.setShouldStartAdvertising(true);
             }
         }
         return instance;
@@ -528,8 +527,8 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
 
             if (instance.isConnected.get()) {
                 instance.onStop();
-
             } else {
+                instance.setCurrentUserAsTeacher();
                 instance.nearbyHelper.startNearbyActivity(instance.shouldStartAdvertising);
             }
         }
@@ -846,8 +845,17 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         LocalBroadcastManager.getInstance(instance.context).sendBroadcast(intent);
     }
 
-    public void setShouldStartAdvertising(boolean b) {
-        this.shouldStartAdvertising = b;
+    public void setCurrentUserAsTeacher() {
+        boolean isCurrentUserTeacher = P2PContext.getInstance().checkIfLoggedInUserIsTeacher();
+        if (isCurrentUserTeacher) {
+            instance.shouldStartAdvertising = true;
+        } else {
+            instance.shouldStartAdvertising = false;
+        }
+    }
+
+    public String getAdvertisingLocalName() {
+        return instance.nearbyHelper.getLocalAdvertiseName();
     }
 }
 
