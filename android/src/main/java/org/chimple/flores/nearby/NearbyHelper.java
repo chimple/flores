@@ -47,10 +47,10 @@ public class NearbyHelper {
     private static CountDownTimer discoveryTimeOutTimer = null;
 
     private Context context;
-    private int howManyTimeDiscoveryFail = 2;
+    private int howManyTimeDiscoveryFail = NearbyHelper.getRandomNumberInRange(2, 5);
     private int connectionFailedTimes = 0;
     public int discoveryFailedTimes = 0;
-    private boolean mDiscoverAsTeacher = false;
+    private boolean mDiscoverAsFailAdv = false;
     /**
      * The devices we've discovered near us.
      */
@@ -94,7 +94,7 @@ public class NearbyHelper {
      * True if we are asking a discovered device to connect to us. While we ask, we cannot ask another
      * device.
      */
-    private boolean mTeacher = false;
+    private boolean mIsCurrentlyAdvertising = false;
     private boolean mIsConnecting = false;
     /**
      * Callbacks for connections to other devices.
@@ -125,16 +125,17 @@ public class NearbyHelper {
                             logD("Connected : " + endpointId + " ," + result.toString());
                             connectedToEndpoint(mPendingConnections.remove(endpointId));
                             _instance.setState(State.STOP_DISCOVERING);
-                            _instance.setDiscoveryAsTeacher(false); //reset
-                            if (_instance.mTeacher) {
+                            _instance.setDiscoverAsFailAdv(false); //reset
+                            if (_instance.mIsCurrentlyAdvertising) {
                                 _instance.setState(State.STOP_ADVERTISING);
-                                _instance.setTeacher(false); // no longer teacher
+                                _instance.setCurrentlyAdvertising(false); // no longer teacher
                             } else {
                                 if (ismAdvertisingForChild) {
                                     logD("Connected Child: " + endpointId + " ," + result.toString());
                                     _instance.setState(State.STOP_ADVERTISING);
                                     _instance.setAdvertisingForChild(false); //reset
                                 } else {
+                                    logD("should start advertising for child");
                                     _instance.setState(State.ADVERTISING_FOR_CHILD);
                                 }
                             }
@@ -183,8 +184,8 @@ public class NearbyHelper {
                     _instance.info.notifyMessage("mEstablishedConnections active connections:" + mEstablishedConnections.size());
 
                     if ((_instance.getLocalAdvertiseName() + ".1").equals(endpoint.getName())) {
-                        _instance.howManyTimeDiscoveryFail = 3;
-                        _instance.setState(State.DISCOVERING_AS_TEACHER);
+                        _instance.howManyTimeDiscoveryFail = NearbyHelper.getRandomNumberInRange(2, 5);
+                        _instance.setState(State.DISCOVERING_AS_FAIL_ADV);
                     }
                 }
 
@@ -230,9 +231,8 @@ public class NearbyHelper {
     }
 
     public void startNearbyActivity(boolean shouldStartAdv) {
-        _instance.setTeacher(shouldStartAdv);
         if (shouldStartAdv) {
-            _instance.setState(State.DISCOVERING_AS_TEACHER);
+            _instance.setState(State.DISCOVERING_AS_FAIL_ADV);
         } else {
             _instance.setState(State.DISCOVERING);
         }
@@ -242,8 +242,8 @@ public class NearbyHelper {
         this.ismAdvertisingForChild = b;
     }
 
-    public void setDiscoveryAsTeacher(boolean b) {
-        mDiscoverAsTeacher = b;
+    public void setDiscoverAsFailAdv(boolean b) {
+        mDiscoverAsFailAdv = b;
     }
 
     public Map<String, EndPoint> getDiscoveredEndpoints() {
@@ -300,6 +300,7 @@ public class NearbyHelper {
                             @Override
                             public void onSuccess(Void unusedResult) {
                                 logD("Now advertising endpoint " + localEndpointName);
+                                _instance.setCurrentlyAdvertising(true);
                                 info.onAdvertisingStarted(localEndpointName);
                             }
                         })
@@ -322,6 +323,7 @@ public class NearbyHelper {
      */
     public void startAdvertising() {
         mIsAdvertising = true;
+        mIsCurrentlyAdvertising = true;
         final String localEndpointName = this.getLocalAdvertiseName();
 
         logD("startAdvertising ... end point " + localEndpointName + " with strategy " + info.getStrategy());
@@ -682,8 +684,8 @@ public class NearbyHelper {
         }
     }
 
-    public void setTeacher(boolean teacher) {
-        mTeacher = teacher;
+    public void setCurrentlyAdvertising(boolean teacher) {
+        mIsCurrentlyAdvertising = teacher;
     }
 
     public void setState(State state) {
@@ -706,9 +708,9 @@ public class NearbyHelper {
     private void onStateChanged(State newState) {
         // Update Nearby Connections to the new state.
         switch (newState) {
-            case DISCOVERING_AS_TEACHER:
-                _instance.setDiscoveryAsTeacher(true);
-                logD("On state change DISCOVERING_AS_TEACHER");
+            case DISCOVERING_AS_FAIL_ADV:
+                _instance.setDiscoverAsFailAdv(true);
+                logD("On state change DISCOVERING_AS_FAIL_ADV");
                 if (isAdvertising()) {
                     stopAdvertising();
                 }
@@ -764,7 +766,7 @@ public class NearbyHelper {
      */
     public enum State {
         UNKNOWN,
-        DISCOVERING_AS_TEACHER,
+        DISCOVERING_AS_FAIL_ADV,
         DISCOVERING,
         ADVERTISING,
         ADVERTISING_FOR_CHILD,
@@ -806,16 +808,17 @@ public class NearbyHelper {
         }
         _instance.info.onDiscoveryFailed();
 
-        if (!isManuallyStoppedDiscovery && _instance.mDiscoverAsTeacher && discoveryFailedTimes >= howManyTimeDiscoveryFail) {
-            _instance.resetAsTeacher();
+        if (!isManuallyStoppedDiscovery && _instance.mDiscoverAsFailAdv && discoveryFailedTimes >= howManyTimeDiscoveryFail) {
+            _instance.resetAsFailAdv();
         } else if (!isManuallyStoppedDiscovery) {
             _instance.resetDiscovery();
         }
     }
 
-    public void resetAsTeacher() {
-        logD("resetAsTeacher");
+    public void resetAsFailAdv() {
+        logD("resetAsFailAdv");
         _instance.setState(State.STOP_DISCOVERING);
+        _instance.setCurrentlyAdvertising(false);
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -825,8 +828,8 @@ public class NearbyHelper {
     }
 
     public void resetOnConnectionFailed() {
-        if (_instance.mDiscoverAsTeacher) {
-            _instance.resetAsTeacher();
+        if (_instance.mDiscoverAsFailAdv) {
+            _instance.resetAsFailAdv();
         } else {
             _instance.resetDiscovery();
         }

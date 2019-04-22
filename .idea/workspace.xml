@@ -3,10 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="1310217c-1bb1-4731-8937-69d4e680bb10" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/P2PDBApiImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/db/P2PDBApiImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearByManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearByManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearbyHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearbyHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/android/app/src/main/java/org/chimple/floresexample/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/src/main/java/org/chimple/floresexample/MainActivity.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -98,7 +98,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -144,7 +144,7 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -219,7 +219,7 @@
     <frame x="0" y="23" width="1680" height="981" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26373628" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26678878" />
       <window_info id="Structure" order="1" weight="0.24964234" />
       <window_info id="Designer" order="2" />
       <window_info id="Captures" order="3" weight="0.25" />

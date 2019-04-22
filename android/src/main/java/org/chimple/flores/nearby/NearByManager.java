@@ -32,7 +32,6 @@ import org.chimple.flores.db.entity.P2PSyncInfo;
 import org.chimple.flores.db.entity.SyncInfoItem;
 import org.chimple.flores.db.entity.SyncInfoRequestMessage;
 import org.chimple.flores.manager.MessageStatus;
-import org.chimple.flores.multicast.MulticastManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -71,7 +70,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
     private Set<String> allSyncInfosReceived = new HashSet<String>();
     private BluetoothAdapter mAdapter;
     private NearbyHelper nearbyHelper;
-    private boolean isTeacher = false;
+    private boolean shouldStartAdvertising = false;
     private Handler mHandler = null;
     private CountDownTimer repeatHandShakeTimer = null;
     private static final int REPEAT_HANDSHAKE_TIMER = 1 * 60 * 1000; // 1 min
@@ -89,6 +88,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                 instance.registerReceivers();
                 instance.nearbyHelper.setBluetooth(true);
                 instance.createRepeatHandShakeTimer();
+                instance.setShouldStartAdvertising(true);
             }
         }
         return instance;
@@ -530,7 +530,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                 instance.onStop();
 
             } else {
-                instance.nearbyHelper.startNearbyActivity(instance.isTeacher);
+                instance.nearbyHelper.startNearbyActivity(instance.shouldStartAdvertising);
             }
         }
     }
@@ -846,8 +846,8 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         LocalBroadcastManager.getInstance(instance.context).sendBroadcast(intent);
     }
 
-    public void setTeacher(boolean b) {
-        this.isTeacher = b;
+    public void setShouldStartAdvertising(boolean b) {
+        this.shouldStartAdvertising = b;
     }
 }
 

@@ -55,7 +55,7 @@
         </activity>
         <activity android:name="org.chimple.flores.FloresPlugin$MessageReceivedActivity" android:exported="false"/>
 
-        <receiver android:name=".OnAutoReceiver">
+        <receiver android:name="org.chimple.flores.OnAutoReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
