@@ -62,6 +62,7 @@ class UserScreen extends StatelessWidget {
                               await AppStateContainer.of(context)
                                   .setLoggedInUser(u['userId'], u['message'], u['message'] == 'teacher');
                               await AppStateContainer.of(context).getUsers();
+                              await AppStateContainer.of(context).getAdvName();
                               Navigator.of(context).push(
                                   MaterialPageRoute<Null>(
                                       builder: (BuildContext context) =>
@@ -98,7 +99,7 @@ class FriendScreen extends StatelessWidget {
     return Scaffold(
       appBar: new AppBar(
         title: new Text(
-            'User: ${AppStateContainer.of(context).loggedInUserName} chat with...'),
+            'advName: ${AppStateContainer.of(context).advName} - ${AppStateContainer.of(context).loggedInUserName}'),
       ),
       body: ListView(
           children: AppStateContainer.of(context)

@@ -73,6 +73,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
     private boolean shouldStartAdvertising = false;
     private Handler mHandler = null;
     private CountDownTimer repeatHandShakeTimer = null;
+    private CountDownTimer startConnectionTimer = null;
     private static final int REPEAT_HANDSHAKE_TIMER = 1 * 60 * 1000; // 1 min
 
     public static NearByManager getInstance(Context context) {
@@ -88,7 +89,6 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                 instance.registerReceivers();
                 instance.nearbyHelper.setBluetooth(true);
                 instance.createRepeatHandShakeTimer();
-                instance.setShouldStartAdvertising(true);
             }
         }
         return instance;
@@ -528,9 +528,30 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
 
             if (instance.isConnected.get()) {
                 instance.onStop();
-
+                if(instance.startConnectionTimer != null) {
+		  instance.startConnectionTimer.cancel();
+		}
             } else {
-                instance.nearbyHelper.startNearbyActivity(instance.shouldStartAdvertising);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (instance != null) {
+                            instance.startConnectionTimer = new CountDownTimer(15 * 1000, 1000) {
+                                public void onTick(long millisUntilFinished) {
+                                    Log.d(TAG, "startConnectionTimer ticking ..." + millisUntilFinished);
+                                }
+
+                                public void onFinish() {
+                                    Log.d(TAG, "startConnectionTimer finished.");
+                                    instance.setCurrentUserAsTeacher();
+                                    instance.nearbyHelper.startNearbyActivity(instance.shouldStartAdvertising);
+                                }
+                            };
+                        }
+                    }
+                });
+
+                instance.startConnectionTimer.start();
             }
         }
     }
@@ -846,8 +867,17 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         LocalBroadcastManager.getInstance(instance.context).sendBroadcast(intent);
     }
 
-    public void setShouldStartAdvertising(boolean b) {
-        this.shouldStartAdvertising = b;
+    public void setCurrentUserAsTeacher() {
+        boolean isCurrentUserTeacher = P2PContext.getInstance().checkIfLoggedInUserIsTeacher();
+        if (isCurrentUserTeacher) {
+            instance.shouldStartAdvertising = true;
+        } else {
+            instance.shouldStartAdvertising = false;
+        }
+    }
+
+    public String getAdvertisingLocalName() {
+        return instance.nearbyHelper.getLocalAdvertiseName();
     }
 }
 
