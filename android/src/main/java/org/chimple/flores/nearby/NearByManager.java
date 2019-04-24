@@ -557,12 +557,12 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
             if (instance.isConnected.get()) {
                 Log.d(TAG, "Stopping Near by....");
                 instance.onStop();
-                if(instance.startNearByTimer != null) {
+                if (instance.startNearByTimer != null) {
                     instance.startNearByTimer.cancel();
                 }
-            } else if(!connected) {
+            } else if (!connected) {
                 instance.setCurrentUserAsTeacher();
-                if(instance.startNearByTimer != null) {
+                if (instance.startNearByTimer != null) {
                     instance.startNearByTimer.cancel();
                     instance.startNearByTimer.start();
                 }
@@ -766,6 +766,10 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         if (instance.repeatHandShakeTimer != null) {
             instance.repeatHandShakeTimer.cancel();
         }
+
+        if (instance.startNearByTimer != null) {
+            instance.startNearByTimer.cancel();
+        }
         instance.nearbyHelper.setState(NearbyHelper.State.STOP_ADVERTISING);
         instance.nearbyHelper.setState(NearbyHelper.State.STOP_DISCOVERING);
         instance.nearbyHelper.disconnectFromAllEndpoints();
@@ -779,6 +783,11 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
             instance.repeatHandShakeTimer.cancel();
             instance.repeatHandShakeTimer = null;
         }
+        if (instance.startNearByTimer != null) {
+            instance.startNearByTimer.cancel();
+            instance.startNearByTimer = null;
+        }
+
         instance.nearbyHelper = null;
         instance = null;
     }
