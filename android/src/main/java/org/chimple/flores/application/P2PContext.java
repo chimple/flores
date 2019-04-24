@@ -7,12 +7,9 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.content.SharedPreferences;
-
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
 import org.chimple.flores.nearby.NearByManager;
-
-import java.util.UUID;
 
 public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
@@ -32,11 +29,11 @@ public class P2PContext {
     public static final String messageEvent = "message-event";
     public static final String bluetoothMessageEvent = "bluetooth-message-event";
     public static final String SHARED_PREF = "shardPref";
-    public static final String multiCastConnectionChangedEvent = "multicast-connection-changed-event";
+    public static final String multiCastConnectionChangedEvent = "multicast-connection-changed-event";    
 
     private static final String TAG = P2PContext.class.getName();
     private static P2PContext instance;
-
+    
     private Context context;
     private boolean initialized;
     private boolean isNetWorkConnected;
@@ -60,7 +57,7 @@ public class P2PContext {
         if (initialized) {
             return;
         }
-
+        
         //Log.d(TAG, "P2P Context initialize");
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -103,22 +100,6 @@ public class P2PContext {
         return isNetWorkConnected;
     }
 
-    public void setLoggedInUserAsTeacher() {
-        String userId = P2PContext.getLoggedInUser();
-        SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
-        SharedPreferences.Editor editor = pref.edit();
-        if (userId != null && pref != null) {
-            editor.putString("IS_TEACHER", userId);
-        }
-        editor.commit(); // commit changes
-    }
-
-    public boolean checkIfLoggedInUserIsTeacher() {
-        SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
-        String userId = pref.getString("USER_ID", null); // getting String
-        String teacherUserId = pref.getString("IS_TEACHER", null); // getting String
-        return (userId != null && teacherUserId != null && teacherUserId.equalsIgnoreCase(userId));
-    }
     public static String getLoggedInUser() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String
@@ -132,7 +113,7 @@ public class P2PContext {
         String deviceId = pref.getString("DEVICE_ID", null); // getting String
         //Log.d(TAG, "GOT Device ID -------------->" +  deviceId);
         return deviceId;
-    }
+    }    
 
     public Context getContext() {
         return context;
@@ -141,12 +122,12 @@ public class P2PContext {
     public void onCleanUp() {
         initialized = false;
         //Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....");
-        if (networkChangeReceiver != null) {
+        if(networkChangeReceiver != null) {
             //Log.d(TAG, "UNREGISTERED P2PContext RECEIVERS ....networkChangeReceiver");
-            context.unregisterReceiver(networkChangeReceiver);
+            context.unregisterReceiver(networkChangeReceiver);                        
         }
 
     }
 
-
+   
 }

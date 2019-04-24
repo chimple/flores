@@ -25,7 +25,6 @@ class AppStateContainer extends StatefulWidget {
 class AppStateContainerState extends State<AppStateContainer> {
   List<dynamic> messages = [];
   List<dynamic> users = [];
-  String advName;
   String loggedInUserId;
   String loggedInUserName;
   String friendId;
@@ -77,22 +76,6 @@ class AppStateContainerState extends State<AppStateContainer> {
       loggedInUserId = userId;
       loggedInUserName = userName;
     });
-  }
-
-
-  Future<void> getAdvName() async {
-    String advName;
-    try {
-      advName = await Flores().advName;
-    } on PlatformException {
-      print('Flores: Failed adv name');
-    } catch (e, s) {
-      print('Exception details:\n $e');
-      print('Stack trace:\n $s');
-    }
-
-    setState(() => this.advName = advName);
-    print('getAdvName: $advName');
   }
 
   Future<void> getUsers() async {

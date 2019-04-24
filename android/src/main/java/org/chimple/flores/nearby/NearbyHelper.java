@@ -23,8 +23,6 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,7 +47,7 @@ public class NearbyHelper {
     private static CountDownTimer discoveryTimeOutTimer = null;
 
     private Context context;
-    private int howManyTimeDiscoveryFail = NearbyHelper.getRandomNumberInRange(2, 3);
+    private int howManyTimeDiscoveryFail = NearbyHelper.getRandomNumberInRange(2, 5);
     private int connectionFailedTimes = 0;
     public int discoveryFailedTimes = 0;
     private boolean mDiscoverAsFailAdv = false;
@@ -186,7 +184,7 @@ public class NearbyHelper {
                     _instance.info.notifyMessage("mEstablishedConnections active connections:" + mEstablishedConnections.size());
 
                     if ((_instance.getLocalAdvertiseName() + ".1").equals(endpoint.getName())) {
-                        _instance.howManyTimeDiscoveryFail = NearbyHelper.getRandomNumberInRange(2, 3);
+                        _instance.howManyTimeDiscoveryFail = NearbyHelper.getRandomNumberInRange(2, 5);
                         _instance.setState(State.DISCOVERING_AS_FAIL_ADV);
                     }
                 }
@@ -232,19 +230,7 @@ public class NearbyHelper {
         return _instance;
     }
 
-    private String generateRandomAdvertiserName() {
-        int length = 4;
-        boolean useLetters = true;
-        boolean useNumbers = false;
-        String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
-        return generatedString;
-    }
-
     public void startNearbyActivity(boolean shouldStartAdv) {
-        // set random advertisingName
-        _instance.setState(State.STOP_DISCOVERING);
-        _instance.setState(State.STOP_ADVERTISING);
-
         if (shouldStartAdv) {
             _instance.setState(State.DISCOVERING_AS_FAIL_ADV);
         } else {
@@ -283,16 +269,14 @@ public class NearbyHelper {
     }
 
     public String getLocalAdvertiseName() {
-        if(this.advertisingName == null) {
-            this.advertisingName = generateRandomAdvertiserName() + "-1";
+        if (this.advertisingName == null) {
+            this.advertisingName = "1";
         }
         return this.advertisingName;
     }
 
-    private void setLocalAdvertiseName(String name) {
-        if(this.advertisingName == null) {
-            this.advertisingName = name;
-        }
+    public void setLocalAdvertiseName(String name) {
+        this.advertisingName = name;
     }
 
 
@@ -410,7 +394,7 @@ public class NearbyHelper {
     protected void startDiscovering() {
         logD("calling startDiscovering ...with strategy" + info.getStrategy());
         if (discoveryTimeOutTimer == null && !mIsDiscovering) {
-            startDiscoveryTimeOutTimer(NearbyHelper.getRandomNumberInRange(10 * 1000, 15 * 1000));
+            startDiscoveryTimeOutTimer(10 * 1000);
         }
         mIsDiscovering = true;
         mIsDiscovered = false;
@@ -501,7 +485,6 @@ public class NearbyHelper {
      */
     public void stopAdvertising() {
         logD("stopAdvertising ...");
-
         mIsAdvertising = false;
         mConnectionsClient.stopAdvertising();
         info.onStopAdvertising();
