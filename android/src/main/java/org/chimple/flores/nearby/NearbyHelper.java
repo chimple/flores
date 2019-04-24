@@ -398,7 +398,6 @@ public class NearbyHelper {
                             @Override
                             public void onFailure(Exception e) {
                                 logW("acceptConnection() failed.", e);
-                                _instance.resetDiscovery();
                             }
                         });
     }

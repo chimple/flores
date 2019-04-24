@@ -73,7 +73,6 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
     private boolean shouldStartAdvertising = false;
     private Handler mHandler = null;
     private CountDownTimer repeatHandShakeTimer = null;
-    private CountDownTimer startConnectionTimer = null;
     private static final int REPEAT_HANDSHAKE_TIMER = 1 * 60 * 1000; // 1 min
 
     public static NearByManager getInstance(Context context) {
@@ -528,30 +527,9 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
 
             if (instance.isConnected.get()) {
                 instance.onStop();
-                if(instance.startConnectionTimer != null) {
-		  instance.startConnectionTimer.cancel();
-		}
             } else {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (instance != null) {
-                            instance.startConnectionTimer = new CountDownTimer(15 * 1000, 1000) {
-                                public void onTick(long millisUntilFinished) {
-                                    Log.d(TAG, "startConnectionTimer ticking ..." + millisUntilFinished);
-                                }
-
-                                public void onFinish() {
-                                    Log.d(TAG, "startConnectionTimer finished.");
-                                    instance.setCurrentUserAsTeacher();
-                                    instance.nearbyHelper.startNearbyActivity(instance.shouldStartAdvertising);
-                                }
-                            };
-                        }
-                    }
-                });
-
-                instance.startConnectionTimer.start();
+                instance.setCurrentUserAsTeacher();
+                instance.nearbyHelper.startNearbyActivity(instance.shouldStartAdvertising);
             }
         }
     }
