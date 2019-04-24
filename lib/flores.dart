@@ -33,6 +33,12 @@ class Flores {
     });
   }
 
+  Future<bool> get isAdvertising async => _methodChannel
+      .invokeMethod('isAdvertising')
+      .then<bool>((dynamic result) => result);
+
+
+
   Future<String> get advName async => _methodChannel
       .invokeMethod('getAdvertisingName')
       .then<String>((dynamic result) => result);

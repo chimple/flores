@@ -4,7 +4,6 @@
     <list default="true" id="1310217c-1bb1-4731-8937-69d4e680bb10" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/application/P2PContext.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearByManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearByManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearbyHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/chimple/flores/nearby/NearbyHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/lib/app_state_container.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/app_state_container.dart" afterDir="false" />
@@ -19,20 +18,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/flores.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="331">
-              <caret line="37" column="35" selection-start-line="37" selection-start-column="35" selection-end-line="37" selection-end-column="35" />
+            <state relative-caret-position="286">
+              <caret line="41" column="21" selection-start-line="41" selection-start-column="21" selection-end-line="41" selection-end-column="21" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/example/lib/app_state_container.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="89" column="19" selection-start-line="89" selection-start-column="19" selection-end-line="89" selection-end-column="19" />
+            <state relative-caret-position="277">
+              <caret line="82" column="34" selection-start-line="82" selection-start-column="15" selection-end-line="82" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -49,8 +48,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/example/lib/main.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="92">
-              <caret line="4" column="26" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
+            <state relative-caret-position="375">
+              <caret line="65" column="73" lean-forward="true" selection-start-line="65" selection-start-column="73" selection-end-line="65" selection-end-column="73" />
+              <folding>
+                <element signature="e#0#20#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -58,7 +60,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../workspace/flutter/packages/flutter/lib/src/widgets/framework.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="287">
+            <state relative-caret-position="14715">
               <caret line="1006" column="7" selection-start-line="1006" selection-start-column="7" selection-end-line="1006" selection-end-column="7" />
             </state>
           </provider>
@@ -86,7 +88,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>addMessage</find>
       <find>logger</find>
       <find>storage</find>
       <find>LoggedINu</find>
@@ -99,9 +100,7 @@
       <find>new AppBar</find>
       <find>chat wi</find>
       <find>chat f</find>
-      <find>advName</find>
       <find>Login</find>
-      <find>getAdvName</find>
       <find>chat with</find>
       <find>AddUser</find>
       <find>users</find>
@@ -110,6 +109,15 @@
       <find>getAdv</find>
       <find>getUsers</find>
       <find>flores.dart</find>
+      <find>advname</find>
+      <find>getAdvName</find>
+      <find>getAdvN</find>
+      <find>advName</find>
+      <find>login</find>
+      <find>${AppStateContainer.of(context).isAdv</find>
+      <find>isAdv</find>
+      <find>isAdvertisingStatus</find>
+      <find>isAdvertising</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -122,9 +130,9 @@
         <option value="$PROJECT_DIR$/pubspec.yaml" />
         <option value="$PROJECT_DIR$/example/pubspec.yaml" />
         <option value="$PROJECT_DIR$/example/android/app/src/main/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/example/lib/app_state_container.dart" />
-        <option value="$PROJECT_DIR$/example/lib/main.dart" />
         <option value="$PROJECT_DIR$/lib/flores.dart" />
+        <option value="$PROJECT_DIR$/example/lib/main.dart" />
+        <option value="$PROJECT_DIR$/example/lib/app_state_container.dart" />
       </list>
     </option>
   </component>
@@ -138,6 +146,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -205,8 +215,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -278,10 +286,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1680" height="981" extended-state="6" />
+    <frame x="0" y="23" width="1680" height="980" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26984128" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2759463" />
       <window_info id="Structure" order="1" weight="0.24964234" />
       <window_info id="Designer" order="2" />
       <window_info id="Captures" order="3" weight="0.25" />
@@ -343,17 +351,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="94" column="16" selection-start-line="94" selection-start-column="16" selection-end-line="94" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/example/pubspec.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="7" column="20" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../workspace/flutter/packages/flutter/lib/src/widgets/framework.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="14715">
+          <caret line="1006" column="7" selection-start-line="1006" selection-start-column="7" selection-end-line="1006" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -364,6 +372,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/android/src/main/java/org/chimple/flores/FloresPlugin.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="108" column="31" selection-start-line="108" selection-start-column="31" selection-end-line="108" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/pubspec.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -371,31 +386,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../workspace/flutter/packages/flutter/lib/src/widgets/framework.dart">
+    <entry file="file://$PROJECT_DIR$/lib/flores.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="287">
-          <caret line="1006" column="7" selection-start-line="1006" selection-start-column="7" selection-end-line="1006" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/example/lib/app_state_container.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="89" column="19" selection-start-line="89" selection-start-column="19" selection-end-line="89" selection-end-column="19" />
+        <state relative-caret-position="286">
+          <caret line="41" column="21" selection-start-line="41" selection-start-column="21" selection-end-line="41" selection-end-column="21" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/example/lib/main.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="92">
-          <caret line="4" column="26" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
+        <state relative-caret-position="375">
+          <caret line="65" column="73" lean-forward="true" selection-start-line="65" selection-start-column="73" selection-end-line="65" selection-end-column="73" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/flores.dart">
+    <entry file="file://$PROJECT_DIR$/example/lib/app_state_container.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
-          <caret line="37" column="35" selection-start-line="37" selection-start-column="35" selection-end-line="37" selection-end-column="35" />
+        <state relative-caret-position="277">
+          <caret line="82" column="34" selection-start-line="82" selection-start-column="15" selection-end-line="82" selection-end-column="34" />
         </state>
       </provider>
     </entry>
