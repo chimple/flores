@@ -26,6 +26,7 @@ class AppStateContainerState extends State<AppStateContainer> {
   List<dynamic> messages = [];
   List<dynamic> users = [];
   String advName;
+  bool isAdv;
   String loggedInUserId;
   String loggedInUserName;
   String friendId;
@@ -79,6 +80,20 @@ class AppStateContainerState extends State<AppStateContainer> {
     });
   }
 
+  Future<void> isAdvertisingStatus() async {
+    bool isAdv = false;
+    try {
+      isAdv = await Flores().isAdvertising;
+    } on PlatformException {
+      print('Flores: Failed isAdv');
+    } catch (e, s) {
+      print('Exception details:\n $e');
+      print('Stack trace:\n $s');
+    }
+
+    setState(() => this.isAdv = isAdv);
+    print('isAdvertising: $isAdv');
+  }
 
   Future<void> getAdvName() async {
     String advName;

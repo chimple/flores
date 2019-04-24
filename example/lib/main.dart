@@ -45,7 +45,7 @@ class UserScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: new AppBar(
-        title: new Text('Login'),
+        title: new Text('Login - ${AppStateContainer.of(context).isAdv}'),
       ),
       body: Column(
         children: <Widget>[
@@ -63,6 +63,7 @@ class UserScreen extends StatelessWidget {
                                   .setLoggedInUser(u['userId'], u['message'], u['message'] == 'teacher');
                               await AppStateContainer.of(context).getUsers();
                               await AppStateContainer.of(context).getAdvName();
+                              await AppStateContainer.of(context).isAdvertisingStatus();
                               Navigator.of(context).push(
                                   MaterialPageRoute<Null>(
                                       builder: (BuildContext context) =>
@@ -99,7 +100,7 @@ class FriendScreen extends StatelessWidget {
     return Scaffold(
       appBar: new AppBar(
         title: new Text(
-            'advName: ${AppStateContainer.of(context).advName} - ${AppStateContainer.of(context).loggedInUserName}'),
+            'advName: ${AppStateContainer.of(context).isAdv} - ${AppStateContainer.of(context).advName} - ${AppStateContainer.of(context).loggedInUserName}'),
       ),
       body: ListView(
           children: AppStateContainer.of(context)
