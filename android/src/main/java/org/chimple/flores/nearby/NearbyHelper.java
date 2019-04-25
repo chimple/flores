@@ -96,7 +96,6 @@ public class NearbyHelper {
      * True if we are asking a discovered device to connect to us. While we ask, we cannot ask another
      * device.
      */
-    private boolean mIsCurrentlyAdvertising = false;
     private boolean mIsConnecting = false;
     /**
      * Callbacks for connections to other devices.
@@ -128,18 +127,11 @@ public class NearbyHelper {
                             connectedToEndpoint(mPendingConnections.remove(endpointId));
                             _instance.setState(State.STOP_DISCOVERING);
                             _instance.setDiscoverAsFailAdv(false); //reset
-                            if (_instance.mIsCurrentlyAdvertising) {
+                            if (_instance.mIsAdvertising) {
                                 _instance.setState(State.STOP_ADVERTISING);
-                                _instance.setCurrentlyAdvertising(false); // no longer teacher
                             } else {
-                                if (ismAdvertisingForChild) {
-                                    logD("Connected Child: " + endpointId + " ," + result.toString());
-                                    _instance.setState(State.STOP_ADVERTISING);
-                                    _instance.setAdvertisingForChild(false); //reset
-                                } else {
-                                    logD("should start advertising for child");
-                                    _instance.setState(State.ADVERTISING_FOR_CHILD);
-                                }
+                                logD("should start advertising for child");
+                                _instance.setState(State.ADVERTISING_FOR_CHILD);
                             }
                             break;
                         case ConnectionsStatusCodes.STATUS_ALREADY_CONNECTED_TO_ENDPOINT:
@@ -208,7 +200,7 @@ public class NearbyHelper {
      * True if we are advertising.
      */
     private boolean mIsAdvertising = false;
-    private boolean ismAdvertisingForChild = false;
+    // private boolean ismAdvertisingForChild = false;
 
 
     /**
@@ -244,7 +236,7 @@ public class NearbyHelper {
         // set random advertisingName
         _instance.setState(State.STOP_DISCOVERING);
         _instance.setState(State.STOP_ADVERTISING);
-
+        Log.d(TAG, "startNearbyActivity");
         if (shouldStartAdv) {
             _instance.setState(State.DISCOVERING_AS_FAIL_ADV);
         } else {
@@ -252,9 +244,9 @@ public class NearbyHelper {
         }
     }
 
-    public void setAdvertisingForChild(boolean b) {
-        this.ismAdvertisingForChild = b;
-    }
+//    public void setAdvertisingForChild(boolean b) {
+//        this.ismAdvertisingForChild = b;
+//    }
 
     public void setDiscoverAsFailAdv(boolean b) {
         mDiscoverAsFailAdv = b;
@@ -283,22 +275,20 @@ public class NearbyHelper {
     }
 
     public String getLocalAdvertiseName() {
-        if(this.advertisingName == null) {
+        if (this.advertisingName == null) {
             this.advertisingName = generateRandomAdvertiserName() + "-1";
         }
         return this.advertisingName;
     }
 
     private void setLocalAdvertiseName(String name) {
-        if(this.advertisingName == null) {
+        if (this.advertisingName == null) {
             this.advertisingName = name;
         }
     }
 
 
     public void startAdvertisingForChild() {
-        mIsAdvertising = true;
-        ismAdvertisingForChild = true;
         final String localEndpointName = this.getLocalAdvertiseName();
 
         logD("startAdvertising ... end point " + localEndpointName + " with strategy " + info.getStrategy());
@@ -316,7 +306,7 @@ public class NearbyHelper {
                             @Override
                             public void onSuccess(Void unusedResult) {
                                 logD("Now advertising endpoint " + localEndpointName);
-                                _instance.setCurrentlyAdvertising(true);
+                                mIsAdvertising = true;
                                 info.onAdvertisingStarted(localEndpointName);
                             }
                         })
@@ -325,7 +315,7 @@ public class NearbyHelper {
                             @Override
                             public void onFailure(Exception e) {
                                 mIsAdvertising = false;
-                                ismAdvertisingForChild = false;
+//                                ismAdvertisingForChild = false;
                                 logW("startAdvertising() failed.", e);
                                 info.onAdvertisingFailed();
                             }
@@ -338,8 +328,6 @@ public class NearbyHelper {
      * we've found out if we successfully entered this mode.
      */
     public void startAdvertising() {
-        mIsAdvertising = true;
-        mIsCurrentlyAdvertising = true;
         final String localEndpointName = this.getLocalAdvertiseName();
 
         logD("startAdvertising ... end point " + localEndpointName + " with strategy " + info.getStrategy());
@@ -357,6 +345,7 @@ public class NearbyHelper {
                             @Override
                             public void onSuccess(Void unusedResult) {
                                 logD("Now advertising endpoint " + localEndpointName);
+                                mIsAdvertising = true;
                                 info.onAdvertisingStarted(localEndpointName);
                             }
                         })
@@ -702,10 +691,6 @@ public class NearbyHelper {
         }
     }
 
-    public void setCurrentlyAdvertising(boolean teacher) {
-        mIsCurrentlyAdvertising = teacher;
-    }
-
     public void setState(State state) {
         if (mState == state) {
             logW("State set to " + state + " but already in that state");
@@ -836,7 +821,6 @@ public class NearbyHelper {
     public void resetAsFailAdv() {
         logD("resetAsFailAdv");
         _instance.setState(State.STOP_DISCOVERING);
-        _instance.setCurrentlyAdvertising(false);
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {

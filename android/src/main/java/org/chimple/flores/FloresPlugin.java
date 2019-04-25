@@ -91,6 +91,17 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                 });
                 break;
             }
+            case "isAdvertising": {
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean isAdv = NearByManager.getInstance(registrar.context()).isAdvertising();
+                        Log.d(TAG, "isAdv: =====>" + isAdv);
+                        result.success(isAdv);
+                    }
+                });
+                break;
+            }
             case "getAdvertisingName": {
                 AsyncTask.execute(new Runnable() {
                     @Override
