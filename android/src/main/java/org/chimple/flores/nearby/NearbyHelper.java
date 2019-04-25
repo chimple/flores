@@ -872,13 +872,15 @@ public class NearbyHelper {
 
     public boolean setBluetooth(boolean enable) {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        boolean isEnabled = bluetoothAdapter.isEnabled();
-        if (enable && !isEnabled) {
-            Log.d(TAG, "setBluetooth: enable");
-            return bluetoothAdapter.enable();
-        } else if (!enable && isEnabled) {
-            Log.d(TAG, "setBluetooth: disable");
-            return bluetoothAdapter.disable();
+        if(bluetoothAdapter != null) {
+            boolean isEnabled = bluetoothAdapter.isEnabled();
+            if (enable && !isEnabled) {
+                Log.d(TAG, "setBluetooth: enable");
+                return bluetoothAdapter.enable();
+            } else if (!enable && isEnabled) {
+                Log.d(TAG, "setBluetooth: disable");
+                return bluetoothAdapter.disable();
+            }
         }
         // No need to change bluetooth state
         return true;
