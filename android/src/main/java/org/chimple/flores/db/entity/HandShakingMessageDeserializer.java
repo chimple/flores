@@ -42,9 +42,15 @@ public class HandShakingMessageDeserializer implements JsonDeserializer<HandShak
             btAddress = jsonBt.getAsString();
         }
 
+        final JsonElement jsonSchool = jsonObject.get("sh");
+        String schoolId = "";
+        if (jsonSchool != null) {
+            schoolId = jsonSchool.getAsString();
+        }
+
 
         HandShakingInfo[] infos = context.deserialize(jsonObject.get("i"), HandShakingInfo[].class);
-        final HandShakingMessage handShakingMessage = new HandShakingMessage(from, messageType, reply, new ArrayList(Arrays.asList(infos)), btAddress);
+        final HandShakingMessage handShakingMessage = new HandShakingMessage(schoolId, from, messageType, reply, new ArrayList(Arrays.asList(infos)), btAddress);
         return handShakingMessage;
     }
 }

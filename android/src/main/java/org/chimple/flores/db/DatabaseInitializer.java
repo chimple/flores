@@ -47,7 +47,7 @@ public class DatabaseInitializer {
                 String message = columns[0];
                 String messageType = columns[1];
 
-                P2PDBApiImpl.getInstance(context).persistMessage(P2PContext.getLoggedInUser(), P2PContext.getCurrentDevice(), "", message, messageType, new Date());
+                P2PDBApiImpl.getInstance(context).persistMessage(P2PContext.getSchool(), P2PContext.getLoggedInUser(), P2PContext.getCurrentDevice(), "", message, messageType, new Date());
             }
 
             P2PDBApiImpl.getInstance(context).upsertProfile();

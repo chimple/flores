@@ -12,4 +12,7 @@ public class P2PUserIdDeviceIdAndMessage {
     @ColumnInfo(name = "message")
     public String message;
 
+    @ColumnInfo(name = "school_id")
+    public String schoolId;
+
 }

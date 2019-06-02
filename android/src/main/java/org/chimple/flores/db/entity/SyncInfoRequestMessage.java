@@ -23,6 +23,11 @@ public class SyncInfoRequestMessage {
     String mDeviceId;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("sh")
+    String mSchoolId;
+
+
+    @Expose(serialize = true, deserialize = true)
     @SerializedName("s")
     String sender;
 
@@ -32,9 +37,10 @@ public class SyncInfoRequestMessage {
     List<SyncInfoItem> items;
 
 
-    public SyncInfoRequestMessage(String sender, String mDeviceId, List<SyncInfoItem> items) {
+    public SyncInfoRequestMessage(String sender, String mDeviceId, String mSchoolId, List<SyncInfoItem> items) {
         this.messageType = MESSAGE_TYPE;
         this.mDeviceId = mDeviceId;
+        this.mSchoolId = mSchoolId;
         this.items = items;
         this.sender = sender;
     }
@@ -56,5 +62,7 @@ public class SyncInfoRequestMessage {
         return mDeviceId;
     }
 
-
+    public String getmSchoolId() {
+        return mSchoolId;
+    }
 }

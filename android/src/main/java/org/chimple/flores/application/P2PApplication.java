@@ -36,7 +36,7 @@ public class P2PApplication extends Application {
 
             public void run() {
                 P2PContext.getInstance().initialize(P2PApplication.this);
-                P2PApplication.this.createShardProfilePreferences();
+//                P2PApplication.this.createShardProfilePreferences();
                 db = AppDatabase.getInstance(P2PApplication.this);
                 multicastManager = MulticastManager.getInstance(P2PApplication.this);
                 bluetoothManager = NearByManager.getInstance(P2PApplication.this);
@@ -49,20 +49,20 @@ public class P2PApplication extends Application {
         initializationThread.start();
     }
 
-    public void createShardProfilePreferences() {
-        SharedPreferences pref = this.context.getSharedPreferences(P2PContext.SHARED_PREF, 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-        String uuid = UUID.randomUUID().toString();
-        editor.putString("USER_ID", uuid);
-        String deviceId = NearByManager.getInstance(this.context).getBluetoothMacAddress();
-
-        if (deviceId != null) {
-            editor.putString("DEVICE_ID", deviceId);
-        } else {
-            editor.putString("DEVICE_ID", uuid + "-device");
-        }
-        editor.commit(); // commit changes
-    }
+//    public void createShardProfilePreferences() {
+//        SharedPreferences pref = this.context.getSharedPreferences(P2PContext.SHARED_PREF, 0); // 0 - for private mode
+//        SharedPreferences.Editor editor = pref.edit();
+//        String uuid = UUID.randomUUID().toString();
+//        editor.putString("USER_ID", uuid);
+//        String deviceId = NearByManager.getInstance(this.context).getBluetoothMacAddress();
+//
+//        if (deviceId != null) {
+//            editor.putString("DEVICE_ID", deviceId);
+//        } else {
+//            editor.putString("DEVICE_ID", uuid + "-device");
+//        }
+//        editor.commit(); // commit changes
+//    }
 
 
     private void initializationComplete() {

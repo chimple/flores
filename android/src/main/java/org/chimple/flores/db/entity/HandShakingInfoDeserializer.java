@@ -19,6 +19,15 @@ public class HandShakingInfoDeserializer implements JsonDeserializer<HandShaking
     public HandShakingInfo deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
 
+        final JsonObject jsonSchoolObject = json.getAsJsonObject();
+        final JsonElement jsonSchoolId = jsonSchoolObject.get("sh");
+
+        String schoolId = null;
+        if (jsonSchoolId != null) {
+            schoolId = jsonSchoolId.getAsString();
+        }
+
+
         final JsonObject jsonObject = json.getAsJsonObject();
         final JsonElement jsonUserId = jsonObject.get("u");
 
@@ -48,16 +57,16 @@ public class HandShakingInfoDeserializer implements JsonDeserializer<HandShaking
 
             for (int i = 0; i < bits.length; i++) {
                 char b = bits[i];
-                if(b == '0' && i < sequence) {
-                    if(sequence.intValue() > SYNC_NUMBER_OF_LAST_MESSAGES) {
+                if (b == '0' && i < sequence) {
+                    if (sequence.intValue() > SYNC_NUMBER_OF_LAST_MESSAGES) {
                         missingMessages.append(sequence.intValue() + 1 - SYNC_NUMBER_OF_LAST_MESSAGES + i);
                     } else {
-                        missingMessages.append(i+1);
+                        missingMessages.append(i + 1);
                     }
                     missingMessages.append(",");
                 }
             }
-            if(missingMessages.length() > 0) {
+            if (missingMessages.length() > 0) {
                 missingMessages.setLength(missingMessages.length() - 1);
             }
             result = missingMessages.toString();
@@ -70,7 +79,7 @@ public class HandShakingInfoDeserializer implements JsonDeserializer<HandShaking
         }
 
 
-        final HandShakingInfo handShakingInfo = new HandShakingInfo(userId, deviceId, sequence, result, profileSequence);
+        final HandShakingInfo handShakingInfo = new HandShakingInfo(schoolId, userId, deviceId, sequence, result, profileSequence);
         return handShakingInfo;
     }
 }

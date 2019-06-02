@@ -13,6 +13,15 @@ public class SyncItemDeserializer implements JsonDeserializer<SyncInfoItem> {
     public SyncInfoItem deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
             throws JsonParseException {
 
+        final JsonObject jsonSchoolObject = json.getAsJsonObject();
+        final JsonElement jsonSchoolId = jsonSchoolObject.get("sh");
+
+        String schoolId = null;
+        if (jsonSchoolId != null) {
+            schoolId = jsonSchoolId.getAsString();
+        }
+
+
         final JsonObject jsonObject = json.getAsJsonObject();
         final JsonElement jsonUserId = jsonObject.get("u");
 
@@ -40,7 +49,7 @@ public class SyncItemDeserializer implements JsonDeserializer<SyncInfoItem> {
         }
 
 
-        final SyncInfoItem item = new SyncInfoItem(userId, deviceId, startingSequence, sequence);
+        final SyncInfoItem item = new SyncInfoItem(schoolId, userId, deviceId, startingSequence, sequence);
         return item;
     }
 }

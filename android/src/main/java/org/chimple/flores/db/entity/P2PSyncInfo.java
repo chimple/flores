@@ -5,13 +5,13 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
-import android.util.Log;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Entity(indices = {
+        @Index("school_id"),
         @Index("user_id"),
         @Index("device_id"),
         @Index("sequence"),
@@ -25,7 +25,8 @@ public class P2PSyncInfo implements Serializable {
     }
 
     @Ignore
-    public P2PSyncInfo(String userId, String deviceId, Long sequence, String recipientUserId, String message, String messageType, Date createdAt) {
+    public P2PSyncInfo(String schoolId, String userId, String deviceId, Long sequence, String recipientUserId, String message, String messageType, Date createdAt) {
+        this.schoolId = schoolId;
         this.userId = userId;
         this.deviceId = deviceId;
         this.sequence = sequence;
@@ -34,7 +35,7 @@ public class P2PSyncInfo implements Serializable {
         this.messageType = messageType;
         this.sender = deviceId;
         this.loggedAt = new Date();
-        if(createdAt != null) {
+        if (createdAt != null) {
             this.createdAt = createdAt;
         } else {
             this.createdAt = new Date();
@@ -46,6 +47,10 @@ public class P2PSyncInfo implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     public Long id; // auto generated primary key
+
+    @Expose(serialize = true, deserialize = true)
+    @ColumnInfo(name = "school_id")
+    public String schoolId; //current school
 
     @Expose(serialize = true, deserialize = true)
     @ColumnInfo(name = "user_id")
@@ -116,6 +121,10 @@ public class P2PSyncInfo implements Serializable {
         this.loggedAt = loggedAt;
     }
 
+    public void setSchoolId(String schoolId) {
+        this.schoolId = schoolId;
+    }
+
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -142,6 +151,10 @@ public class P2PSyncInfo implements Serializable {
 
     public Long getId() {
         return id;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
     }
 
     public String getUserId() {

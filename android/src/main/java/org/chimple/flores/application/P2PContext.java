@@ -4,15 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.content.SharedPreferences;
+import android.util.Log;
 
 import org.chimple.flores.db.AppDatabase;
 import org.chimple.flores.multicast.MulticastManager;
 import org.chimple.flores.nearby.NearByManager;
-
-import java.util.UUID;
 
 public class P2PContext {
     public static final String uiMessageEvent = "ui-message-event";
@@ -24,11 +23,8 @@ public class P2PContext {
     public static final String CONSOLE_TYPE = "console";
     public static final String LOG_TYPE = "log";
     public static final String CLEAR_CONSOLE_TYPE = "clear-console";
-    public static final String USER_ID = "USER_ID";
-    public static final String DEVICE_ID = "DEVICE_ID";
     public static final String NEW_MESSAGE_ADDED = "NEW_MESSAGE_ADDED";
     public static final String NEW_GROUP_MESSAGE_ADDED = "NEW_GROUP_MESSAGE_ADDED";
-    public static final String REFRESH_DEVICE = "REFRESH_DEVICE";
     public static final String messageEvent = "message-event";
     public static final String bluetoothMessageEvent = "bluetooth-message-event";
     public static final String SHARED_PREF = "shardPref";
@@ -119,18 +115,24 @@ public class P2PContext {
         String teacherUserId = pref.getString("IS_TEACHER", null); // getting String
         return (userId != null && teacherUserId != null && teacherUserId.equalsIgnoreCase(userId));
     }
+
     public static String getLoggedInUser() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String userId = pref.getString("USER_ID", null); // getting String
-        //Log.d(TAG, "GOT User ID -------------->" +  userId);
+        Log.d(TAG, "GOT User ID -------------->" + userId);
         return userId;
     }
 
+    public static String getSchool() {
+        SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
+        String schoolId = pref.getString("SCHOOL_ID", null); // getting String
+        return schoolId;
+    }
 
     public static String getCurrentDevice() {
         SharedPreferences pref = P2PContext.getInstance().getContext().getSharedPreferences(P2PContext.SHARED_PREF, 0);
         String deviceId = pref.getString("DEVICE_ID", null); // getting String
-        //Log.d(TAG, "GOT Device ID -------------->" +  deviceId);
+        Log.d(TAG, "GOT Device ID -------------->" + deviceId);
         return deviceId;
     }
 

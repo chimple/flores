@@ -48,8 +48,9 @@ class Flores {
       .then<List<dynamic>>((dynamic result) => result);
 
   Future<List<dynamic>> getConversations(
-          String userId, String secondUserId, String messageType) async =>
+          String schoolId, String userId, String secondUserId, String messageType) async =>
       _methodChannel.invokeMethod('getConversations', <String, String>{
+        'schoolId': schoolId,
         'userId': userId,
         'secondUserId': secondUserId,
         'messageType': messageType
@@ -62,6 +63,7 @@ class Flores {
   Future<bool> start() async {
     var uuid = new Uuid();
     String userId = uuid.v4();
+//    String schoolId = uuid.v4();
     String deviceId = userId + '-device';
     String message = 'Profile-' + userId;
     final Map<String, String> params = <String, String>{
@@ -75,8 +77,9 @@ class Flores {
         .then<bool>((dynamic result) => result);
   }
 
-  Future<bool> addUser(String userId, String deviceId, String message) async {
+  Future<bool> addUser(String schoolId, String userId, String deviceId, String message) async {
     final Map<String, String> params = <String, String>{
+      'schoolId': schoolId,
       'userId': userId,
       'deviceId': deviceId,
       'message': message
@@ -96,8 +99,9 @@ class Flores {
   }
 
   Future<bool> loggedInUser(
-      String userId, String deviceId, bool isTeacher) async {
+      String schoolId, String userId, String deviceId, bool isTeacher) async {
     final Map<String, String> params = <String, String>{
+      'schoolId': schoolId,
       'userId': userId,
       'deviceId': deviceId,
       'isTeacher': isTeacher ? "true" : "false"
@@ -109,8 +113,9 @@ class Flores {
   }
 
   Future<List<dynamic>> getLatestConversations(
-      String userId, String messageType) async {
+      String schoolId, String userId, String messageType) async {
     final Map<String, String> params = <String, String>{
+      'schoolId': schoolId,
       'userId': userId,
       'messageType': messageType
     };
@@ -120,9 +125,10 @@ class Flores {
         .then<List<dynamic>>((dynamic result) => result);
   }
 
-  Future<bool> addMessage(String userId, String recipientId, String messageType,
+  Future<bool> addMessage(String schoolId, String userId, String recipientId, String messageType,
       String message, bool status, String sessionId) async {
     final Map<String, String> params = <String, String>{
+      'schoolId': schoolId,
       'userId': userId,
       'recipientId': recipientId,
       'messageType': messageType,
@@ -136,9 +142,10 @@ class Flores {
         .then<bool>((dynamic result) => result);
   }
 
-  Future<bool> addGroupMessage(String userId, String recipientId,
+  Future<bool> addGroupMessage(String schoolId, String userId, String recipientId,
       String messageType, String message, bool status, String sessionId) async {
     final Map<String, String> params = <String, String>{
+      'schoolId': schoolId,
       'userId': userId,
       'recipientId': recipientId,
       'messageType': messageType,

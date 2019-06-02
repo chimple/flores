@@ -17,7 +17,13 @@ void main() async {
     prefs.setString('deviceId', deviceId);
   }
 
-  runApp(AppStateContainer(deviceId: deviceId, child: MyApp()));
+  String schoolId = prefs.getString('schoolId');
+  if (schoolId == null) {
+    schoolId = "TEST SCHOOL";
+    prefs.setString('schoolId', schoolId);
+  }
+
+  runApp(AppStateContainer(schoolId: schoolId, deviceId: deviceId, child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

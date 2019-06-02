@@ -300,7 +300,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                 }
             }
 
-            final Map<String, HandShakingInfo> myHandShakingMessages = p2PDBApiImpl.handShakingInformationFromCurrentDevice();
+            final Map<String, HandShakingInfo> myHandShakingMessages = p2PDBApiImpl.handShakingInformationFromCurrentDevice(P2PContext.getSchool());
 
             Iterator<String> keys = uniqueHandShakeInfosReceived.keySet().iterator();
             while (keys.hasNext()) {
@@ -312,7 +312,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                     if (infoFromOtherDevice != null && infoFromMyDevice != null) {
 
                         Long latestProfilePhotoInfo = infoFromOtherDevice.getProfileSequence();
-                        Long latestUserProfileId = p2PDBApiImpl.findLatestProfilePhotoId(infoFromOtherDevice.getUserId(), infoFromOtherDevice.getDeviceId());
+                        Long latestUserProfileId = p2PDBApiImpl.findLatestProfilePhotoId(P2PContext.getSchool(), infoFromOtherDevice.getUserId(), infoFromOtherDevice.getDeviceId());
 
                         if (latestUserProfileId != null && latestUserProfileId != null
                                 && latestUserProfileId.longValue() < latestProfilePhotoInfo.longValue()) {
@@ -406,7 +406,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
             Iterator itPhotoValues = photoValues.iterator();
             while (itPhotoValues.hasNext()) {
                 HandShakingInfo t = (HandShakingInfo) itPhotoValues.next();
-                HandShakingInfo n = new HandShakingInfo(t.getUserId(), t.getDeviceId(), t.getProfileSequence(), null, null);
+                HandShakingInfo n = new HandShakingInfo(t.getSchoolId(), t.getUserId(), t.getDeviceId(), t.getProfileSequence(), null, null);
                 n.setFrom(t.getFrom());
                 n.setStartingSequence(Long.valueOf(t.getProfileSequence()));
                 n.setSequence(Long.valueOf(t.getProfileSequence()));
@@ -426,7 +426,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
                     Set<String> missingMessagesSet = ImmutableSet.copyOf(missingMessages);
                     missingMessages = null;
                     for (String m : missingMessagesSet) {
-                        HandShakingInfo n = new HandShakingInfo(t.getUserId(), t.getDeviceId(), t.getSequence(), null, null);
+                        HandShakingInfo n = new HandShakingInfo(t.getSchoolId(), t.getUserId(), t.getDeviceId(), t.getSequence(), null, null);
                         n.setFrom(t.getFrom());
                         n.setStartingSequence(Long.valueOf(m));
                         n.setSequence(Long.valueOf(m));
@@ -542,7 +542,7 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
             // construct handshaking message(s)
             // put in queue - TBD
             // send one by one from queue - TBD
-            String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(needAck);
+            String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(P2PContext.getSchool(), needAck);
             Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
             instance.sendMulticastMessage(serializedHandShakingMessage);
         } catch (Exception e) {
@@ -654,7 +654,9 @@ public class NearByManager extends AbstractManager implements NearbyInfo {
         List<String> jsonRequests = new CopyOnWriteArrayList<String>();
         SyncInfoRequestMessage request = p2PDBApiImpl.buildSyncRequestMessage(message);
         // process only if matching current device id
-        if (request != null && request.getmDeviceId().equalsIgnoreCase(P2PContext.getCurrentDevice())) {
+        if (request != null
+                && request.getmDeviceId().equalsIgnoreCase(P2PContext.getCurrentDevice())
+        ) {
             Log.d(TAG, "processInComingSyncRequestMessage => device id matches with: " + P2PContext.getCurrentDevice());
             notifyUI("sync request message received", " ------> ", LOG_TYPE);
             List<SyncInfoItem> items = request.getItems();

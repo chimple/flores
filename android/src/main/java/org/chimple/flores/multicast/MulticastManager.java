@@ -265,9 +265,9 @@ public class MulticastManager extends AbstractManager {
 
 
     private void stopMultiCastOperations() {
-        if (instance.bluetoothManager != null) {
-            instance.bluetoothManager.updateNetworkConnected(false);
-        }
+//        if (instance.bluetoothManager != null) {
+//            instance.bluetoothManager.updateNetworkConnected(false);
+//        }
         instance.stopListening();
         if (instance.repeatHandShakeTimer != null) {
             instance.repeatHandShakeTimer.cancel();
@@ -283,10 +283,11 @@ public class MulticastManager extends AbstractManager {
             instance.repeatHandShakeTimer.cancel();
             instance.repeatHandShakeTimer.start();
         }
-        if (P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null) {
-            //Log.d(TAG, "in sendFindBuddyMessage");
-            //Log.d(TAG, "startMultiCastOperations getCurrentDevice ----> " + P2PContext.getCurrentDevice());
-            //Log.d(TAG, "startMultiCastOperations getLoggedInUser ----> " + P2PContext.getLoggedInUser());
+        if (P2PContext.getSchool() != null && P2PContext.getCurrentDevice() != null && P2PContext.getLoggedInUser() != null) {
+            Log.d(TAG, "in sendFindBuddyMessage");
+            Log.d(TAG, "startMultiCastOperations getCurrentDevice ----> " + P2PContext.getCurrentDevice());
+            Log.d(TAG, "startMultiCastOperations getLoggedInUser ----> " + P2PContext.getLoggedInUser());
+            Log.d(TAG, "startMultiCastOperations getSchool ----> " + P2PContext.getSchool());
             instance.sendFindBuddyMessage();
         }
     }
@@ -411,8 +412,8 @@ public class MulticastManager extends AbstractManager {
         // construct handshaking message(s)
         // put in queue - TBD
         // send one by one from queue - TBD
-        String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(needAck);
-        //Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
+        String serializedHandShakingMessage = instance.p2PDBApiImpl.serializeHandShakingMessage(P2PContext.getSchool(), needAck);
+        Log.d(TAG, "sending initial handshaking message: " + serializedHandShakingMessage);
         instance.sendMulticastMessage(serializedHandShakingMessage);
     }
 
@@ -438,7 +439,7 @@ public class MulticastManager extends AbstractManager {
 
 
     public void addNewMessage(String message) {
-        dbSyncManager.addMessage(P2PContext.getLoggedInUser(), null, "Chat", message);
+        dbSyncManager.addMessage(P2PContext.getSchool(), P2PContext.getLoggedInUser(), null, "Chat", message);
     }
 
     public void processInComingHandShakingMessage(String message) {
@@ -447,9 +448,9 @@ public class MulticastManager extends AbstractManager {
         notifyUI("handshaking message received", " ------> ", LOG_TYPE);
         //parse message and add to all messages
         HandShakingMessage handShakingMessage = instance.parseHandShakingMessage(message);
-        if (handShakingMessage.getBt() != null && handShakingMessage.getFrom() != null) {
-            instance.p2PDBApiImpl.saveBtAddress(handShakingMessage.getFrom(), handShakingMessage.getBt());
-        }
+//        if (handShakingMessage.getBt() != null && handShakingMessage.getFrom() != null) {
+//            instance.p2PDBApiImpl.saveBtAddress(handShakingMessage.getFrom(), handShakingMessage.getBt());
+//        }
         boolean shouldSendAck = shouldSendAckForHandShakingMessage(handShakingMessage);
 
         // send handshaking information if message received "from" first time
@@ -461,7 +462,7 @@ public class MulticastManager extends AbstractManager {
 
         synchronized (MulticastManager.class) {
             if (waitForHandShakingMessagesTimer == null) {
-                //Log.d(TAG, "waitForHandShakingMessagesTimer => created to process Incoming handshaking requests");
+                Log.d(TAG, "waitForHandShakingMessagesTimer => created to process Incoming handshaking requests");
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
@@ -470,13 +471,13 @@ public class MulticastManager extends AbstractManager {
                             }
 
                             public void onFinish() {
-                                //Log.d(TAG, "waitForHandShakingMessagesTimer finished ... processing sync information ...");
+                                Log.d(TAG, "waitForHandShakingMessagesTimer finished ... processing sync information ...");
                                 AsyncTask.execute(new Runnable() {
                                     @Override
                                     public void run() {
                                         if (waitForHandShakingMessagesTimer != null) {
                                             waitForHandShakingMessagesTimer.cancel();
-                                            //Log.d(TAG, "waitForHandShakingMessagesTimer => reset to cancelled");
+                                            Log.d(TAG, "waitForHandShakingMessagesTimer => reset to cancelled");
                                             waitForHandShakingMessagesTimer = null;
                                         }
 
@@ -525,8 +526,8 @@ public class MulticastManager extends AbstractManager {
 
     public List<String> generateSyncInfoPullRequest(final Map<String, HandShakingMessage> messages) {
         List<String> jsons = new ArrayList<String>();
-        final Collection<HandShakingInfo> pullSyncInfo = instance.computeSyncInfoRequired(messages);
-        //Log.d(TAG, "generateSyncInfoPullRequest -> computeSyncInfoRequired ->" + pullSyncInfo.size());
+        final Collection<HandShakingInfo> pullSyncInfo = instance.computeSyncInfoRequired(P2PContext.getSchool(), messages);
+        Log.d(TAG, "generateSyncInfoPullRequest -> computeSyncInfoRequired ->" + pullSyncInfo.size());
         notifyUI("generateSyncInfoPullRequest -> computeSyncInfoRequired ->" + pullSyncInfo.size(), " ------> ", LOG_TYPE);
         if (pullSyncInfo != null) {
             jsons = p2PDBApiImpl.serializeSyncRequestMessages(pullSyncInfo);
@@ -539,8 +540,8 @@ public class MulticastManager extends AbstractManager {
         // DON'T reject out of order message, send handshaking request for only missing data
         // reject duplicate messages if any
         boolean isValid = true;
-        String iKey = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
-        String iPreviousKey = info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue() - 1);
+        String iKey = info.getSchoolId() + "_" + info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue());
+        String iPreviousKey = info.getSchoolId() + "_" + info.getDeviceId() + "_" + info.getUserId() + "_" + Long.valueOf(info.getSequence().longValue() - 1);
         //Log.d(TAG, "validIncomingSyncMessage previousKey" + iPreviousKey);
         // remove duplicates
         if (allSyncInfosReceived.contains(iKey)) {
@@ -568,7 +569,7 @@ public class MulticastManager extends AbstractManager {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                //Log.d(TAG, "processInComingSyncInfoMessage -> " + message + " fromIP -> " + fromIP);
+                Log.d(TAG, "processInComingSyncInfoMessage -> " + message + " fromIP -> " + fromIP);
                 Iterator<P2PSyncInfo> infos = p2PDBApiImpl.deSerializeP2PSyncInfoFromJson(message).iterator();
                 while (infos.hasNext()) {
                     P2PSyncInfo info = infos.next();
@@ -620,7 +621,9 @@ public class MulticastManager extends AbstractManager {
         List<String> jsonRequests = new CopyOnWriteArrayList<String>();
         SyncInfoRequestMessage request = p2PDBApiImpl.buildSyncRequestMessage(message);
         // process only if matching current device id
-        if (request != null && request.getmDeviceId().equalsIgnoreCase(P2PContext.getCurrentDevice())) {
+        if (request != null
+                && request.getmSchoolId().equalsIgnoreCase(P2PContext.getSchool())
+                && request.getmDeviceId().equalsIgnoreCase(P2PContext.getCurrentDevice())) {
             //Log.d(TAG, "processInComingSyncRequestMessage => device id matches with: " + P2PContext.getCurrentDevice());
             notifyUI("sync request message received", " ------> ", LOG_TYPE);
             List<SyncInfoItem> items = request.getItems();
@@ -664,7 +667,7 @@ public class MulticastManager extends AbstractManager {
     }
 
 
-    private Collection<HandShakingInfo> computeSyncInfoRequired(final Map<String, HandShakingMessage> messages) {
+    private Collection<HandShakingInfo> computeSyncInfoRequired(String schoolId, final Map<String, HandShakingMessage> messages) {
         // sort by device id and sequence desc order
         synchronized (MulticastManager.class) {
             final Set<HandShakingInfo> allHandShakingInfos = sortHandShakingInfos(messages);
@@ -699,7 +702,7 @@ public class MulticastManager extends AbstractManager {
                 }
             }
 
-            final Map<String, HandShakingInfo> myHandShakingMessages = p2PDBApiImpl.handShakingInformationFromCurrentDevice();
+            final Map<String, HandShakingInfo> myHandShakingMessages = p2PDBApiImpl.handShakingInformationFromCurrentDevice(schoolId);
 
             Iterator<String> keys = uniqueHandShakeInfosReceived.keySet().iterator();
             while (keys.hasNext()) {
@@ -711,7 +714,7 @@ public class MulticastManager extends AbstractManager {
                     if (infoFromOtherDevice != null && infoFromMyDevice != null) {
 
                         Long latestProfilePhotoInfo = infoFromOtherDevice.getProfileSequence();
-                        Long latestUserProfileId = p2PDBApiImpl.findLatestProfilePhotoId(infoFromOtherDevice.getUserId(), infoFromOtherDevice.getDeviceId());
+                        Long latestUserProfileId = p2PDBApiImpl.findLatestProfilePhotoId(infoFromOtherDevice.getSchoolId(), infoFromOtherDevice.getUserId(), infoFromOtherDevice.getDeviceId());
 
                         if (latestUserProfileId != null && latestUserProfileId != null
                                 && latestUserProfileId.longValue() < latestProfilePhotoInfo.longValue()) {
@@ -805,7 +808,7 @@ public class MulticastManager extends AbstractManager {
             Iterator itPhotoValues = photoValues.iterator();
             while (itPhotoValues.hasNext()) {
                 HandShakingInfo t = (HandShakingInfo) itPhotoValues.next();
-                HandShakingInfo n = new HandShakingInfo(t.getUserId(), t.getDeviceId(), t.getProfileSequence(), null, null);
+                HandShakingInfo n = new HandShakingInfo(t.getSchoolId(), t.getUserId(), t.getDeviceId(), t.getProfileSequence(), null, null);
                 n.setFrom(t.getFrom());
                 n.setStartingSequence(Long.valueOf(t.getProfileSequence()));
                 n.setSequence(Long.valueOf(t.getProfileSequence()));
@@ -817,7 +820,7 @@ public class MulticastManager extends AbstractManager {
             Iterator itValues = values.iterator();
             while (itValues.hasNext()) {
                 HandShakingInfo t = (HandShakingInfo) itValues.next();
-                //Log.d(TAG, "validating : " + t.getUserId() + " " + t.getDeviceId() + " " + t.getStartingSequence() + " " + t.getSequence());
+//                Log.d(TAG, "validating : " + t.getUserId() + " " + t.getDeviceId() + " " + t.getStartingSequence() + " " + t.getSequence());
 
                 if (t.getMissingMessages() != null && t.getMissingMessages().length() > 0) {
 
@@ -825,7 +828,7 @@ public class MulticastManager extends AbstractManager {
                     Set<String> missingMessagesSet = ImmutableSet.copyOf(missingMessages);
                     missingMessages = null;
                     for (String m : missingMessagesSet) {
-                        HandShakingInfo n = new HandShakingInfo(t.getUserId(), t.getDeviceId(), t.getSequence(), null, null);
+                        HandShakingInfo n = new HandShakingInfo(t.getSchoolId(), t.getUserId(), t.getDeviceId(), t.getSequence(), null, null);
                         n.setFrom(t.getFrom());
                         n.setStartingSequence(Long.valueOf(m));
                         n.setSequence(Long.valueOf(m));
@@ -849,7 +852,7 @@ public class MulticastManager extends AbstractManager {
     /*
         only for testing
      */
-    public List<String> computeSyncInformation() {
+    public List<String> computeSyncInformation(String schoolId) {
         List<String> computedMessages = new CopyOnWriteArrayList<String>();
 
         final Map<String, HandShakingMessage> messages = Collections.unmodifiableMap(handShakingMessagesInCurrentLoop);
@@ -892,7 +895,7 @@ public class MulticastManager extends AbstractManager {
             }
         }
 
-        List<P2PSyncInfo> allSyncInfos = p2PDBApiImpl.buildSyncInformation(new CopyOnWriteArrayList(allHandShakingInfos));
+        List<P2PSyncInfo> allSyncInfos = p2PDBApiImpl.buildSyncInformation(schoolId, new CopyOnWriteArrayList(allHandShakingInfos));
         Iterator<P2PSyncInfo> it = allSyncInfos.iterator();
         while (it.hasNext()) {
             P2PSyncInfo p = it.next();
@@ -913,7 +916,8 @@ public class MulticastManager extends AbstractManager {
     }
 
     private boolean shouldSendAckForHandShakingMessage(HandShakingMessage handShakingMessage) {
-        boolean sendAck = handShakingMessage.getReply().equalsIgnoreCase("true");
+        boolean sendAck = handShakingMessage.getReply().equalsIgnoreCase("true")
+                && handShakingMessage.getSchoolId().equalsIgnoreCase(P2PContext.getSchool());
         //Log.d(TAG, "shouldSendAckForHandShaking: " + handShakingMessage.getFrom() + " sendAck:" + sendAck);
         return sendAck;
     }

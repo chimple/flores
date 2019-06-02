@@ -9,8 +9,9 @@ import 'package:uuid/uuid.dart';
 class AppStateContainer extends StatefulWidget {
   final Widget child;
   final String deviceId;
+  final String schoolId;
 
-  AppStateContainer({this.child, this.deviceId});
+  AppStateContainer({this.child, this.deviceId, this.schoolId});
 
   static AppStateContainerState of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_InheritedAppStateContainer)
@@ -32,11 +33,14 @@ class AppStateContainerState extends State<AppStateContainer> {
   String friendId;
 
   String get deviceId => widget.deviceId;
+  String get schoolId => widget.schoolId;
 
   @override
   void initState() {
     super.initState();
     print('AppStateContainer: main initState');
+    print('AppStateContainer: main initState with device' + deviceId);
+    print('AppStateContainer: main initState with school' + schoolId);
     try {
       Flores().initialize((Map<dynamic, dynamic> message) {
         print('Flores received message: $message');
@@ -53,7 +57,7 @@ class AppStateContainerState extends State<AppStateContainer> {
   Future<String> addUser(String name) async {
     String userId = Uuid().v4();
     try {
-      Flores().addUser(userId, deviceId, name);
+      Flores().addUser(schoolId, userId, deviceId, name);
     } on PlatformException {
       print('Flores: Failed loggedInUser');
     } catch (e, s) {
@@ -65,9 +69,10 @@ class AppStateContainerState extends State<AppStateContainer> {
     return userId;
   }
 
-  Future<void> setLoggedInUser(String userId, String userName, bool isTeacher) async {
+  Future<void> setLoggedInUser(
+      String userId, String userName, bool isTeacher) async {
     try {
-      await Flores().loggedInUser(userId, deviceId, isTeacher);
+      await Flores().loggedInUser(schoolId, userId, deviceId, isTeacher);
     } on PlatformException {
       print('Flores: Failed loggedInUser');
     } catch (e, s) {
@@ -128,7 +133,8 @@ class AppStateContainerState extends State<AppStateContainer> {
   Future<void> getMessages(String friendId) async {
     List<dynamic> msgs;
     try {
-      msgs = await Flores().getConversations(loggedInUserId, friendId, 'chat');
+      msgs = await Flores()
+          .getConversations(schoolId, loggedInUserId, friendId, 'chat');
     } on PlatformException {
       print('Failed getting messages');
     } catch (e, s) {
@@ -145,8 +151,8 @@ class AppStateContainerState extends State<AppStateContainer> {
   }
 
   Future<void> sendMessage(String friendId, String message) async {
-    await Flores()
-        .addMessage(loggedInUserId, friendId, 'chat', message, true, '');
+    await Flores().addMessage(
+        schoolId, loggedInUserId, friendId, 'chat', message, true, '');
     getMessages(friendId);
   }
 

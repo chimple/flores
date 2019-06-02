@@ -58,7 +58,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
     private final PluginRegistry.Registrar registrar;
 
     public static void onMessageReceived(P2PSyncInfo message) {
-        Log.i(TAG, "messageReceived: " + message);
+        Log.i(TAG, "messageReceived: " + convertToMap(message));
         methodChannel.invokeMethod("messageReceived", convertToMap(message));
     }
 
@@ -69,13 +69,16 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {
-                        List<P2PUserIdDeviceIdAndMessage> udList = DBSyncManager.getInstance(registrar.context()).getUsers();
+                        String schoolId = P2PContext.getInstance().getSchool();
+                        Log.d(TAG, "current school: =====>" + schoolId);
+                        List<P2PUserIdDeviceIdAndMessage> udList = DBSyncManager.getInstance(registrar.context()).getUsers(schoolId);
                         List<Map<String, String>> users = new ArrayList<Map<String, String>>();
                         //Log.i(TAG, "getUsers: "+users);
 
                         for (P2PUserIdDeviceIdAndMessage ud : udList
                         ) {
                             Map<String, String> user = new HashMap<String, String>();
+                            user.put("schoolId", ud.schoolId);
                             user.put("userId", ud.userId);
                             user.put("deviceId", ud.deviceId);
                             user.put("message", ud.message);
@@ -118,11 +121,12 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     @Override
                     public void run() {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
+                        String schoolId = arg.get("schoolId");
                         String userId = arg.get("userId");
                         String deviceId = arg.get("deviceId");
-                        Log.i(TAG, "addUser with user id: " + userId + " and device id:" + deviceId);
+                        Log.i(TAG, "school: " + schoolId + " addUser with user id: " + userId + " and device id:" + deviceId);
                         String message = arg.get("message");
-                        boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(userId, deviceId, message);
+                        boolean status = DBSyncManager.getInstance(registrar.context()).upsertUser(schoolId, userId, deviceId, message);
                         String bluetoothAddress = NearByManager.getInstance(registrar.context()).getBluetoothMacAddress();
                         DBSyncManager.getInstance(registrar.context()).saveBtAddress(deviceId, bluetoothAddress);
                         NearByManager.getInstance(registrar.context()).setCurrentUserAsTeacher();
@@ -140,12 +144,13 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     public void run() {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
                         String userId = P2PContext.getInstance().getLoggedInUser();
+                        String schoolId = P2PContext.getInstance().getSchool();
                         String recipientId = null;
                         String messageType = "Chat";
                         String message = arg.get("message");
                         boolean retStatus =
                                 DBSyncManager.getInstance(registrar.context())
-                                        .addMessage(userId, recipientId, messageType, message);
+                                        .addMessage(schoolId, userId, recipientId, messageType, message);
                         result.success(retStatus);
                     }
                 });
@@ -157,6 +162,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     @Override
                     public void run() {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
+                        String schoolId = arg.get("schoolId");
                         String userId = arg.get("userId");
                         String recipientId = arg.get("recipientId");
                         String messageType = arg.get("messageType");
@@ -166,7 +172,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                         String sessionId = arg.get("sessionId");
                         boolean retStatus =
                                 DBSyncManager.getInstance(registrar.context())
-                                        .addMessage(userId, recipientId, messageType, message, status, sessionId);
+                                        .addMessage(schoolId, userId, recipientId, messageType, message, status, sessionId);
                         result.success(retStatus);
                     }
                 });
@@ -179,6 +185,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                     public void run() {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
                         String userId = arg.get("userId");
+                        String schoolId = arg.get("schoolId");
                         String recipientId = arg.get("recipientId");
                         String messageType = arg.get("messageType");
                         String message = arg.get("message");
@@ -187,7 +194,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                         String sessionId = arg.get("sessionId");
                         boolean retStatus =
                                 DBSyncManager.getInstance(registrar.context())
-                                        .addGroupMessage(userId, recipientId, messageType, message, status, sessionId);
+                                        .addGroupMessage(schoolId, userId, recipientId, messageType, message, status, sessionId);
                         result.success(retStatus);
                     }
                 });
@@ -201,18 +208,20 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
                         String messageType = arg.get("messageType");
                         String userId = arg.get("userId");
+                        String schoolId = arg.get("schoolId");
                         String secondUserId = arg.get("secondUserId");
                         List<String> userIds = new ArrayList<String>();
                         userIds.add(userId);
                         userIds.add(secondUserId);
                         List<P2PUserIdMessage> messageList =
                                 DBSyncManager.getInstance(registrar.context())
-                                        .fetchLatestMessagesByMessageType(messageType, userIds);
+                                        .fetchLatestMessagesByMessageType(schoolId, messageType, userIds);
                         List<Map<String, String>> messages = new ArrayList<Map<String, String>>();
                         for (P2PUserIdMessage m : messageList
                         ) {
                             Map<String, String> message = new HashMap<String, String>();
                             message.put("userId", m.userId);
+                            message.put("schoolId", m.schoolId);
                             message.put("message", m.message);
                             messages.add(message);
                         }
@@ -234,11 +243,12 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
                         String messageType = arg.get("messageType");
                         String userId = arg.get("userId");
+                        String schoolId = arg.get("schoolId");
                         String secondUserId = arg.get("secondUserId");
                         List<P2PSyncInfo> messageList =
                                 DBSyncManager.getInstance(registrar.context())
-                                        .getConversations(userId, secondUserId, messageType);
-                        //Log.i(TAG, "getConversations: "+messageType+userId+secondUserId);
+                                        .getConversations(schoolId, userId, secondUserId, messageType);
+                        Log.i(TAG, "getConversations: " + messageType + userId + secondUserId);
                         List<Map<String, String>> messages = convertToListOfMaps(messageList);
                         //Log.i(TAG, messages.toString());
                         if (messages.size() >= 0) {
@@ -258,9 +268,10 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
                         String messageType = arg.get("messageType");
                         String userId = arg.get("userId");
+                        String schoolId = arg.get("schoolId");
                         List<P2PSyncInfo> messageList =
                                 DBSyncManager.getInstance(registrar.context())
-                                        .getLatestConversations(userId, messageType);
+                                        .getLatestConversations(schoolId, userId, messageType);
                         List<Map<String, String>> messages = convertToListOfMaps(messageList);
 
                         if (messages.size() >= 0) {
@@ -280,9 +291,10 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
                         Map<String, String> arg = (Map<String, String>) call.arguments;
                         String userId = arg.get("userId");
                         String deviceId = arg.get("deviceId");
+                        String schoolId = arg.get("schoolId");
                         String isTeacher = arg.get("isTeacher");
                         boolean status = DBSyncManager.getInstance(registrar.context())
-                                .loggedInUser(userId, deviceId);
+                                .loggedInUser(schoolId, userId, deviceId);
 
                         if (isTeacher.equalsIgnoreCase("true")) {
                             P2PContext.getInstance().setLoggedInUserAsTeacher();
@@ -323,6 +335,7 @@ public class FloresPlugin implements MethodCallHandler, StreamHandler {
     @NonNull
     static private Map<String, String> convertToMap(P2PSyncInfo m) {
         Map<String, String> message = new HashMap<String, String>();
+        message.put("schoolId", m.schoolId);
         message.put("userId", m.userId);
         message.put("message", m.message);
         message.put("messageType", m.messageType);

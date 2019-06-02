@@ -21,13 +21,16 @@ public class ProfileMessageDeserializer implements JsonDeserializer<ProfileMessa
         final JsonElement jsonDeviceType = jsonObject.get("d");
         final String deviceId = jsonDeviceType.getAsString();
 
+        final JsonElement jsonSchoolIdType = jsonObject.get("sh");
+        final String schoolId = jsonSchoolIdType.getAsString();
+
         final JsonElement jsonUserIdType = jsonObject.get("u");
         final String userId = jsonUserIdType.getAsString();
 
         final JsonElement jsonDataType = jsonObject.get("d");
         final String data = jsonDataType.getAsString();
 
-        final ProfileMessage profileMessage = new ProfileMessage(userId, deviceId, messageType, data);
+        final ProfileMessage profileMessage = new ProfileMessage(schoolId, userId, deviceId, messageType, data);
         return profileMessage;
     }
 }

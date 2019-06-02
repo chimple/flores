@@ -12,6 +12,10 @@ public class SyncInfoItem {
     String deviceId;
 
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("sh")
+    String schoolId;
+
+    @Expose(serialize = true, deserialize = true)
     @SerializedName("u")
     String userId;
 
@@ -23,7 +27,8 @@ public class SyncInfoItem {
     @SerializedName("ss")
     Long startingSequence;
 
-    public SyncInfoItem(String userId, String deviceId, Long startingSequence, Long sequence) {
+    public SyncInfoItem(String schoolId, String userId, String deviceId, Long startingSequence, Long sequence) {
+        this.schoolId = schoolId;
         this.userId = userId;
         this.deviceId = deviceId;
         this.startingSequence = startingSequence;
@@ -32,6 +37,10 @@ public class SyncInfoItem {
 
     public String getDeviceId() {
         return deviceId;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
     }
 
     public String getUserId() {

@@ -30,6 +30,13 @@ public class SyncRequestMessageDeserializer implements JsonDeserializer<SyncInfo
             md = jsonMd.getAsString();
         }
 
+        final JsonElement jsonSh = jsonObject.get("sh");
+        String sh = "";
+        if (jsonSh != null) {
+            sh = jsonSh.getAsString();
+        }
+
+
         final JsonElement jsonSender = jsonObject.get("s");
         String sender = "";
         if (jsonSender != null) {
@@ -37,7 +44,7 @@ public class SyncRequestMessageDeserializer implements JsonDeserializer<SyncInfo
         }
 
         SyncInfoItem[] infos = context.deserialize(jsonObject.get("l"), SyncInfoItem[].class);
-        final SyncInfoRequestMessage message = new SyncInfoRequestMessage(sender, md, new ArrayList(Arrays.asList(infos)));
+        final SyncInfoRequestMessage message = new SyncInfoRequestMessage(sender, md, sh, new ArrayList(Arrays.asList(infos)));
         return message;
     }
 }

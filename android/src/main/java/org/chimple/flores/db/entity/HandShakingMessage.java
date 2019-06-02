@@ -1,6 +1,8 @@
 package org.chimple.flores.db.entity;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class HandShakingMessage {
@@ -12,6 +14,10 @@ public class HandShakingMessage {
     @SerializedName("r")
     String reply;
 
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName("sh")
+    String schoolId;
+
 
     @Expose(serialize = true, deserialize = true)
     @SerializedName("f")
@@ -21,11 +27,21 @@ public class HandShakingMessage {
     @SerializedName("bt")
     String bt;
 
-    public String getBt() { return bt; }
+    public String getBt() {
+        return bt;
+    }
 
-    public String getFrom() { return from; }
+    public String getFrom() {
+        return from;
+    }
 
-    public String getReply() { return reply; }
+    public String getReply() {
+        return reply;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
+    }
 
     public String getMessageType() {
         return messageType;
@@ -39,8 +55,9 @@ public class HandShakingMessage {
     @SerializedName("i")
     List<HandShakingInfo> infos;
 
-    public HandShakingMessage(String from, String messageType, String reply, List<HandShakingInfo> infos, String bt) {
+    public HandShakingMessage(String schoolId, String from, String messageType, String reply, List<HandShakingInfo> infos, String bt) {
         this.messageType = messageType;
+        this.schoolId = schoolId;
         this.infos = infos;
         this.from = from;
         this.reply = reply;
@@ -56,14 +73,14 @@ public class HandShakingMessage {
         if (this == info) {
             return true;
         } else {
-            return (this.messageType.equals(info.messageType) && this.from.equals(info.from) && this.infos == info.infos);
+            return (this.schoolId.equals(info.schoolId) && this.messageType.equals(info.messageType) && this.from.equals(info.from) && this.infos == info.infos);
         }
     }
 
 
     public int hashCode() {
         int hashno = 7;
-        hashno = 13 * hashno + from.hashCode() +(messageType == null ? 0 : messageType.hashCode()) + (infos == null ? 0 : infos.hashCode());
+        hashno = 13 * hashno + from.hashCode() + (schoolId == null ? 0 : schoolId.hashCode()) + (messageType == null ? 0 : messageType.hashCode()) + (infos == null ? 0 : infos.hashCode());
         return hashno;
     }
 }

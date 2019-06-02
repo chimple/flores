@@ -6,6 +6,10 @@ import com.google.gson.annotations.SerializedName;
 
 public class ProfileMessage {
     @Expose(serialize = true, deserialize = true)
+    @SerializedName("sh")
+    String schoolId;
+
+    @Expose(serialize = true, deserialize = true)
     @SerializedName("u")
     String userId;
 
@@ -22,9 +26,10 @@ public class ProfileMessage {
     @SerializedName("d")
     String data;
 
-    public ProfileMessage(String userId, String deviceId, String messageType, String data) {
+    public ProfileMessage(String schoolId, String userId, String deviceId, String messageType, String data) {
         this.messageType = messageType;
         this.data = data;
+        this.schoolId = schoolId;
         this.userId = userId;
         this.deviceId = deviceId;
     }
@@ -38,7 +43,7 @@ public class ProfileMessage {
         if (this == info) {
             return true;
         } else {
-            return (this.messageType.equals(info.messageType) && this.userId.equals(info.userId) && this.data.equals(info.data) && this.deviceId.equals(info.deviceId));
+            return (this.messageType.equals(info.messageType) && this.schoolId.equals(info.schoolId) && this.userId.equals(info.userId) && this.data.equals(info.data) && this.deviceId.equals(info.deviceId));
         }
     }
 
